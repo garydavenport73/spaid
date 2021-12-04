@@ -12,9 +12,9 @@ with the current data is saved.
 This solves several problems:
 1) It runs basically anywhere a browser is installed, ie cross-platform.
 2) Utilizes html/css to make graphical user interfaces, which is quick and looks nice.
-3) Allows for data persistence between sesssions.
+3) Allows for data persistence between sessions.
 4) Does not require extra dependencies like NodeJS or Electron etc.
-5) Does not require an software installation or modifications to OS.
+5) Does not require any software installation or modifications to OS.
 6) Requires no connection to database, database like object is included.
 
 The way I intend to solve these problems is as follows:
@@ -42,4 +42,4 @@ save by hitting the save button.
 I think I may alert the user to save with a different filename at least for the 
 first load, so that the new copy does not overrwrite the original.
 
-I may put a 'watch' button to show what's going on in the database div by displaying it.
+I may put a 'show' button to show what's going on in the database div by displaying it.
