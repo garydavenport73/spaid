@@ -1,5 +1,7 @@
 # spaid
 Self-saving PAge Including Data
+or
+Single Page Application Including Database
 
 This project has been brewing in the back of my mind for awhile.
 
