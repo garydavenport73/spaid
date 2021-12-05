@@ -101,7 +101,7 @@ readInUser1();
 //SPAID functions
 function savePage() {
     let thisDocument = new XMLSerializer().serializeToString(document.documentElement);
-    saveStringToTextFile(thisDocument, "spaidpassed", ".html");
+    saveStringToTextFile(thisDocument, "spaid", ".html");
 }
 
 function saveDatabase() {
