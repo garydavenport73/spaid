@@ -54,9 +54,15 @@ if (document.getElementById('spaid-data') == null) {
 
     spaidDataDiv = document.createElement('div');
     spaidDataDiv.setAttribute('id', 'spaid-data');
+    // spaidDataDiv.style.display = 'none';
 
     spaidButtonsDiv = document.createElement('div');
     spaidButtonsDiv.setAttribute('id', 'spaid-buttons');
+
+    spaidResultDiv = document.createElement('div');
+    spaidResultDiv.setAttribute('id', 'spaid-result');
+    spaidResultDiv.innerHTML = '<hr>Run SQL statment above to see results.<br>Type HELP for more info.<hr>';
+    // spaidResultDiv.style.display = 'none';
 
     saveButton = document.createElement('button');
     saveButton.setAttribute('id', 'spaid-save');
@@ -72,30 +78,86 @@ if (document.getElementById('spaid-data') == null) {
 
     showButton = document.createElement('button');
     showButton.setAttribute('id', 'spaid-show');
-    showButton.innerHTML = 'show/hide';
+    showButton.innerHTML = 'show/hide database';
+
+    sqlInput = document.createElement('input');
+    sqlInput.setAttribute('id', 'spaid-input');
+    sqlInput.setAttribute('placeholder', '[ENTER SQL STATEMENT]')
+
+    runButton = document.createElement('button');
+    runButton.setAttribute('id', 'spaid-run');
+    runButton.innerHTML = 'run';
+
+    showResultButton = document.createElement('button');
+    showResultButton.setAttribute('id', 'spaid-show-result');
+    showResultButton.innerHTML = 'show/hide result';
 
     document.body.prepend(spaidDataDiv);
     spaidButtonsDiv.appendChild(saveButton);
     spaidButtonsDiv.appendChild(loadDBButton)
     spaidButtonsDiv.appendChild(saveDBButton);
     spaidButtonsDiv.appendChild(showButton);
+    spaidButtonsDiv.appendChild(sqlInput);
+    spaidButtonsDiv.appendChild(runButton);
+    spaidButtonsDiv.appendChild(showResultButton);
+    document.body.prepend(spaidResultDiv);
     document.body.prepend(spaidButtonsDiv);
 
 } else {
 
     spaidDataDiv = document.getElementById('spaid-data');
+    spaidResultDiv = document.getElementById('spaid-result');
     saveButton = document.getElementById('spaid-save');
     showButton = document.getElementById('spaid-show');
     loadDBButton = document.getElementById('spaid-load-db');
     saveDBButton = document.getElementById('spaid-save-db');
+    sqlInput = document.getElementById('spaid-input');
+    runButton = document.getElementById('spaid-run');
+    showResultButton = document.getElementById('spaid-show-result');
+
 }
 
 saveButton.addEventListener('click', savePage);
 loadDBButton.addEventListener('click', loadDatabase);
 saveDBButton.addEventListener('click', saveDatabase);
-showButton.addEventListener("click", toggleDataVisible);
+showButton.addEventListener('click', toggleDataVisible);
+runButton.addEventListener('click', runSQL);
+showResultButton.addEventListener('click', toggleResultVisible);
 
 //SPAID functions
+
+function runSQL() {
+    let strSQL = document.getElementById('spaid-input').value;
+    resultDiv = document.getElementById('spaid-result');
+
+    console.log(strSQL);
+    thisResult = sqlQuery(strSQL);
+
+    // for (let i = 0; i < thisResult.length; i++) {
+
+    // }
+
+    tableName = thisResult["TABLE_NAME"];
+    resultDiv.innerHTML = '<hr>';
+    resultDiv.innerHTML += '<br';
+    resultDiv.innerHTML += strSQL + '<br>';
+    resultDiv.innerHTML += tableName + '<br>';
+
+    //resultDiv.innerHTML += JSON.stringify(thisResult);
+
+    resultDiv.innerHTML += formatTable(thisResult);
+
+    resultDiv.innerHTML += '<hr>';
+
+
+
+}
+
+function formatTable(arrayOfObjectsTable) {
+    formattedTable = JSON.stringify(arrayOfObjectsTable);
+    return formattedTable;
+}
+
 function savePage() {
     let thisDocument = new XMLSerializer().serializeToString(document.documentElement);
     saveStringToTextFile(thisDocument, "spaid", ".html");
@@ -150,6 +212,15 @@ function toggleDataVisible() {
     }
 }
 
+function toggleResultVisible() {
+    if (spaidResultDiv.style.display == 'none') {
+        spaidResultDiv.style.display = 'inherit';
+
+    } else {
+        spaidResultDiv.style.display = 'none';;
+    }
+}
+
 function readInDatabaseFromDiv() {
     jsonData = spaidDataDiv.innerHTML;
     console.log(jsonData);
@@ -167,38 +238,101 @@ function createTable(tableName, fieldNames = [], dataTypes = []) {
         }
     }
     dbObject[tableName]["TABLE_NAME"] = tableName;
+
+
+
+    //if dbObject["tableMetadata"] is null make
+    if (dbObject["TABLE_METADATA"] === undefined) {
+        //alert("no tableMetadataTable");
+        dbObject["TABLE_METADATA"] = [];
+    }
+
+
+    tempObject = {};
+    tempObject["TABLE_NAME"] = tableName;
+    tempObject["primaryKey"] = 1;
+    for (let i = 0; i < fieldNames.length; i++) {
+        tempObject[fieldNames[i]] = dataTypes[i];
+        //dbObject[tableName][fieldNames[i]] = dataTypes[i];
+    }
+
+    dbObject["TABLE_METADATA"].push(tempObject);
     updateDataDiv();
+
     return dbObject[tableName];
 }
 
 function dropTable(tableName) {
     delete dbObject[tableName];
+
+    //need to delete from metadata table
+
+    metadataTable = dbObject["TABLE_METADATA"];
+    for (let i = metadataTable.length - 1; i >= 0; i--) {
+        if (metadataTable[i]["TABLE_NAME"] === tableName) {
+            metadataTable.splice(i, 1);
+            //will need to delete from table
+        }
+    }
+
     updateDataDiv();
     return dbObject[tableName];
+}
+
+function getTableMetadataRow(tableName) {
+    index = 0;
+    let metadataTable = dbObject["TABLE_METADATA"];
+    for (let i = 0; i < metadataTable.length; i++) {
+        if (metadataTable[i]["TABLE_NAME"] === tableName) {
+            index = i;
+        }
+    }
+    return index;
+}
+
+function getTableMetaDataRowObject(tableName) {
+    index = 0;
+    let metadataTable = dbObject["TABLE_METADATA"];
+    for (let i = 0; i < metadataTable.length; i++) {
+        if (metadataTable[i]["TABLE_NAME"] === tableName) {
+            index = i;
+        }
+    }
+    return metadataTable[index];
 }
 
 function insertInto(tableName, fieldNames = [], values = []) {
     if (fieldNames.length != values.length) {
         alert('field/value mismatch!');
     } else {
-        let primaryKey = dbObject[tableName]["primaryKey"];
+        //let primaryKey = dbObject[tableName]["primaryKey"];
+
+        row = getTableMetadataRow(tableName);
+
+        let primaryKey = dbObject["TABLE_METADATA"][row]["primaryKey"];
+
+        //alert("row found at " + row.toString());
+
         let tempObject = {};
         tempObject['primaryKey'] = primaryKey;
+
         for (let i = 0; i < fieldNames.length; i++) {
             //check to see what type of data type field is
-            //console.log(dbObject[tableName][fieldNames[i]]);
-            if (dbObject[tableName][fieldNames[i]] === "number") {
+            if (dbObject["TABLE_METADATA"][row][fieldNames[i]] === "number") {
                 tempObject[fieldNames[i]] = Number(values[i]);
             } else {
                 tempObject[fieldNames[i]] = values[i];
             }
         }
         dbObject[tableName].push(JSON.parse(JSON.stringify(tempObject)));
-        dbObject[tableName]["primaryKey"] = dbObject[tableName]["primaryKey"] + 1;
+
+        dbObject["TABLE_METADATA"][row]["primaryKey"] = row + 1;
+        //dbObject[tableName]["primaryKey"] = dbObject[tableName]["primaryKey"] + 1;
         //console.log(tempObject);
     }
     updateDataDiv();
     //console.log(dbObject[tableName]);
+    //dbObject[tableName]["TABLE_NAME"] = tableName;
     return dbObject[tableName];
 }
 
@@ -257,6 +391,7 @@ function orderByFilter(arrayOfObjectsTable, field, direction = "ASC") {
         arrayOfObjectsTable.reverse();
     }
     console.log(arrayOfObjectsTable);
+    // dbObject[tableName]["TABLE_NAME"] = tableName;
     return arrayOfObjectsTable;
 }
 
@@ -271,7 +406,8 @@ function innerJoin(arrayOfObjectsTable1, arrayOfObjectsTable2, table1Field, tabl
     for (let i = 0; i < table1.length; i++) {
         rowObject = JSON.parse(JSON.stringify(table1[i]));
         for (const key in rowObject) {
-            newFieldName = `${table1.TABLE_NAME}_${key}`;
+            newFieldName = table1["TABLE_NAME"] + "_" + key;
+            //newFieldName = `${table1.TABLE_NAME}_${key}`;
             //console.log(newFieldName);
             rowObject[newFieldName] = rowObject[key];
             delete rowObject[key];
@@ -282,7 +418,8 @@ function innerJoin(arrayOfObjectsTable1, arrayOfObjectsTable2, table1Field, tabl
     for (let i = 0; i < table2.length; i++) {
         rowObject = JSON.parse(JSON.stringify(table2[i]));
         for (const key in rowObject) {
-            newFieldName = `${table2.TABLE_NAME}_${key}`;
+            newFieldName = table2["TABLE_NAME"] + "_" + key;
+            // newFieldName = `${table2.TABLE_NAME}_${key}`;
             //console.log(newFieldName);
             rowObject[newFieldName] = rowObject[key];
             delete rowObject[key];
@@ -396,7 +533,11 @@ function whereFilter(arrayOfObjectsTable, compareField, operator = '=', compareV
 
 function deleteFromTable(tableName, compareField, operator = "=", compareValue) {
 
-    if ((compareField === "primaryKey") || (dbObject[tableName][compareField] === "number")) {
+    row = getTableMetadataRow(tableName);
+
+    // let primaryKey = dbObject["TABLE_METADATA"][row]["primaryKey"];
+
+    if ((compareField === "primaryKey") || (dbObject["TABLE_METADATA"][row][compareField] === "number")) {
         compareValue = Number(compareValue);
     }
 
@@ -442,6 +583,14 @@ function deleteFromTable(tableName, compareField, operator = "=", compareValue) 
 }
 
 function update(tableName, fieldNames = [], values = [], compareField, operator = "=", compareValue) {
+
+    row = getTableMetadataRow(tableName);
+
+    // let primaryKey = dbObject["TABLE_METADATA"][row]["primaryKey"];
+
+    //if ((compareField === "primaryKey") || (dbObject["TABLE_METADATA"][row][compareField] === "number")) {
+
+
     if (fieldNames.length != values.length) {
         alert('field/value mismatch!');
     } else {
@@ -449,7 +598,8 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
             for (let i = 0; i < dbObject[tableName].length; i++) {
                 if (dbObject[tableName][i][compareField] === compareValue) {
                     for (let j = 0; j < fieldNames.length; j++) {
-                        if (dbObject[tableName][fieldNames[j]] === "number") {
+                        // if (dbObject[tableName][fieldNames[j]] === "number") {
+                        if (dbObject["TABLE_METADATA"][row][fieldNames[j]] === "number") {
                             dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
                         } else {
                             dbObject[tableName][i][fieldNames[j]] = values[j];
@@ -462,7 +612,7 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
             for (let i = 0; i < dbObject[tableName].length; i++) {
                 if (dbObject[tableName][i][compareField] != compareValue) {
                     for (let j = 0; j < fieldNames.length; j++) {
-                        if (dbObject[tableName][fieldNames[j]] === "number") {
+                        if (dbObject["TABLE_METADATA"][row][fieldNames[j]] === "number") {
                             dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
                         } else {
                             dbObject[tableName][i][fieldNames[j]] = values[j];
@@ -474,7 +624,7 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
             for (let i = 0; i < dbObject[tableName].length; i++) {
                 if (dbObject[tableName][i][compareField] > compareValue) {
                     for (let j = 0; j < fieldNames.length; j++) {
-                        if (dbObject[tableName][fieldNames[j]] === "number") {
+                        if (dbObject["TABLE_METADATA"][row][fieldNames[j]] === "number") {
                             dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
                         } else {
                             dbObject[tableName][i][fieldNames[j]] = values[j];
@@ -486,7 +636,7 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
             for (let i = 0; i < dbObject[tableName].length; i++) {
                 if (dbObject[tableName][i][compareField] >= compareValue) {
                     for (let j = 0; j < fieldNames.length; j++) {
-                        if (dbObject[tableName][fieldNames[j]] === "number") {
+                        if (dbObject["TABLE_METADATA"][row][fieldNames[j]] === "number") {
                             dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
                         } else {
                             dbObject[tableName][i][fieldNames[j]] = values[j];
@@ -498,7 +648,7 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
             for (let i = 0; i < dbObject[tableName].length; i++) {
                 if (dbObject[tableName][i][compareField] < compareValue) {
                     for (let j = 0; j < fieldNames.length; j++) {
-                        if (dbObject[tableName][fieldNames[j]] === "number") {
+                        if (dbObject["TABLE_METADATA"][row][fieldNames[j]] === "number") {
                             dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
                         } else {
                             dbObject[tableName][i][fieldNames[j]] = values[j];
@@ -510,7 +660,7 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
             for (let i = 0; i < dbObject[tableName].length; i++) {
                 if (dbObject[tableName][i][compareField] <= compareValue) {
                     for (let j = 0; j < fieldNames.length; j++) {
-                        if (dbObject[tableName][fieldNames[j]] === "number") {
+                        if (dbObject["TABLE_METADATA"][row][fieldNames[j]] === "number") {
                             dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
                         } else {
                             dbObject[tableName][i][fieldNames[j]] = values[j];
@@ -524,40 +674,99 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
     }
 }
 
+
+
 function showTables() {
-    //just formatting horizontal bars
-    let maxLength = 0;
-    for (let tableName in dbObject) {
-        maxLength = Math.max(maxLength, tableName.length);
-    }
-    //
+    let tempTable = [];
+    let tempRowObject = {};
     console.log("");
-    console.log("-".repeat(maxLength));
+    console.log("-".repeat(32));
     console.log('dbObject');
-    console.log("-".repeat(maxLength));
+    console.log("-".repeat(32));
     for (let tableName in dbObject) {
-        console.log(tableName);
+        if (tableName != "TABLE_METADATA") {
+            console.log(tableName);
+
+            tempRowObject["TABLE_NAME"] = tableName;
+
+            tempTable.push(JSON.parse(JSON.stringify(tempRowObject)));
+        }
+
     }
+
+    tempTable["TABLE_NAME"] = 'Show Tables';
+
+    console.log(tempTable);
+    return tempTable;
+
 }
+
+
 
 function describe(thisTableName) {
-    let keys = Object.keys(dbObject[thisTableName]);
-    console.log(dbObject[thisTableName]["TABLE_NAME"]);
-    console.log("-".repeat(32));
-    for (let i = 0; i < keys.length; i++) {
-        if ((keys[i] != "primaryKey") && (keys[i] != "TABLE_NAME") && (isNaN(keys[i]))) {
-            if (dbObject[thisTableName].hasOwnProperty(keys[i])) {
-                console.log(keys[i], dbObject[thisTableName][keys[i]]);
-            }
 
+    metadata = getTableMetaDataRowObject(thisTableName);
+
+    console.log("");
+    console.log("-".repeat(32));
+    console.log(metadata["TABLE_NAME"]);
+    console.log("-".repeat(32));
+
+    let tempTable = [];
+    let tempObject = {};
+
+    tempObject = { "TABLE_NAME": thisTableName };
+    tempTable["TABLE_NAME"] = thisTableName;
+
+    for (let key in metadata) {
+        if (Object.hasOwnProperty.call(metadata, key)) {
+            if ((key != "TABLE_NAME")) {
+                if (key === "primaryKey") {
+                    console.log(key, "number");
+
+                    tempObject[key] = "number";
+
+                } else {
+                    console.log(key, metadata[key]);
+                    tempObject[key] = metadata[key];
+                }
+            }
         }
     }
+
+    tempTable.push(JSON.parse(JSON.stringify(tempObject)));
+
+    console.log("-".repeat(32));
+
+    console.log(tempTable);
+    return tempTable;
 }
+
+
+
+
+// let keys = Object.keys(dbObject[thisTableName]);
+// console.log(dbObject[thisTableName]["TABLE_NAME"]);
+// console.log("-".repeat(32));
+// for (let i = 0; i < keys.length; i++) {
+//     if ((keys[i] != "primaryKey") && (keys[i] != "TABLE_NAME") && (isNaN(keys[i]))) {
+//         if (dbObject[thisTableName].hasOwnProperty(keys[i])) {
+//             console.log(keys[i], dbObject[thisTableName][keys[i]]);
+//         }
+
+//     }
+// }
+//}
 
 function updateDataDiv() {
     spaidDataDiv.innerHTML = JSON.stringify(dbObject);
 }
 
+
+/// MAIN FUNCTION THAT FINDS THE RIGHT FUNCTION TO CALL, GETS
+/// ITS RETURN VALUE AND RETURNS IT BACK.  ALWAYS RETURNS
+/// A TABLE LIKE OBJECT, ARRAY OF OBJECTS, EXCEPT FOR DROP
+/// TABLE, WHICH RETURNS UNDEFINED
 function sqlQuery(strSQL) {
     //NOTE ORDER IS IMPORTANT
 
@@ -595,6 +804,14 @@ function sqlQuery(strSQL) {
         console.log("process DROP TABLE statement");
         thisTable = processDropTable(strSQL);
 
+    } else if (strSQL.includes("SHOW")) {
+        console.log("process SHOW TABLES statement");
+        thisTable = processShowTables();
+
+    } else if (strSQL.includes("DESCRIBE")) {
+        console.log("process DESCRIBE TABLE statement");
+        thisTable = processDescribeTable(strSQL);
+
     } else {
         console.log('sql statement not understood');
     }
@@ -602,6 +819,19 @@ function sqlQuery(strSQL) {
     console.log(thisTable);
     return thisTable;
 
+}
+
+function processShowTables(strSQL) {
+    return showTables();
+}
+
+function processDescribeTable(strSQL) {
+    let tempTable = [];
+    strSQL = strSQL.replaceAll(";", " ");
+    let tokens = tokenizeStringBySpace(strSQL);
+    let tableName = getTokenAfter(tokens, "DESCRIBE");
+    tempTable = describe(tableName);
+    return tempTable;
 }
 
 function processDropTable(strSQL) {
@@ -910,6 +1140,8 @@ function removeCommaEntriesFromArray(myArray) {
     return myArray;
 }
 
+
+//////  STRING FUNCTIONS FOR PARSING SQL STATMENTS /////////
 function getStringBetween(completeString, startString, endString) {
     let middleString = completeString.substring(
         completeString.lastIndexOf(startString) + startString.length,
@@ -957,8 +1189,6 @@ function getTokenAfter(myArray, string) {
         return myArray[index + 1];
     }
 }
-
-
 
 function addWhiteSpaceAroundOperators(myString) {
     // the order is very important
@@ -1013,14 +1243,18 @@ function addWhiteSpaceAroundOperators(myString) {
 /////// not part of spaid programming  ////
 
 sqlQuery("CREATE TABLE users (firstName string, lastName string, age number);");
-sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (booboo, jones, 77) ;")
-sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (sherman, tank, 88) ;")
+sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (booboo, jones, 77) ;");
+sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (sherman, tank, 88) ;");
+
+sqlQuery("CREATE TABLE pets (name string, sex string, age number);");
+sqlQuery("INSERT INTO pets (name,sex, age) VALUES (fido, male, 3) ;");
+sqlQuery("INSERT INTO pets (name,sex, age) VALUES (sylvester, female, 9) ;");
 
 /////// not part of spaid programming  //// these are for web page functions
 changeButton = document.getElementById('change-name');
 changeButton.addEventListener('click', writeOutUser);
 const user1TextArea = document.getElementById('user1');
-readInDatabaseFromDiv();
+// readInDatabaseFromDiv();
 console.log(dbObject);
 readInUser1();
 ////// just testing functions
@@ -1033,30 +1267,5 @@ function writeOutUser() {
     spaidDataDiv.innerHTML = JSON.stringify(dbObject);
 }
 
-//create another table
-createTable("anotherTable", ["name", "age", "date"], ["string", "number", "string"]);
 
-//add stuff to it
-insertInto("anotherTable", ["name", "age", "date"], ["Adam", 4000, "today"]);
-insertInto("anotherTable", ["name", "age", "date"], ["Paisley", 20, "yesteryear"]);
-
-
-createTable("customers", ["name", "customerID"], ["string", "number"]);
-for (let i = 0; i < 5; i++) {
-    insertInto("customers", ["name", "customerID"], ["name" + i.toString(), i + 3]);
-}
-createTable("orders", ["orderID", "productName", "purchaserID"], ["number", "string", "number"]);
-for (let i = 0; i < 7; i++) {
-    insertInto("orders", ["orderID", "productName", "purchaserID"], [(i + 5), "productName" + (i + 3).toString(), i + 4]);
-}
-
-
-
-
-sqlQuery("CREATE TABLE newTable (name string, age number)");
-
-sqlQuery("INSERT INTO newTable (name,age)VALUES(buster,5)");
-
-sqlQuery("INSERT INTO newTable (name,age)VALUES(brown,7)");
-
-describe("newTable");
+describe("users");
