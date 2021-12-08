@@ -54,14 +54,14 @@ if (document.getElementById('spaid-data') == null) {
 
     spaidDataDiv = document.createElement('div');
     spaidDataDiv.setAttribute('id', 'spaid-data');
-    // spaidDataDiv.style.display = 'none';
+    spaidDataDiv.style.display = 'none';
 
     spaidButtonsDiv = document.createElement('div');
     spaidButtonsDiv.setAttribute('id', 'spaid-buttons');
 
     spaidResultDiv = document.createElement('div');
     spaidResultDiv.setAttribute('id', 'spaid-result');
-    spaidResultDiv.innerHTML = '<hr>Run SQL statment above to see results.<br>Type HELP for more info.<hr>';
+    spaidResultDiv.innerHTML = '<hr>Run SQL statement above to see results.<br>Type HELP for example statements and info.<hr>';
     // spaidResultDiv.style.display = 'none';
 
     saveButton = document.createElement('button');
@@ -138,23 +138,86 @@ function runSQL() {
     // }
 
     tableName = thisResult["TABLE_NAME"];
+
     resultDiv.innerHTML = '<hr>';
     resultDiv.innerHTML += '<br';
-    resultDiv.innerHTML += strSQL + '<br>';
-    resultDiv.innerHTML += tableName + '<br>';
+    resultDiv.innerHTML += 'SQL statement processed: ' + strSQL + '<br>';
+    resultDiv.innerHTML += 'Table name: ' + tableName + '<br>';
+    resultDiv.innerHTML += '<hr>';
 
     //resultDiv.innerHTML += JSON.stringify(thisResult);
 
-    resultDiv.innerHTML += formatTable(thisResult);
+    resultDiv.innerHTML += (formatTable(thisResult)).replaceAll('undefined', '-');
+
+
+
 
     resultDiv.innerHTML += '<hr>';
 
+    // formattedTable = document.getElementById('formattted-table');
+    // if (formattedTable != null) {
+    //     formattedTable.style.color = "red";
+    // }
 
 
 }
 
 function formatTable(arrayOfObjectsTable) {
+
+
+    thisTable = arrayOfObjectsTable;
+    //looping 2x's through information
+
+    //loop1
+    let headerArray = [];
+    for (let i = 0; i < thisTable.length; i++) { //go through every index in table
+        //go through each object properties
+        for (const key in thisTable[i]) {
+            if (Object.hasOwnProperty.call(thisTable[i], key)) {
+
+                if (headerArray.includes(key)) {
+                    //do nothing
+                } else {
+                    headerArray.push(key);
+                }
+            }
+        }
+    }
+    console.log("header array")
+    console.log(headerArray);
+
+
+    //add each key name to an array headerarray if it is not in array already
+
+    //loop2
+    //that array is the header
+    //go through each line of table and make a line
+    tempString = '';
+    tempStringHtml = "<table>";
+
+    tempStringHtml += "<tr>";
+    for (let j = 0; j < headerArray.length; j++) {
+        tempString += headerArray[j] + ",";
+        tempStringHtml += '<th>' + headerArray[j] + '</th>';
+    }
+    tempStringHtml += '</tr>'
+    console.log(tempString);
+
+
+    for (let i = 0; i < thisTable.length; i++) { //go through every index in table
+        tempStringHtml += '<tr>';
+        for (let j = 0; j < headerArray.length; j++) { //go through every index of header array
+            tempString += thisTable[i][headerArray[j]] + ",";
+            tempStringHtml += '<td>' + thisTable[i][headerArray[j]] + '</td>';
+        }
+        tempStringHtml += '</tr>';
+        console.log(tempString);
+
+    }
+    tempStringHtml += '</table>';
+
     formattedTable = JSON.stringify(arrayOfObjectsTable);
+    formattedTable = tempStringHtml;
     return formattedTable;
 }
 
@@ -224,19 +287,24 @@ function toggleResultVisible() {
 function readInDatabaseFromDiv() {
     jsonData = spaidDataDiv.innerHTML;
     console.log(jsonData);
-    dbObject = JSON.parse(jsonData);
+    if (jsonData != "") {
+        dbObject = JSON.parse(jsonData);
+    }
 }
 
 function createTable(tableName, fieldNames = [], dataTypes = []) {
-    if (fieldNames.length != dataTypes.length) {
-        console.log("fieldNames dataTypes mismatch length")
-    } else {
-        dbObject[tableName] = [];
-        dbObject[tableName]["primaryKey"] = 1
-        for (let i = 0; i < fieldNames.length; i++) {
-            dbObject[tableName][fieldNames[i]] = dataTypes[i];
-        }
-    }
+
+
+    // if (fieldNames.length != dataTypes.length) {
+    //     console.log("fieldNames dataTypes mismatch length")
+    // } else {
+    dbObject[tableName] = [];
+    // dbObject[tableName]["PRIMARY_KEY"] = 1
+
+    // for (let i = 0; i < fieldNames.length; i++) {
+    //     dbObject[tableName][fieldNames[i]] = dataTypes[i];
+    // }
+    // }
     dbObject[tableName]["TABLE_NAME"] = tableName;
 
 
@@ -250,7 +318,7 @@ function createTable(tableName, fieldNames = [], dataTypes = []) {
 
     tempObject = {};
     tempObject["TABLE_NAME"] = tableName;
-    tempObject["primaryKey"] = 1;
+    tempObject["PRIMARY_KEY"] = 1;
     for (let i = 0; i < fieldNames.length; i++) {
         tempObject[fieldNames[i]] = dataTypes[i];
         //dbObject[tableName][fieldNames[i]] = dataTypes[i];
@@ -276,7 +344,7 @@ function dropTable(tableName) {
     }
 
     updateDataDiv();
-    return dbObject[tableName];
+    return [];
 }
 
 function getTableMetadataRow(tableName) {
@@ -305,16 +373,19 @@ function insertInto(tableName, fieldNames = [], values = []) {
     if (fieldNames.length != values.length) {
         alert('field/value mismatch!');
     } else {
-        //let primaryKey = dbObject[tableName]["primaryKey"];
+        //let primaryKey = dbObject[tableName]["PRIMARY_KEY"];
 
         row = getTableMetadataRow(tableName);
+        //alert(dbObject["TABLE_METADATA"][row]["TABLE_NAME"]);
+        //alert(row);
+        //alert(dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"]);
 
-        let primaryKey = dbObject["TABLE_METADATA"][row]["primaryKey"];
+        let primaryKey = dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"];
 
         //alert("row found at " + row.toString());
 
         let tempObject = {};
-        tempObject['primaryKey'] = primaryKey;
+        tempObject['PRIMARY_KEY'] = primaryKey;
 
         for (let i = 0; i < fieldNames.length; i++) {
             //check to see what type of data type field is
@@ -326,7 +397,7 @@ function insertInto(tableName, fieldNames = [], values = []) {
         }
         dbObject[tableName].push(JSON.parse(JSON.stringify(tempObject)));
 
-        dbObject["TABLE_METADATA"][row]["primaryKey"] = row + 1;
+        dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"] = primaryKey + 1;
         //dbObject[tableName]["primaryKey"] = dbObject[tableName]["primaryKey"] + 1;
         //console.log(tempObject);
     }
@@ -464,7 +535,7 @@ function whereFilter(arrayOfObjectsTable, compareField, operator = '=', compareV
 
     //check here to see if compareValue needs to be checked for number
 
-    if ((compareField === "primaryKey") || (arrayOfObjectsTable[compareField] === "number")) {
+    if ((compareField === "PRIMARY_KEY") || (arrayOfObjectsTable[compareField] === "number")) {
         compareValue = Number(compareValue);
     }
 
@@ -535,9 +606,9 @@ function deleteFromTable(tableName, compareField, operator = "=", compareValue) 
 
     row = getTableMetadataRow(tableName);
 
-    // let primaryKey = dbObject["TABLE_METADATA"][row]["primaryKey"];
+    // let primaryKey = dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"];
 
-    if ((compareField === "primaryKey") || (dbObject["TABLE_METADATA"][row][compareField] === "number")) {
+    if ((compareField === "PRIMARY_KEY") || (dbObject["TABLE_METADATA"][row][compareField] === "number")) {
         compareValue = Number(compareValue);
     }
 
@@ -586,9 +657,9 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
 
     row = getTableMetadataRow(tableName);
 
-    // let primaryKey = dbObject["TABLE_METADATA"][row]["primaryKey"];
+    // let primaryKey = dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"];
 
-    //if ((compareField === "primaryKey") || (dbObject["TABLE_METADATA"][row][compareField] === "number")) {
+    //if ((compareField === "PRIMARY_KEY") || (dbObject["TABLE_METADATA"][row][compareField] === "number")) {
 
 
     if (fieldNames.length != values.length) {
@@ -721,7 +792,7 @@ function describe(thisTableName) {
     for (let key in metadata) {
         if (Object.hasOwnProperty.call(metadata, key)) {
             if ((key != "TABLE_NAME")) {
-                if (key === "primaryKey") {
+                if (key === "PRIMARY_KEY") {
                     console.log(key, "number");
 
                     tempObject[key] = "number";
@@ -749,7 +820,7 @@ function describe(thisTableName) {
 // console.log(dbObject[thisTableName]["TABLE_NAME"]);
 // console.log("-".repeat(32));
 // for (let i = 0; i < keys.length; i++) {
-//     if ((keys[i] != "primaryKey") && (keys[i] != "TABLE_NAME") && (isNaN(keys[i]))) {
+//     if ((keys[i] != "PRIMARY_KEY") && (keys[i] != "TABLE_NAME") && (isNaN(keys[i]))) {
 //         if (dbObject[thisTableName].hasOwnProperty(keys[i])) {
 //             console.log(keys[i], dbObject[thisTableName][keys[i]]);
 //         }
@@ -812,6 +883,9 @@ function sqlQuery(strSQL) {
         console.log("process DESCRIBE TABLE statement");
         thisTable = processDescribeTable(strSQL);
 
+    } else if (strSQL.includes("HELP")) {
+        console.log("process HELP statement");
+        thisTable = processHelp(strSQL);
     } else {
         console.log('sql statement not understood');
     }
@@ -820,6 +894,15 @@ function sqlQuery(strSQL) {
     return thisTable;
 
 }
+
+function processHelp(strSQL) {
+    let tempTable = [];
+    let tempObject = { 'help': helpString };
+    tempTable.push(tempObject);
+    return JSON.parse(JSON.stringify(tempTable));
+}
+
+
 
 function processShowTables(strSQL) {
     return showTables();
@@ -899,7 +982,7 @@ function processDelete(strSQL) {
     operator = myArray[1];
     compareValue = myArray[2];
 
-    if ((dbObject[tableName][compareField] === "number") || (compareField === "primaryKey")) {
+    if ((dbObject[tableName][compareField] === "number") || (compareField === "PRIMARY_KEY")) {
         compareValue = Number(compareValue);
     }
 
@@ -942,7 +1025,7 @@ function processUpdate(strSQL) {
         }
     }
 
-    if (compareField === "primaryKey") {
+    if (compareField === "PRIMARY_KEY") {
         compareValue = Number(compareValue);
     } else if (dbObject[tableName][compareField] === "number") {
         compareValue = Number(compareValue);
@@ -1090,7 +1173,7 @@ function processSelectStatement(strSQL) {
 
         //console.log(tempTable[compareField]);
 
-        if ((dbObject[tableName][compareField] === "number") || (compareField.includes("primaryKey"))) { //check if primary key also
+        if ((dbObject[tableName][compareField] === "number") || (compareField.includes("PRIMARY_KEY"))) { //check if primary key also
             tempTable = whereFilter(tempTable, compareField, operator, Number(compareValue));
         } else {
             tempTable = whereFilter(tempTable, compareField, operator, compareValue);
@@ -1240,32 +1323,87 @@ function addWhiteSpaceAroundOperators(myString) {
 // DROP TABLE
 // DROP TABLE table_name;
 
+
+let helpString = "example statements: <br><pre> CREATE TABLE users (userID number, username string, email string);<br> INSERT INTO users (userID, username, email) VALUES (73, kilroy, kilroy@kil.roy);<br> UPDATE users SET lastname = Smith, age = 5 WHERE userID = 7;<br> DELETE\
+FROM users WHERE name = kilroy;<br> DELETE FROM users WHERE PRIMARY_KEY &gt; 0; (deletes all entries)<br> DESCRIBE users;<br> SHOW TABLES;<br> DROP TABLE mytable;<br> SELECT orders.orderID, customers.name FROM orders INNER JOIN customers ON orders.customerID\
+= customers.customerID;<br> SELECT * FROM users;<br> SELECT username FROM users;<br> SELECT userID, username FROM users WHERE userID &gt; 10;<br> SELECT userID, username, age FROM users WHERE age &gt; 12 ORDER BY age DESC;<br> SELECT userID, username,\
+age FROM users WHERE age &lt;= 12 ORDER BY age ASC;<br> SELECT userID, username FROM users WHERE userID &lt;&gt; 5 ORDER BY PRIMARY_KEY;<br> SELECT * FROM users ORDER BY age ASC;<br></pre>\
+<br> reserved SQL keywords;<br> <pre>INNER\
+<br> JOIN\
+<br> SELECT\
+<br> INSERT\
+<br> INTO\
+<br> UPDATE\
+<br> DELETE\
+<br> CREATE\
+<br> DROP\
+<br> TABLE\
+<br> SHOW\
+<br> TABLES\
+<br> DESCRIBE\
+<br> HELP\
+<br> SET\
+<br> WHERE\
+<br> VALUES\
+<br> ON\
+<br> PRIMARY_KEY\
+<br> TABLE_METADATA\
+<br> =\
+<br> !=\
+<br> &lt;&gt;\
+<br> &gt;=\
+<br> &lt;=\
+<br> &gt;\
+<br> &lt;\
+<br> *</pre>\
+<br>\
+<br> Notes:\
+<br> <pre> ; not needed (but ok)<br> &apos;&apos; or &quot;&quot; not needed around strings (but ok)<br> only datatypes are string and number (can use 0 or 1 for boolean)<br> CAPITALIZATION of keywords is required.<br> all tables are autoincremented starting\
+at 1<br> column name of primary key is PRIMARY_KEY<br> INNER JOIN will give back a table with column names like orders_orderID customers_name as the field names ie they are not simplified<br> (inner joining twice is not possible through the sqlQuery function\
+at this time, but can be done programatically using the innerJoin function outside of sql statements, this is currently being developed)</pre><br>\
+<br> resevered document id&apos;s:<br> <pre> spaid-data\
+<br> spaid-buttons\
+<br> spaid-result\
+<br> spaid-save\
+<br> spaid-load-db\
+<br> spaid-save-db\
+<br> spaid-show\
+<br> spaid-input\
+<br> spaid-run\
+<br> spaid-show-result</pre>\
+<br>";
+
+
+
 /////// not part of spaid programming  ////
 
-sqlQuery("CREATE TABLE users (firstName string, lastName string, age number);");
-sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (booboo, jones, 77) ;");
-sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (sherman, tank, 88) ;");
+// sqlQuery("CREATE TABLE pets (name string, sex string, age number);");
+// sqlQuery("INSERT INTO pets (name,sex, age) VALUES (fido, male, 3) ;");
+// sqlQuery("INSERT INTO pets (name,sex, age) VALUES (sylvester, female, 9) ;");
 
-sqlQuery("CREATE TABLE pets (name string, sex string, age number);");
-sqlQuery("INSERT INTO pets (name,sex, age) VALUES (fido, male, 3) ;");
-sqlQuery("INSERT INTO pets (name,sex, age) VALUES (sylvester, female, 9) ;");
+// sqlQuery("CREATE TABLE users (firstName string, lastName string, age number);");
+// sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (booboo, jones, 77) ;");
+// sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (sherman, tank, 88) ;");
+
+
+readInDatabaseFromDiv();
 
 /////// not part of spaid programming  //// these are for web page functions
-changeButton = document.getElementById('change-name');
-changeButton.addEventListener('click', writeOutUser);
-const user1TextArea = document.getElementById('user1');
-// readInDatabaseFromDiv();
-console.log(dbObject);
-readInUser1();
-////// just testing functions
-function readInUser1() {
-    user1TextArea.innerHTML = dbObject["users"][0].firstName;
-}
+// changeButton = document.getElementById('change-name');
+// changeButton.addEventListener('click', writeOutUser);
+// const user1TextArea = document.getElementById('user1');
 
-function writeOutUser() {
-    dbObject["users"][0].firstName = user1TextArea.value;
-    spaidDataDiv.innerHTML = JSON.stringify(dbObject);
-}
+//console.log(dbObject);
+// readInUser1();
+// ////// just testing functions
+// function readInUser1() {
+//     user1TextArea.innerHTML = dbObject["users"][0].firstName;
+// }
+
+// function writeOutUser() {
+//     dbObject["users"][0].firstName = user1TextArea.value;
+//     spaidDataDiv.innerHTML = JSON.stringify(dbObject);
+// }
 
 
-describe("users");
+// describe("users");
