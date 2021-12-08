@@ -1,0 +1,76 @@
+example statements:
+
+CREATE TABLE users (userID number, username string, email string);
+INSERT INTO users (userID, username, email) VALUES (73, kilroy, kilroy@kil.roy);
+UPDATE users SET lastname = Smith, age = 5 WHERE userID = 7;
+DELETE FROM users WHERE name = kilroy;
+DELETE FROM users WHERE PRIMARY_KEY > 0; (deletes all entries)
+DESCRIBE users;
+SHOW TABLES;
+DROP TABLE mytable;
+SELECT orders.orderID, customers.name FROM orders INNER JOIN customers ON orders.customerID = customers.customerID;
+SELECT * FROM users;
+SELECT username FROM users;
+SELECT userID, username FROM users WHERE userID > 10;
+SELECT userID, username, age FROM users WHERE age > 12 ORDER BY age DESC;
+SELECT userID, username, age FROM users WHERE age <= 12 ORDER BY age ASC;
+SELECT userID, username FROM users WHERE userID <> 5 ORDER BY PRIMARY_KEY;
+SELECT * FROM users ORDER BY age ASC;
+
+reserved SQL keywords;
+INNER
+JOIN
+SELECT
+INSERT
+INTO
+UPDATE
+DELETE
+CREATE
+DROP
+TABLE
+SHOW
+TABLES
+DESCRIBE
+HELP
+SET
+WHERE
+VALUES
+ON
+PRIMARY_KEY
+TABLE_METADATA
+=
+!=
+<>
+>=
+<=
+>
+<
+*
+
+Notes:
+; not needed (but ok)
+'' or "" not needed around strings (but ok)
+only datatypes are string and number (can use 0 or 1 for boolean)
+CAPITALIZATION of keywords is required.
+all tables are autoincremented starting at 1
+column name of primary key is PRIMARY_KEY
+INNER JOIN will give back a table with column names like orders_orderID customers_name as the field names ie they are not simplified
+(inner joining twice is not possible through the sqlQuery function at this time, but can be done programatically using the innerJoin function outside of sql statements, this is currently being developed)
+
+resevered document id's:
+spaid-data
+spaid-buttons
+spaid-result
+spaid-save
+spaid-load-db
+spaid-save-db
+spaid-show
+spaid-input
+spaid-run
+spaid-show-result
+
+
+
+
+
+
