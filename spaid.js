@@ -38,16 +38,16 @@
 //
 //
 // Notes:
-// =
+// the order is very important
 // <>
 // !=
-// >
 // >=
-// <
+// >
 // <=
+// <
+// =
 
 let dbObject = {};
-
 
 if (document.getElementById('spaid-data') == null) {
     //alert('no spaid-data div found, creating it!');
@@ -133,10 +133,6 @@ function runSQL() {
     console.log(strSQL);
     thisResult = sqlQuery(strSQL);
 
-    // for (let i = 0; i < thisResult.length; i++) {
-
-    // }
-
     tableName = thisResult["TABLE_NAME"];
 
     resultDiv.innerHTML = '<hr>';
@@ -145,25 +141,13 @@ function runSQL() {
     resultDiv.innerHTML += 'Table name: ' + tableName + '<br>';
     resultDiv.innerHTML += '<hr>';
 
-    //resultDiv.innerHTML += JSON.stringify(thisResult);
-
     resultDiv.innerHTML += (formatTable(thisResult)).replaceAll('undefined', '-');
 
-
-
-
     resultDiv.innerHTML += '<hr>';
-
-    // formattedTable = document.getElementById('formattted-table');
-    // if (formattedTable != null) {
-    //     formattedTable.style.color = "red";
-    // }
-
 
 }
 
 function formatTable(arrayOfObjectsTable) {
-
 
     thisTable = arrayOfObjectsTable;
     //looping 2x's through information
@@ -294,27 +278,21 @@ function readInDatabaseFromDiv() {
 
 function createTable(tableName, fieldNames = [], dataTypes = []) {
 
+    //***************MADE UNTESTED CHANGE HERE */
+    if (fieldNames.length != dataTypes.length) {
+        console.log("fieldNames dataTypes mismatch length")
+    } else {
+        dbObject[tableName] = [];
+    }
 
-    // if (fieldNames.length != dataTypes.length) {
-    //     console.log("fieldNames dataTypes mismatch length")
-    // } else {
-    dbObject[tableName] = [];
-    // dbObject[tableName]["PRIMARY_KEY"] = 1
-
-    // for (let i = 0; i < fieldNames.length; i++) {
-    //     dbObject[tableName][fieldNames[i]] = dataTypes[i];
-    // }
-    // }
-    dbObject[tableName]["TABLE_NAME"] = tableName;
-
-
+    dbObject[tableName]["TABLE_NAME"] = tableName; //helpful sometimes for showing table
+    //but is not the official representation of the table name, see below for metadata
 
     //if dbObject["tableMetadata"] is null make
     if (dbObject["TABLE_METADATA"] === undefined) {
         //alert("no tableMetadataTable");
         dbObject["TABLE_METADATA"] = [];
     }
-
 
     tempObject = {};
     tempObject["TABLE_NAME"] = tableName;
@@ -333,8 +311,7 @@ function createTable(tableName, fieldNames = [], dataTypes = []) {
 function dropTable(tableName) {
     delete dbObject[tableName];
 
-    //need to delete from metadata table
-
+    //need to delete from metadata table also 
     metadataTable = dbObject["TABLE_METADATA"];
     for (let i = metadataTable.length - 1; i >= 0; i--) {
         if (metadataTable[i]["TABLE_NAME"] === tableName) {
@@ -342,7 +319,6 @@ function dropTable(tableName) {
             //will need to delete from table
         }
     }
-
     updateDataDiv();
     return [];
 }
@@ -373,16 +349,9 @@ function insertInto(tableName, fieldNames = [], values = []) {
     if (fieldNames.length != values.length) {
         alert('field/value mismatch!');
     } else {
-        //let primaryKey = dbObject[tableName]["PRIMARY_KEY"];
-
         row = getTableMetadataRow(tableName);
-        //alert(dbObject["TABLE_METADATA"][row]["TABLE_NAME"]);
-        //alert(row);
-        //alert(dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"]);
 
         let primaryKey = dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"];
-
-        //alert("row found at " + row.toString());
 
         let tempObject = {};
         tempObject['PRIMARY_KEY'] = primaryKey;
@@ -398,19 +367,15 @@ function insertInto(tableName, fieldNames = [], values = []) {
         dbObject[tableName].push(JSON.parse(JSON.stringify(tempObject)));
 
         dbObject["TABLE_METADATA"][row]["PRIMARY_KEY"] = primaryKey + 1;
-        //dbObject[tableName]["primaryKey"] = dbObject[tableName]["primaryKey"] + 1;
-        //console.log(tempObject);
+
     }
     updateDataDiv();
-    //console.log(dbObject[tableName]);
-    //dbObject[tableName]["TABLE_NAME"] = tableName;
+
     return dbObject[tableName];
 }
 
 function selectAllFrom(tableName) {
     let tempTable = [];
-    //console.log(dbObject[tableName]);
-    //console.log(dbObject[tableName].length);
 
     for (let i = 0; i < dbObject[tableName].length; i++) {
         tempTable.push(JSON.parse(JSON.stringify(dbObject[tableName][i])));
@@ -500,7 +465,6 @@ function innerJoin(arrayOfObjectsTable1, arrayOfObjectsTable2, table1Field, tabl
 
     console.log(tempTable1);
     console.log(tempTable2);
-
 
     //rewrite table1Field to table1_table1Field
     //rewrite table2Field to table2_table2Field
@@ -745,8 +709,6 @@ function update(tableName, fieldNames = [], values = [], compareField, operator 
     }
 }
 
-
-
 function showTables() {
     let tempTable = [];
     let tempRowObject = {};
@@ -762,17 +724,13 @@ function showTables() {
 
             tempTable.push(JSON.parse(JSON.stringify(tempRowObject)));
         }
-
     }
 
     tempTable["TABLE_NAME"] = 'Show Tables';
 
     console.log(tempTable);
     return tempTable;
-
 }
-
-
 
 function describe(thisTableName) {
 
@@ -813,26 +771,9 @@ function describe(thisTableName) {
     return tempTable;
 }
 
-
-
-
-// let keys = Object.keys(dbObject[thisTableName]);
-// console.log(dbObject[thisTableName]["TABLE_NAME"]);
-// console.log("-".repeat(32));
-// for (let i = 0; i < keys.length; i++) {
-//     if ((keys[i] != "PRIMARY_KEY") && (keys[i] != "TABLE_NAME") && (isNaN(keys[i]))) {
-//         if (dbObject[thisTableName].hasOwnProperty(keys[i])) {
-//             console.log(keys[i], dbObject[thisTableName][keys[i]]);
-//         }
-
-//     }
-// }
-//}
-
 function updateDataDiv() {
     spaidDataDiv.innerHTML = JSON.stringify(dbObject);
 }
-
 
 /// MAIN FUNCTION THAT FINDS THE RIGHT FUNCTION TO CALL, GETS
 /// ITS RETURN VALUE AND RETURNS IT BACK.  ALWAYS RETURNS
@@ -901,8 +842,6 @@ function processHelp(strSQL) {
     tempTable.push(tempObject);
     return JSON.parse(JSON.stringify(tempTable));
 }
-
-
 
 function processShowTables(strSQL) {
     return showTables();
@@ -1194,7 +1133,7 @@ function processSelectStatement(strSQL) {
         }
         tempTable = orderByFilter(tempTable, orderByField, direction);
     }
-    // see if ther is an order by condition
+    // see if there is an order by condition
     //   get string after order 
     //   split string by spaces
     //   remove extra spaces
@@ -1223,15 +1162,13 @@ function removeCommaEntriesFromArray(myArray) {
     return myArray;
 }
 
-
-//////  STRING FUNCTIONS FOR PARSING SQL STATMENTS /////////
+//////  STRING FUNCTIONS FOR HELP IN PARSING SQL STATMENTS /////////
 function getStringBetween(completeString, startString, endString) {
     let middleString = completeString.substring(
         completeString.lastIndexOf(startString) + startString.length,
         completeString.lastIndexOf(endString)
     );
     return middleString;
-
 }
 
 function getStringAfter(completeString, thisString) {
@@ -1373,37 +1310,4 @@ at this time, but can be done programatically using the innerJoin function outsi
 <br> spaid-show-result</pre>\
 <br>";
 
-
-
-/////// not part of spaid programming  ////
-
-// sqlQuery("CREATE TABLE pets (name string, sex string, age number);");
-// sqlQuery("INSERT INTO pets (name,sex, age) VALUES (fido, male, 3) ;");
-// sqlQuery("INSERT INTO pets (name,sex, age) VALUES (sylvester, female, 9) ;");
-
-// sqlQuery("CREATE TABLE users (firstName string, lastName string, age number);");
-// sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (booboo, jones, 77) ;");
-// sqlQuery("INSERT INTO users (firstName,lastName, age) VALUES (sherman, tank, 88) ;");
-
-
 readInDatabaseFromDiv();
-
-/////// not part of spaid programming  //// these are for web page functions
-// changeButton = document.getElementById('change-name');
-// changeButton.addEventListener('click', writeOutUser);
-// const user1TextArea = document.getElementById('user1');
-
-//console.log(dbObject);
-// readInUser1();
-// ////// just testing functions
-// function readInUser1() {
-//     user1TextArea.innerHTML = dbObject["users"][0].firstName;
-// }
-
-// function writeOutUser() {
-//     dbObject["users"][0].firstName = user1TextArea.value;
-//     spaidDataDiv.innerHTML = JSON.stringify(dbObject);
-// }
-
-
-// describe("users");
