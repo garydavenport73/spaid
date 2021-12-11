@@ -1500,7 +1500,7 @@ DELETE FROM table_name WHERE condition;<br>\
 SELECT * FROM table_name;<br>\
 SELECT column1, column2, ...FROM table_name;<br>\
 SELECT column1, column2, ... FROM table_name WHERE condition;<br>\
-SELECT column1, column2, ... FROM table_name ORDER BY column1, column2, ... ASC|DESC;<br>\
+SELECT column1, column2, ... FROM table_name ORDER BY column ASC|DESC;<br>\
 SELECT column1, column2, ... FROM table1 INNER JOIN table2 ON table1.column_name = table2.column_name;<br>\
 INSERT INTO newtable [a SELECT statement];<br>\
 HELP<br>\
