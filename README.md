@@ -7,13 +7,13 @@ Single Page Application Including Database
 
 ### Please note webpages built should be opened directly as a file, not with a live server.
 
-This project has been brewing in the back of my mind for awhile.
+This project has been brewing in the back of my mind for a while.
 
 The overall purpose of the project is allow one to make programs that
-run in a browser locally and contain within the page a database.
+run in a browser locally and contain within the page a database like object.
 
 Then before closing the page, you can save it and a copy of the page
-with the current data is saved.
+saving the current data is saved.
 
 This solves several problems:
 1) It runs basically anywhere a browser is installed, ie cross-platform.
@@ -36,6 +36,11 @@ When the save button is clicked, the script makes a copy of the web page includi
   
 When this saved page is opened, it will contain the persistent data.
 
+You can save the database and load it in manually, or you can save a copy of the page with the database.
+The databases are loaded and saved in JSON format.  If you want to continually save over the same
+file, like you might as in the case of a word processor like operation you can, but until the program
+is tested more I'd recommmend using new filenames between sessions.
+
 There are a bunch of functions but they are really intended to be funneled to one central
 function sqlQuery.
 
@@ -44,12 +49,15 @@ The syntax is like this:
 
 `The query string always returns a table which is an array of objects with attached metadata.`
 
-I will build a better page using the attached 'database like object' which is currently non-relational.
+I will build a better test page using the attached 'database like object' which is currently non-relational.
+Now that the project has gotten to a point where it can be used, I will build my first application
+with it soon.
 
-What is more important to me with this project is persistence between sessions and self-containment.
+What is more important to me with this project is persistence between sessions and self-containment, not
+so much that it is relational.
 
 `I'd simply like to be able to write some nicely interfaced basic desktop programs 
-without the extreme solution of installing a complete server solution to serve and store date.`
+without the extreme solution of installing a complete server solution to serve and store data.`
 
 `I also want to be able to open the page anywhere without installing 
 anything to the pc, so I can write programs that I can use on my work computers.`
@@ -89,17 +97,22 @@ Either way something is written to the console to be inspected.
 To use, add the javascript reference before the end of the body and it will insert a fresh
 'database' if there isn't one present.
 
-It is essentially not style, but I would exect someone to only display the save and perhaps
-save database and load database functions.  This is left up to the user.
+It is essentially not styled, but I would exect someone to only display the save and perhaps
+save database and load database functions.  The styling is left up to the user.  I envision a little button or maybe 
+transulcent bar at the top of the browser or maybe something like what 'citrix' does. in terms of looks.
 
 Currently, if there is not database present in the webpage, a sample webpage of pet owners and
-pets is loaded.
+pets is loaded in the sample webpage mySpaid.html.
 
 There is a SQL interpreter with visualization of both the tables and the database available
 at the top of the web page.
 
 Please see the list of keywords, acceptable SQL statments and type-in tutorial below.  I think I may make a series of sql statments
-that can be read in to the interpreter separated by ; like in a sqlDump, but for not this is all I've done.
+that can be read in to the interpreter separated by ; like in a sqlDump, but for now this is all the further I've made it with the project.
+
+Right now you can only INNER JOIN two tables, but you can insert the result to another table.  
+Then you can rename the columns, then repeat another INNER JOIN.  The INNER JOIN always returns column names which are combined
+like customers_customerID and with the _ instead of the . notation. 
 
 <pre>
 Available datatypes are STRING or NUMBER.
