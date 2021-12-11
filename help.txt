@@ -17,7 +17,7 @@ DELETE FROM table_name WHERE condition;
 SELECT * FROM table_name;
 SELECT column1, column2, ...FROM table_name;
 SELECT column1, column2, ... FROM table_name WHERE condition;
-SELECT column1, column2, ... FROM table_name ORDER BY column1, column2, ... ASC|DESC;
+SELECT column1, column2, ... FROM table_name ORDER BY column ASC|DESC;
 SELECT column1, column2, ... FROM table1 INNER JOIN table2 ON table1.column_name = table2.column_name;
 INSERT INTO newtable [a SELECT statement];
 HELP
