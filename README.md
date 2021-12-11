@@ -41,6 +41,26 @@ The databases are loaded and saved in JSON format.  If you want to continually s
 file, like you might as in the case of a word processor like operation you can, but until the program
 is tested more I'd recommmend using new filenames between sessions.
 
+The webpage contains a div which is hidden containing a JSON database-like object.
+
+<img src="screenshot2.png">
+
+The database controls are:
+- `save` - saves a copy of the current webpage containing the database in a hidden div.
+- `save database` - which will save a copy of the JSON datbase like object which is hidden in the div.
+- `load database` - which will load in the database to the hidden div for use in the web page.
+- `show/hide database` - which will toggle the hidden div containing the JSON database-like object.
+- `an input box` - you put SQL statments in there.
+- `run button` - which will execute the SQL statments.
+- `a show/hide results button` which toggles a tabular format showing the results of the SQL statments.
+
+`The input box and run button can be used to build a database and you can inspect the results
+as you build.  You can build your database here much like you might with command line in MariaDB.`
+
+Or you can load do it programatically.  I am working on a dump like function which will allow 
+the interpreter to loop through SQL statements and I plan to add a button to the buttons bar 
+which will allow for execution of sequential SQL statements.
+
 There are a bunch of functions but they are really intended to be funneled to one central
 function sqlQuery.
 
