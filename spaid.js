@@ -1567,9 +1567,13 @@ INSERT INTO dogNames SELECT name FROM dogsOnly;<br>\
 SHOW TABLES;<br>\
 </pre>";
 
-////////////THIS CAN BE DELETED BUT IS HERE FOR DEMONSTRATION
+////////////THIS CAN BE COMMENTED OUT BELOW BUT IS HERE FOR DEMONSTRATION
+
+
+
 
 if (spaidDataDiv.innerHTML === "") {
+    alert("Right now, sample data is being loading for demonstration purposes.  Just comment out the end of the Javascript file to disable this.");
     sqlQuery("CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);");
     sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES ('John', 'Jones', 'john@gmail.com');");
     sqlQuery("INSERT INTO owners (firstname, lastname, email, age) VALUES ('David', 'Davis', 'ddavis@gmail.com',73);");
