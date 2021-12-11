@@ -3,7 +3,7 @@ Self-saving PAge Including Data
 or
 Single Page Application Including Database
 
-###Please note webpages built should be opened directly, not with a live server.
+### Please note webpages built should be opened directly as a file, not with a live server.
 
 This project has been brewing in the back of my mind for awhile.
 
