@@ -183,7 +183,7 @@ function formatTable2(arrayOfObjectsTable) {
     console.log("-".repeat(32));
     console.log("table:" + thisTable["TABLE_NAME"]);
     let tempString = "";
-    tempStringHtml = "<table>"; //start table
+    tempStringHtml = "<pre><table>"; //start table
     tempStringHtml += "<tr>"; //start header row
     for (let j = 0; j < headerArray.length; j++) {
         tempString += headerArray[j] + " ";
@@ -207,7 +207,7 @@ function formatTable2(arrayOfObjectsTable) {
 
         tempStringHtml += '</tr>';
     }
-    tempStringHtml += '</table>';
+    tempStringHtml += '</table></pre>';
 
     formattedTable = tempStringHtml;
 
@@ -283,10 +283,6 @@ function readInDatabaseFromDiv() {
         dbObject = JSON.parse(jsonData);
     }
 }
-
-
-
-
 
 
 function attachMetaDataToTable(someTable, metaData) {
@@ -531,12 +527,6 @@ function transferMetadata(table, donorTable) {
 
 }
 
-
-
-
-
-
-
 function _showTables() {
     let tempTable = [];
     let tempRowObject = {};
@@ -544,13 +534,9 @@ function _showTables() {
         tempRowObject["TABLE_NAME"] = tableName;
         tempTable.push(JSON.parse(JSON.stringify(tempRowObject)));
     }
-
     tempTable["TABLE_NAME"] = 'SHOW TABLES';
-
     return tempTable;
 }
-
-
 
 function updateDataDiv() {
     spaidDataDiv.innerHTML = JSON.stringify(dbObject);
@@ -582,12 +568,12 @@ function sqlQuery(strSQL) {
 
     console.log(strSQL);
     //NOTE ORDER IS IMPORTANT
-    strSQL = strSQL.replaceAll("'", " ");
-    strSQL = strSQL.replaceAll("\"", " ");
-    strSQL = strSQL.replaceAll(";", " ")
-    strSQL = strSQL.replaceAll("(", " ( ");
-    strSQL = strSQL.replaceAll(")", " ) ");
 
+    strSQL = strSQL.trim();
+
+    if (strSQL[strSQL.length - 1] === ";") {
+        strSQL = strSQL.slice(0, -1);
+    }
 
     let thisTable = [];
 
@@ -820,6 +806,7 @@ function processDropTable(strSQL) {
     let tokens = tokenizeStringBySpace(strSQL);
     tableName = getTokenAfter(tokens, "TABLE");
     tempTable = _dropTable(tableName);
+
     return tempTable;
 }
 
@@ -830,6 +817,7 @@ function _dropTable(tableName) {
     //send something back
     let tempTable = [];
     tempTable["TABLE_NAME"] = "DROPPED " + tableName;
+
     return tempTable;
 }
 
@@ -844,7 +832,7 @@ function processCreateTable(strSQL) {
     endString = getStringAfter(strSQL, tableName);
     endString = endString.replace("(", " ");
     endString = endString.replace(")", " ");
-    tokenPairs = splitByCommas(endString);
+    tokenPairs = splitByCommasAndCleanWhiteSpace(endString);
     let tempArray = []
     for (let i = 0; i < tokenPairs.length; i++) {
         tempArray = tokenizeStringBySpace(tokenPairs[i]);
@@ -887,29 +875,33 @@ function _createTable(tableName, fieldNames = [], dataTypes = []) {
 }
 
 function processDelete(strSQL) {
-    //will parse something like -     // DELETE FROM table_name WHERE condition;
-    //it calls the paramaterized function and passes its return value back
-    strSQL = addWhiteSpaceAroundOperators(strSQL);
+    // will parse something like-
+    // DELETE FROM table_name WHERE condition;
+    // DELETE FROM table_name WHERE column=` some value   `;
+    // it calls the paramaterized function and passes its return value back;
+
     let tempTable = [];
-    //alert(strSQL);
-    //strSQL = addWhiteSpaceAroundOperators(strSQL);
-    //alert(strSQL);
 
     let tokens = tokenizeStringBySpace(strSQL);
-    tableName = getTokenAfter(tokens, "FROM");
-    endString = getStringAfter(strSQL, "WHERE");
-    myArray = tokenizeStringBySpace(endString);
+    tableName = getTokenAfter(tokens, "FROM"); //got tableName!
 
-    //alert(myArray);
-    compareField = myArray[0];
-    operator = myArray[1];
+    //get compareField and operator
+    let lastString = getStringAfter(strSQL, "WHERE");
 
-    //alert(operator);
+    let stopIndex = lastString.indexOf("`");
+    firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
 
-    let lastString = getStringAfter(strSQL, operator);
-    let compareValue = lastString.trim();
+    firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
 
-    //change to number if appropriate
+    //get compare field and operator
+    let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
+
+    let compareField = tempTokens3[0];
+    let operator = tempTokens3[1];
+
+    //get compare value
+    compareValue = readBackTicks(lastString)[0];
+
     if (dbObject[tableName][compareField] === "NUMBER") {
         compareValue = Number(compareValue);
     }
@@ -971,56 +963,80 @@ function _deleteFromTable(tableName, compareField, operator = "=", compareValue)
     return tempTable;
 }
 
+function trimArrayElements(myArray) {
+    for (let i = 0; i < myArray.length; i++) { //trim both side of each token
+        myArray[i] = myArray[i].trim();
+    }
+    return myArray;
+}
+
 function processUpdate(strSQL) {
 
     //will parse something like - 
-    //UPDATE table_name SET column1 = value1, column2 = value2, ... WHERE condition;
+    //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE condition;
+
+    //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE something >= `something`;  remove ticks from where clause just in case->done
     //it calls the paramaterized function and passes its return value back
 
     tempTable = [];
-    strSQL = addWhiteSpaceAroundOperators(strSQL);
+    //strSQL = addWhiteSpaceAroundOperators(strSQL);
 
     //get tableName
     let tempTokens1 = tokenizeStringBySpace(strSQL);
-    tableName = getTokenAfter(tempTokens1, "UPDATE");
+    tableName = getTokenAfter(tempTokens1, "UPDATE"); //got tableName!
 
+
+    //get compareField and operator
     let lastString = getStringAfter(strSQL, "WHERE");
-    let tempTokens3 = tokenizeStringBySpace(lastString);
+
+    let stopIndex = lastString.indexOf("`");
+    firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
+
+    firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
+
+    //no get first tick and go from that space
+    //lastString = addWhiteSpaceAroundOperators(lastString);
+    let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
 
     let compareField = tempTokens3[0];
     let operator = tempTokens3[1];
-    let endString = getStringAfter(strSQL, operator);
-    let compareValue = endString.trim();
+
+    //get compare value
+
+
+    compareValue = readBackTicks(lastString)[0];
 
     let middleString = getStringBetween(strSQL, "SET", "WHERE");
-    let updatePairs = splitByCommas(middleString);
+    middleString = middleString.trim();
+
+    let updatePairs = splitByBackTicks(middleString);
+
+    //remove the equal sign from first and every other token, at the end
+    for (let i = 0; i < updatePairs.length; i = i + 2) {
+        updatePairs[i] = updatePairs[i].slice(0, -1);
+    }
+
+    //remove a comma from beginning if present
+    for (let i = 0; i < updatePairs.length; i = i + 2) {
+        if (updatePairs[i][0] === ",") {
+            updatePairs[i] = updatePairs[i].slice(1);
+        }
+    }
+
+    for (let i = 0; i < updatePairs.length; i = i + 2) { //trim only odd 
+        updatePairs[i] = updatePairs[i].trim();
+    }
 
     let fieldNames = [];
     let values = [];
-    let tempArray = [];
 
     console.log(updatePairs);
-    for (let i = 0; i < updatePairs.length; i++) {
-        tempArray = updatePairs[i].split("=");
-        tempArray[0] = tempArray[0].trim();
-        tempArray[1] = tempArray[1].trim();
-        fieldNames[i] = tempArray[0];
-        values[i] = tempArray[1];
+    for (let i = 0; i < updatePairs.length / 2; i++) {
+        fieldNames[i] = updatePairs[i * 2];
+        //values[i] = updatePairs[(i * 2) + 1];  //no longer this half of 'pairs' see below using backticks
     }
 
-    //datatypes should be handled in _update()
-
-    // for (let i = 0; i < values.length; i++) {
-    //     if (dbObject[tableName][fieldNames[i]] === "NUMBER") {
-    //         values[i] = Number(values[i]);
-    //     }
-    // }
-
-    // if (compareField === "PRIMARY_KEY") { //probably not needed
-    //     compareValue = Number(compareValue);
-    // } else if (dbObject[tableName][compareField] === "NUMBER") {
-    //     compareValue = Number(compareValue);
-    // }
+    values = readBackTicks(middleString);
 
     tempTable = _update(tableName, fieldNames, values, compareField, operator, compareValue);
     return tempTable;
@@ -1129,32 +1145,47 @@ function processInsertInto(strSQL) {
 
     tempTable = [];
 
+    strSQL = strSQL.replace("(", " ( "); //only replaces first
+    strSQL = strSQL.replace(")", " ) "); //only replaces first
+
     let tempTokens = tokenizeStringBySpace(strSQL);
     let tableName = getTokenAfter(tempTokens, "INTO"); //got tableName!
-    let middleString = getStringBetween(strSQL, tableName, "VALUES");
-    middleString = middleString.replace("(", " ");
-    middleString = middleString.replace(")", " ");
-    columns = splitByCommas(middleString); //got columns!
+
+    let middleString = getStringBetween(strSQL, "(", ")");
+
+    columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
+
+
     lastString = getStringAfter(strSQL, "VALUES");
-    lastString = lastString.replace("(", " ");
-    lastString = lastString.replace(")", " ");
-    values = splitByCommas(lastString); //got values!
+    lastString = lastString.replace("(", " "); //replace only first in string
 
+    let position = lastString.lastIndexOf(')');
+    lastString = lastString.substring(0, position) + " " + lastString.substring(position + 1); //replace only last )
 
-    //
-    // should handle dataconversion in _insertInto
-    // 
-    // for (let i = 0; i < values.length; i++) {
-    //     if (dbObject[tableName][columns[i]] === "NUMBER") {
-    //         values[i] = Number(values[i]);
-    //     }
-    // }
+    lastString = lastString.trim(); //trim edges
+
+    values = readBackTicks(lastString);
 
     tempTable = _insertInto(tableName, columns, values);
 
     return tempTable;
 }
 
+function readBackTicks(myString) {
+    let tickLocations = [];
+    let myArray = [];
+    let tempString = "";
+    for (let i = 0; i < myString.length; i++) {
+        if (myString[i] === "`") {
+            tickLocations.push(i);
+        }
+    }
+    for (let i = 0; i < tickLocations.length / 2; i++) {
+        tempString = myString.substring(tickLocations[i * 2] + 1, tickLocations[(i * 2) + 1]);
+        myArray.push(tempString);
+    }
+    return myArray;
+}
 
 function _insertInto(tableName, fieldNames = [], values = []) {
     if (fieldNames.length != values.length) {
@@ -1188,6 +1219,8 @@ function _insertInto(tableName, fieldNames = [], values = []) {
 
         //return the table just modified
         tempTable = sqlQuery("SELECT * FROM " + tableName);
+        //console.log(tempTable);
+
         return tempTable;
     }
 }
@@ -1197,7 +1230,7 @@ function processInsertSelect(strSQL) {
     //
     //INSERT INTO copiedTable SELECT * FROM myTable;
     //INSERT INTO dogOwners SELECT * FROM petTable WHERE pets_pettype = "dog";
-    //INSERT INTO SELECT owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID
+    //INSERT INTO someTable SELECT owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID
     //
     //it calls the paramaterized function and passes its return value back
 
@@ -1210,6 +1243,7 @@ function processInsertSelect(strSQL) {
     strSQL = strSQL.replace("INSERT", "");
     strSQL = strSQL.replace("INTO", "");
     strSQL = strSQL.replace(newTableName, "");
+    strSQL = strSQL.trim();
 
     //important step choose inner join vs ordinary select statement
     if (tokens.includes("INNER")) { //process inner join
@@ -1264,7 +1298,7 @@ function processInnerJoin(strSQL) {
     let middleString = getStringBetween(strSQL, "SELECT", "FROM");
 
     middleString = middleString.replaceAll(".", "_");
-    let columns = splitByCommas(middleString); //got columns!
+    let columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
 
     //get table1 name   got tableNames!
     //get table2 name
@@ -1312,9 +1346,11 @@ function processInnerJoin(strSQL) {
 
 }
 
+//SELECT column1, column2, ... FROM table_name WHERE column <>`something` ORDER BY column ASC|DESC;<br>\
 function processSelectStatement(strSQL) {
     tempTable = [];
-    strSQL = addWhiteSpaceAroundOperators(strSQL);
+    //strSQL = addWhiteSpaceAroundOperators(strSQL); //NEED TO DO AWAY WITH ************
+    strSQL = addWhiteSpaceFirstOperator(strSQL);
     // get an array of columns
     let columns = []
         //   get string between SELECT and FROM
@@ -1322,7 +1358,7 @@ function processSelectStatement(strSQL) {
         //   split by commas
         //   this is the columns array
     let middleString = getStringBetween(strSQL, "SELECT", "FROM");
-    columns = splitByCommas(middleString); //Got columns!
+    columns = splitByCommasAndCleanWhiteSpace(middleString); //Got columns!
 
     // get table name
     let tokens = tokenizeStringBySpace(strSQL);
@@ -1336,26 +1372,10 @@ function processSelectStatement(strSQL) {
     }
 
     if (strSQL.includes("WHERE")) {
-        //console.log("there is a WHERE CONDITION");
         whereIndex = tokens.indexOf("WHERE");
         let compareField = tokens[whereIndex + 1];
         let operator = tokens[whereIndex + 2];
-
-        let endString = getStringAfter(strSQL, operator);
-        console.log("endstring");
-        console.log(endString);
-
-        let moreTokens = endString.split("ORDER");
-
-        let compareValue = moreTokens[0].trim();
-
-        // //this should be done in wherefilterr
-        // if ((dbObject[tableName][compareField] === "NUMBER") || (compareField.includes("PRIMARY_KEY"))) { //check if primary key also
-        //     tempTable = whereFilter(tempTable, compareField, operator, Number(compareValue));
-        // } else {
-        //     tempTable = whereFilter(tempTable, compareField, operator, compareValue);
-        // }
-
+        let compareValue = readBackTicks(strSQL)[0];
         tempTable = whereFilter(tempTable, compareField, operator, compareValue);
     }
 
@@ -1370,11 +1390,9 @@ function processSelectStatement(strSQL) {
         }
         tempTable = orderByFilter(tempTable, orderByField, direction);
     }
-
+    console.log(tempTable);
     return tempTable;
 }
-
-
 
 //////  STRING FUNCTIONS FOR HELP IN PARSING SQL STATMENTS /////////
 function removeEmptyEntriesFromArray(myArray) {
@@ -1406,8 +1424,8 @@ function removeEntriesFromArray(myArray, entry) {
 
 function getStringBetween(completeString, startString, endString) {
     let middleString = completeString.substring(
-        completeString.lastIndexOf(startString) + startString.length,
-        completeString.lastIndexOf(endString)
+        completeString.indexOf(startString) + startString.length,
+        completeString.indexOf(endString)
     );
     return middleString;
 }
@@ -1430,9 +1448,42 @@ function cleanWhiteSpaceInArrayElements(myArray) {
     return myArray;
 }
 
-function splitByCommas(string) {
+function splitByCommasAndCleanWhiteSpace(string) {
     let myArray = string.split(",");
     myArray = cleanWhiteSpaceInArrayElements(myArray);
+    return myArray;
+}
+
+function collapseParenthesis(myArray) {
+    for (let i = 0; i < myArray.length; i++) {
+        myArray[i] = myArray[i].replaceAll(" ( ", "(");
+        myArray[i] = myArray[i].replaceAll(" ) ", ")");
+    }
+    return myArray;
+}
+
+function splitByBackTicks(string) {
+    let myArray = string.split("`");
+    //myArray = collapseParenthesis(myArray);
+    myArray = cleanWhiteSpaceInArrayElements(myArray);
+    myArray = removeCommaEntriesFromArray(myArray);
+    myArray = removeEmptyEntriesFromArray(myArray);
+
+    console.log("***********SPLIT BACKTICK************** WITH single comma reemove and empty remove")
+    console.log(myArray);
+    return myArray;
+}
+
+function onlySplitByBackTicks(thisString) {
+    let myArray = thisString.split("`");
+
+    return myArray;
+}
+
+function splitBySingleQuote(string) {
+    let myArray = string.split("'");
+    myArray = cleanWhiteSpaceInArrayElements(myArray);
+    console.log(myArray);
     return myArray;
 }
 
@@ -1480,6 +1531,35 @@ function addWhiteSpaceAroundOperators(myString) {
     return myString;
 }
 
+function addWhiteSpaceFirstOperator(myString) {
+    // the order is very important
+    // <>
+    // !=
+    // >=
+    // >
+    // <=
+    // <
+    // =
+
+    if (myString.includes("<>") === true) {
+        myString = myString.replace("<>", " <> ");
+    } else if (myString.includes("!=") === true) {
+        myString = myString.replace("!=", " != ");
+    } else if (myString.includes(">=") === true) {
+        myString = myString.replace(">=", " >= ");
+    } else if (myString.includes(">") === true) {
+        myString = myString.replace(">", " > ");
+    } else if (myString.includes("<=") === true) {
+        myString = myString.replace("<=", " <= ");
+    } else if (myString.includes("<") === true) {
+        myString = myString.replace("<", " < ");
+    } else if (myString.includes("=") === true) {
+        myString = myString.replace("=", " = ");
+    }
+
+    return myString;
+}
+
 let helpString = "<pre><br>\
 Available datatypes are STRING or NUMBER.<br>\
 <br>\
@@ -1491,11 +1571,11 @@ DESCRIBE table_name;<br>\
 DROP TABLE table_name;<br>\
 ALTER TABLE table_name ADD column_name datatype;<br>\
 ALTER TABLE table_name DROP COLUMN column_name;<br>\
-ALTER TABLE table_name CHANGE samename samename datatype;<br>\
+ALTER TABLE table_name CHANGE samename samename newdatatype;<br>\
 ALTER TABLE table_name CHANGE oldname newname samedatatype:<br>\
 ALTER TABLE table_name CHANGE oldname newname newdatatype;<br>\
-INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);<br>\
-UPDATE table_name SET column1 = value1, column2 = value2, ... WHERE condition;<br>\
+INSERT INTO table_name (column1, column2, column3, ...) VALUES (`value1`, `value2`, `value3`, ...);<br>\
+UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE condition;<br>\
 DELETE FROM table_name WHERE condition;<br>\
 SELECT * FROM table_name;<br>\
 SELECT column1, column2, ...FROM table_name;<br>\
@@ -1508,13 +1588,13 @@ HELP<br>\
 Reserved Keywords:<br>\
 -----------------------------<br>\
 INNER, JOIN, SELECT, INSERT, INTO, UPDATE, DELETE, CREATE, DROP, TABLE, SHOW, TABLES, DESCRIBE, HELP, SET,<br>\
-WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER, =, !=, <>, >=, <=, >, <, *<br>\
+WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER, =, !=, <>, >=, <=, >, <, * `(back ticks)<br>\
 <br>\
 Notes:<br>\
 -----------------------------<br>\
  Datatypes are STRING and NUMBER.<br>\
  ; not needed.<br>\
- '' or \"\" not needed.<br>\
+ use `backticks` around all values whether STRING OR NUMBER<br>\
  CAPITALIZATION of keywords is required.<br>\
  All tables are autoincremented starting at 1.<br>\
  Column name of primary key is PRIMARY_KEY.<br>\
@@ -1523,24 +1603,24 @@ Notes:<br>\
 Examples/Tutorial:<br>\
 -----------------------------<br>\
 CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);<br>\
-INSERT INTO owners (firstname, lastname, email) VALUES ('John', 'Jones', 'john@gmail.com');<br>\
-INSERT INTO owners (firstname, lastname, email, age) VALUES ('David', 'Davis', 'ddavis@gmail.com',73);<br>\
-INSERT INTO owners (firstname, lastname, email) VALUES ('Justin', 'Thyme', 'justint@gmail.com');<br>\
+INSERT INTO owners (firstname, lastname, email) VALUES (`John`, `Jones`, `john@gmail.com`);<br>\
+INSERT INTO owners (firstname, lastname, email, age) VALUES (`David`, `Davis`, `ddavis@gmail.com`,`73`);<br>\
+INSERT INTO owners (firstname, lastname, email) VALUES (`Justin`, `Thyme`, `justint@gmail.com`);<br>\
 CREATE TABLE pets (name STRING, sex STRING, pettype STRING, ownerID NUMBER);<br>\
 SHOW TABLES;<br>\
 SELECT * FROM owners;<br>\
 SELECT * FROM pets;<br>\
-INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('fido', 'female', 'dog', 3);<br>\
-INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('cuddles', 'female', 'cat', 3);<br>\
-INSERT INTO pets (name, pettype, ownerID) VALUES ('gina', 'guinea pig', 3);<br>\
-INSERT INTO pets (name, pettype, ownerID) VALUES ('jeany', 'guinea pig', 3);<br>\
-INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('sherman', 'male, 'dog', 2);<br>\
-INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('freddie', 'male', 'dog', 1);<br>\
-UPDATE pets SET sex = 'male', name = 'gene' WHERE name ='gina';<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`fido`, `female`, `dog`, `3`);<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`cuddles`, `female`, `cat`, `3`);<br>\
+INSERT INTO pets (name, pettype, ownerID) VALUES (`gina`, `guinea pig`, `3`);<br>\
+INSERT INTO pets (name, pettype, ownerID) VALUES (`jeany`, `guinea pig`, `3`);<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`sherman`, `male`, `dog`, `2`);<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`freddie`, `male`, `dog`, `1`);<br>\
+UPDATE pets SET sex = `male`, name = `gene` WHERE name =`gina`;<br>\
 SELECT * FROM pets;<br>\
-UPDATE pets SET sex = 'male', ownerID = 5 WHERE pettype = guinea pig;<br>\
+UPDATE pets SET sex = `male`, ownerID = `5` WHERE pettype = `guinea pig`;<br>\
 ALTER TABLE pets ADD weight NUMBER;<br>\
-UPDATE pets SET weight = 70 WHERE name = sherman;<br>\
+UPDATE pets SET weight = `70` WHERE name = `sherman`;<br>\
 DESCRIBE pets;<br>\
 SELECT owners.PRIMARY_KEY, pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;<br>\
 INSERT INTO petDirectory SELECT pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;<br>\
@@ -1555,37 +1635,34 @@ SHOW TABLES;<br>\
 DROP TABLE petDirectory;<br>\
 SHOW TABLES;<br>\
 ALTER TABLE owners ADD telephone STRING;<br>\
-UPDATE owners SET telephone = \"3042321000\" WHERE PRIMARY_KEY = 2;<br>\
+UPDATE owners SET telephone = `3042321000` WHERE PRIMARY_KEY = `2`;<br>\
 DESCRIBE owners;<br>\
 ALTER TABLE owners CHANGE telephone telephone NUMBER;<br>\
 DESCRIBE owners;<br>\
 SELECT * FROM owners;<br>\
-INSERT INTO dogsOnly SELECT * FROM pets WHERE pettype = dog ORDER BY ownerID DESC;<br>\
+INSERT INTO dogsOnly SELECT * FROM pets WHERE pettype = `dog` ORDER BY ownerID DESC;<br>\
 SELECT * FROM dogsOnly;<br>\
 ALTER TABLE dogsOnly DROP COLUMN pettype;<br>\
 INSERT INTO dogNames SELECT name FROM dogsOnly;<br>\
 SHOW TABLES;<br>\
 </pre>";
 
-////////////THIS CAN BE COMMENTED OUT BELOW BUT IS HERE FOR DEMONSTRATION
-
-
-
+//////////THIS CAN BE COMMENTED OUT BELOW BUT IS HERE FOR DEMONSTRATION
 
 if (spaidDataDiv.innerHTML === "") {
     alert("Right now, sample data is being loading for demonstration purposes.  Just comment out the end of the Javascript file to disable this.");
     sqlQuery("CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);");
-    sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES ('John', 'Jones', 'john@gmail.com');");
-    sqlQuery("INSERT INTO owners (firstname, lastname, email, age) VALUES ('David', 'Davis', 'ddavis@gmail.com',73);");
-    sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES ('Justin', 'Thyme', 'justint@gmail.com');");
+    sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES (`John`, `Jones`, `john@gmail.com`);");
+    sqlQuery("INSERT INTO owners (firstname, lastname, email, age) VALUES (`David`, `Davis`, `ddavis@gmail.com`,`73`);");
+    sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES (`Justin`, `Thyme`, `justint@gmail.com`);");
     sqlQuery("CREATE TABLE pets (name STRING, sex STRING, pettype STRING, ownerID NUMBER);");
     sqlQuery("SHOW TABLES;");
     sqlQuery("SELECT * FROM owners;");
     sqlQuery("SELECT * FROM pets;");
-    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('fido', 'female', 'dog', 3);");
-    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('cuddles', 'female', 'cat', 3);");
-    sqlQuery("INSERT INTO pets (name, pettype, ownerID) VALUES ('gina', 'guinea pig', 3);");
-    sqlQuery("INSERT INTO pets (name, pettype, ownerID) VALUES ('jeany', 'guinea pig', 3);");
-    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('sherman', 'male, 'dog', 2);");
-    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES ('freddie', 'male', 'dog', 1);");
+    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`fido`, `female`, `dog`, `3`);");
+    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`cuddles`, `female`, `cat`, `3`);");
+    sqlQuery("INSERT INTO pets (name, pettype, ownerID) VALUES (`gina`, `guinea pig`, `3`);");
+    sqlQuery("INSERT INTO pets (name, pettype, ownerID) VALUES (`jeany`, `guinea pig`, `3`);");
+    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`sherman`, `male`, `dog`, `2`);");
+    sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`freddie`, `male`, `dog`, `1`);");
 }
