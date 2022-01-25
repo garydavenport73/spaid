@@ -48,6 +48,8 @@
 // =
 
 let dbObject = {};
+let dbMetaData = {};
+dbMetaData["CURRENT_FILENAME"] = '';
 
 if (document.getElementById('spaid-data') == null) {
     //alert('no spaid-data div found, creating it!');
@@ -221,15 +223,19 @@ function savePage() {
 }
 
 function saveDatabase() {
-    saveStringToTextFile(spaidDataDiv.innerHTML, "database", ".json");
+    saveStringToTextFile(spaidDataDiv.innerHTML, "database", ".json", true);
 }
 
-function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html") {
+function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addDate = false) {
     let saveFileName = fileName;
     let datetime = new Date();
-    saveFileName = saveFileName.concat("_", (datetime.getMonth() + 1).toString(), "_", (datetime.getDate()).toString(), "_",
-        datetime.getFullYear().toString(), "_", datetime.getHours().toString(), datetime.getMinutes().toString(),
-        datetime.getMinutes().toString(), datetime.getSeconds().toString(), fileType);
+    if (addDate === true) {
+        saveFileName = saveFileName.concat("_", (datetime.getMonth() + 1).toString(), "_", (datetime.getDate()).toString(), "_",
+            datetime.getFullYear().toString(), "_", datetime.getHours().toString(), datetime.getMinutes().toString(),
+            datetime.getMinutes().toString(), datetime.getSeconds().toString(), fileType);
+    } else {
+        saveFileName = saveFileName + fileType;
+    }
     let blobVersionOfText = new Blob([str1], {
         type: "text/plain"
     });
@@ -249,7 +255,7 @@ function loadDatabase() {
     inputTypeIsFile.type = "file";
     inputTypeIsFile.addEventListener("change", function() {
         let inputFile = inputTypeIsFile.files[0];
-        filenameOfLoadedDB = inputFile.name;
+        dbMetaData["CURRENT_FILENAME"] = inputFile.name;
         let fileReader = new FileReader();
         fileReader.onload = function(fileLoadedEvent) {
             dbObject = JSON.parse(fileLoadedEvent.target.result);
@@ -906,7 +912,14 @@ function processDelete(strSQL) {
         compareValue = Number(compareValue);
     }
 
-    tempTable = _deleteFromTable(tableName, compareField, operator, compareValue);
+    //alert(compareValue);
+
+    if (compareValue === undefined) {
+        //do nothing
+    } else {
+        tempTable = _deleteFromTable(tableName, compareField, operator, compareValue);
+    }
+
     return tempTable;
 }
 
