@@ -228,11 +228,12 @@ function saveDatabase() {
 
 function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addDate = false) {
     let saveFileName = fileName;
-    let datetime = new Date();
     if (addDate === true) {
-        saveFileName = saveFileName.concat("_", (datetime.getMonth() + 1).toString(), "_", (datetime.getDate()).toString(), "_",
-            datetime.getFullYear().toString(), "_", datetime.getHours().toString(), datetime.getMinutes().toString(),
-            datetime.getMinutes().toString(), datetime.getSeconds().toString(), fileType);
+        //make a string representing the date to add on to the filename
+        let dateString = (new Date()).toLocaleString();
+        dateString = "_" + dateString.replaceAll("/", "_").replaceAll(",", "_").replaceAll(" ", "_").replaceAll(":", "_");
+        //insert into filename
+        saveFileName = saveFileName + dateString + fileType;
     } else {
         saveFileName = saveFileName + fileType;
     }
