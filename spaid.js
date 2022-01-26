@@ -123,10 +123,14 @@ if (document.getElementById('spaid-data') == null) {
 
 saveButton.addEventListener('click', savePage);
 loadDBButton.addEventListener('click', loadDatabase);
-saveDBButton.addEventListener('click', saveDatabase);
+saveDBButton.addEventListener('click', _saveDatabase);
 showButton.addEventListener('click', toggleDataVisible);
 runButton.addEventListener('click', runSQL);
 showResultButton.addEventListener('click', toggleResultVisible);
+
+function _saveDatabase() {
+    saveDatabase();
+}
 
 //SPAID functions
 
@@ -222,9 +226,53 @@ function savePage() {
     saveStringToTextFile(thisDocument, "spaid", ".html");
 }
 
-function saveDatabase() {
-    saveStringToTextFile(spaidDataDiv.innerHTML, "database", ".json", true);
+function saveDatabase(filename = '', addDate = false) {
+
+    let baseName = '';
+    let extension = '';
+
+    //no filename specified as argument and noned defined in database
+    if ((filename === '') && (dbMetaData["CURRENT_FILENAME"] === '')) {
+        baseName = "database";
+        extension = ".json";
+        addDate = true;
+
+        // either filename or database filename specified, in this case its the filename argument which
+        // will take precedent over existing filename since it was specified
+    } else if (filename != '') {
+        //console.log(filename);
+        let tempArray = filename.split("."); //checking to see if filename is basename or basename + extension
+        if (tempArray.length === 1) { //no extension
+            baseName = filename;
+            extension = '.json';
+        }
+        if (tempArray.length > 1) { //extension present
+            baseName = tempArray[0]; //use first token before first '.';
+            extension = "." + tempArray[tempArray.length - 1]; //use last token after '.'
+        }
+
+        // either filename or database filename specified, in this case its the database metadata filename
+    } else { //} if(dbMetaData!=''){
+
+        filename = dbMetaData["CURRENT_FILENAME"];
+        let tempArray = filename.split(".");
+        if (tempArray.length === 1) {
+            baseName = filename;
+            extension = '.json';
+        }
+        if (tempArray.length > 1) {
+            baseName = tempArray[0]; //use first token before first '.';
+            extension = "." + tempArray[tempArray.length - 1]; //use last token after '.'
+        }
+    }
+    saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
+    //I believe I should most likely be changing name of database here
+    dbMetaData["CURRENT_FILENAME"] = baseName + extension;
 }
+
+// function saveDatabase() {
+//     saveStringToTextFile(spaidDataDiv.innerHTML, "database", ".json", true);
+// }
 
 function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addDate = false) {
     let saveFileName = fileName;
@@ -1680,3 +1728,5 @@ if (spaidDataDiv.innerHTML === "") {
     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`sherman`, `male`, `dog`, `2`);");
     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`freddie`, `male`, `dog`, `1`);");
 }
+
+//saveDatabase();
