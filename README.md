@@ -1,51 +1,110 @@
-# spaid
-Self-saving PAge Including Data
-or
-Single Page Application Including Database
+# SPAID
+## Single Page Application Including Data
+-----------------------
+## Why would I want to use this?
 
-<img src="screenshot.png">
+* Ordinarily a web page consists of its content, style, and functionality through HTML, CSS, and JavaScript.
+* However, to take your page to the next level, you ordinarily would connect to a database, allowing for persistence and additional functionality, opening up many possibilities.
+* With this script, instead of reading and writing back and forth from a separate server (or local installed server), the script allows the applicaion to read and write to itself.
+* IMPORTANT:  Please note web pages built should be opened directly as a file, not with a live server.
 
-### Please note webpages built should be opened directly as a file, not with a live server.
+## How does it work?
 
-This project has been brewing in the back of my mind for a while.
+* The script works by keeping your application's data in a JSON string, which is added to a hidden div.  Whenever the applications data changes, the JSON string in the hidden div changes.
 
-The overall purpose of the project is allow one to make programs that
-run in a browser locally and contain within the page a database like object.
+## How do I add it to an existing page?
+* place a script tag to spaid.js just before the ending body tag in the html file. `example: <script src='spaid.js'></script>`.  This example assumes your spaid.js file is in the same folder as your webpage.  Otherwise, use the appropriate relative or absolute path.
 
-Then before closing the page, you can save it and a copy of the page
-saving the current data is saved.
+## What happens when I add it.
+* The script will insert before the body (at the top of your web page) a SQL interpreter.
+* You can use this interpreter to build tables or experiment.
+* You can use this interpreter to build tables, but more commonly this would be done in your JavaScript code in the application.
+* The script adds a database like object and a set of functions.
 
-This solves several problems:
-1) It runs basically anywhere a browser is installed, ie cross-platform.
-2) Utilizes html/css to make graphical user interfaces, which is quick and looks nice.
-3) Allows for data persistence between sessions.
-4) Does not require extra dependencies like NodeJS or Electron etc.
-5) Does not require any software installation or modifications to OS.
-6) Requires no connection to database, database like object is included.
+<img src='screenshot1.png'>
+<img src='screenshot.png'>
 
-The way I intend to solve these problems is as follows:
+## How can I use this script with my web page?
+* There is a SQL Builder interpreter window where you can build save and load databases.
+* There are a set of functions that can be called from your program.
 
-A script is included in an html file.
-The script does the following:
-The script will check to see if a div element is present within
-  the document with an id of "spaid-data".
-  If that element is not present, it is made.  If it is present do nothing.
-A SAVE button is added to the page.
-When the save button is clicked, the script makes a copy of the web page including
-  the div (with id of "spaid-data"), and saves a copy of the page with the data.
-  
-When this saved page is opened, it will contain the persistent data.
+## What functions come with 'spaid.js'?
+1. runSQL(mySQLString)
+    * Takes an SQL string as it's argument
+    * Executes the SQL statement.
+    * It always returns a table-like object, which is an array of objects with key/value pairs.  (key=fieldname, value = cell value);
 
-You can save the database and load it in manually, or you can save a copy of the page with the database.
-The databases are loaded and saved in JSON format.  If you want to continually save over the same
-file, like you might as in the case of a word processor like operation you can, but until the program
-is tested more I'd recommmend using new filenames between sessions.
+2. loadDatabase()
+    * Opens a fileDialog where the user can choose the database to load. 
 
-The webpage contains a div which is hidden containing a JSON database-like object.
+3. saveDatabase(filename, addDate)
+    * Opens a save file dialog or depending on browser, it may save just ask for confirmation
+    * Its best to set the browser to ask for location of download
+    * filename, the prefilled name for the download when save dialog opens.  If left blank "database.json" will be used.
+    * addDate, set to true by default, will add date and time information to the save dialog.
 
-<img src="screenshot2.png">
+4. savePage()
+    * This will take the current web page including the data, 'serialize' it (makes a copy of itself including data), and saves that file.
+    * Be careful, you are allowed to overwrite the current loaded page.  It is recommended to save to a new name, then rename the file if you are satisfied with the results.
+    * Note: Currently, this only works properly if 'spaid.js' is read in as a separate file.  If you include it in the html file itself in between script tags, this function will not currenlty work properly.
 
-The database controls are:
+## What if I don't want to see an additional window in my page?
+You can use the interpreter to build a database, then hide it using the following css:
+
+``` 
+#spaid-buttons,
+#spaid-data,
+#spaid-result {
+     display: none;
+}
+```
+------------------------
+## Advantages/Pros:
+--------------------
+* This project essentially allows a webpage to store its own 'database' in a hidden div inside of itself.
+
+* This allows for the building of truly cross-platform applications wihtout any external dependencies (like NodeJS).
+
+* This allows for persistence between sessions.
+
+* GUI building is accomplished much easier, faster and better than many other desktop frameworks because the interface is built in HTML, CSS, and JavaScript.
+
+* The application can be copied to a server or used locally.
+
+* The spaid.js file can be placed in the html file and runs on small devices like phones for example.
+
+* When running from a desktop, the webpage can serialize itself (including its own data) and save over itself or to a new filename.
+
+* Requires no special connection to database, it is simply present with the web page.
+
+### These applications offer security in these ways:
+1) No installation to the operating system is needed.
+2) Source code is readily available by reading the file or examining the browser's developer tools.
+3) Input and output from the application to the host computer requires permission from the user.
+-----------------------
+## Disadvantages/Cons:
+1) Persistence between sessions must be approved by the user with a save function (i.e. there are no behind the scene i/o writes to the local system).
+2) The entire contents of the database are loaded into local memory, which limits the size of the database.
+3) The database is uncompressed human-readable text in JSON format, which is larger than other formats.
+4) The speed is not fast.
+5) The types of SQL statements are limited as well as the data types to STRING and 'NUMBER'.
+6) There is not much error checking when SQL statments are processed, your SQL statements are assummed to be correct.
+--------------------------
+## When to use:
+1. Data persistence is needed, but with relatively smaller amounts of data.  Examples might be personal contacts, timesheets, video game progress and so forth.
+2. Local installation of an application is not available on a computer, for example a work computer.
+3. The user is comfortable loading and saving their work.
+4. The user is ideally able to set the browser to download to a folder of choice.
+5. The user's data is typically stored locally (There is not reason you can't just send the JSON data or fetch the data to or from a server for nonlocal storage.
+-------------------------------
+## Here is an example of the first working application I built using spaid.js.  It is a simple time logger for work related activities:
+----------------------
+
+<img src='screenshot3.png'>
+
+----------------------------------
+## The SQL Builder area controls are:
+---------------------------------
 - `save` - saves a copy of the current webpage containing the database in a hidden div.
 - `save database` - which will save a copy of the JSON datbase like object which is hidden in the div.
 - `load database` - which will load in the database to the hidden div for use in the web page.
@@ -54,33 +113,20 @@ The database controls are:
 - `run button` - which will execute the SQL statments.
 - `a show/hide results button` which toggles a tabular format showing the results of the SQL statments.
 
+<img src=screenshot2.png>
+
 `The input box and run button can be used to build a database and you can inspect the results
 as you build.  You can build your database here much like you might with command line in MariaDB.`
 
-Or you can load do it programatically.  I am working on a dump like function which will allow 
-the interpreter to loop through SQL statements and I plan to add a button to the buttons bar 
+Or you can do it programatically.  I am working on a dump like function which will allow the interpreter to loop through SQL statements and I plan to add a button to the buttons bar 
 which will allow for execution of sequential SQL statements.
 
-There are a bunch of functions but they are really intended to be funneled to one central
-function sqlQuery.
+There are a bunch of functions but they are really intended to be funneled to one central function sqlQuery.
 
 The syntax is like this:
 `myTable = sqlQuery(strSQLstring);`
 
-`The query string always returns a table which is an array of objects with attached metadata.`
-
-I will build a better test page using the attached 'database like object' which is currently non-relational.
-Now that the project has gotten to a point where it can be used, I will build my first application
-with it soon.
-
-What is more important to me with this project is persistence between sessions and self-containment, not
-so much that it is relational.
-
-`I'd simply like to be able to write some nicely interfaced basic desktop programs 
-without the extreme solution of installing a complete server solution to serve and store data.`
-
-`I also want to be able to open the page anywhere without installing 
-anything to the pc, so I can write programs that I can use on my work computers.`
+`!Note: The query string always returns a table which is an array of objects with attached metadata.`
 
 The function returns a "table" which is an array or objects.  The array is indexed, the 
 rows are objects and their column names are the keys, and the values are the cell data.
@@ -121,18 +167,22 @@ It is essentially not styled, but I would exect someone to only display the save
 save database and load database functions.  The styling is left up to the user.  I envision a little button or maybe 
 transulcent bar at the top of the browser or maybe something like what 'citrix' does. in terms of looks.
 
-Currently, if there is not database present in the webpage, a sample webpage of pet owners and
+Currently, a sample database of pet owners and
 pets is loaded in the sample webpage mySpaid.html.
 
 There is a SQL interpreter with visualization of both the tables and the database available
 at the top of the web page.
 
-Please see the list of keywords, acceptable SQL statments and type-in tutorial below.  I think I may make a series of sql statments
-that can be read in to the interpreter separated by ; like in a sqlDump, but for now this is all the further I've made it with the project.
+Please see the list of keywords, acceptable SQL statments and type-in tutorial below.
 
-Right now you can only INNER JOIN two tables, but you can insert the result to another table.  
-Then you can rename the columns, then repeat another INNER JOIN.  The INNER JOIN always returns column names which are combined
-like customers_customerID and with the _ instead of the . notation. 
+Right now you can only INNER JOIN two tables, but you can insert the result to another table.
+
+Then you can rename the columns, then repeat another INNER JOIN.  The INNER JOIN always returns column names which are combined like customers_customerID and with the _ instead of the . notation.
+
+--------------------------
+## Please note the special use of the \`\`s around data entries in certain SQL statements.  Currently there are a limited number of SQL statements available, but as the program develops more will be added.  
+----------------------------
+# Please note webpages built should be opened directly as a file, not with a live server.
 
 <pre>
 Available datatypes are STRING or NUMBER.
