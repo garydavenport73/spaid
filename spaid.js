@@ -267,7 +267,7 @@ function saveDatabase(filename = '', addDate = false) {
     }
     saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
     //I believe I should most likely be changing name of database here
-    dbMetaData["CURRENT_FILENAME"] = baseName + extension;
+    //dbMetaData["CURRENT_FILENAME"] = baseName + extension;
 }
 
 // function saveDatabase() {
@@ -296,6 +296,13 @@ function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addD
     document.body.appendChild(downloadLink);
     downloadLink.click();
     downloadLink.parentElement.removeChild(downloadLink);
+
+
+    if (confirm("Would you like to update the filename of the current database to " + saveFileName + "?") == true) {
+        dbMetaData["CURRENT_FILENAME"] = saveFileName;
+    } else {
+        //pass
+    }
 }
 
 function loadDatabase() {
@@ -1728,5 +1735,3 @@ if (spaidDataDiv.innerHTML === "") {
     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`sherman`, `male`, `dog`, `2`);");
     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`freddie`, `male`, `dog`, `1`);");
 }
-
-//saveDatabase();
