@@ -751,6 +751,15 @@ function updateDataDiv() {
 //  the function returns an index array of objects with attached properties
 
 function sqlQuery(strSQL) {
+    let sqlStatementsArray = splitSQLStatementsBySemicolon(strSQL);
+    let tempTable = [];
+    for (let i = 0; i < sqlStatementsArray.length; i++) {
+        tempTable = _sqlQuery(sqlStatementsArray[i]);
+    }
+    return tempTable;
+}
+
+function _sqlQuery(strSQL) {
 
     console.log(strSQL);
     //NOTE ORDER IS IMPORTANT
@@ -1669,8 +1678,35 @@ function splitByBackTicks(string) {
 
 function onlySplitByBackTicks(thisString) {
     let myArray = thisString.split("`");
-
     return myArray;
+}
+
+//return array of sql statements split by ; outside of back-ticks
+function splitSQLStatementsBySemicolon(sqlStatementsSeparatedBySemicolon) {
+
+    let tempArray = [];
+    tempArray = sqlStatementsSeparatedBySemicolon.split('`');
+    //go through elements in array, and only replace ; in odd elements;
+    for (let i = 0; i < tempArray.length; i++) {
+        if ((i + 1) % 2 === 0) {
+            tempArray[i] = tempArray[i].replaceAll(';', "NOLOCIMES");
+        }
+    }
+
+    //rejoin back into string
+    sqlStatementsSeparatedBySemicolon = tempArray.join('`');
+    //split by ;
+    tempArray = [];
+    tempArray = sqlStatementsSeparatedBySemicolon.split(';');
+
+    //go through each sql statement and replace the ; in between ticks
+    for (let i = 0; i < tempArray.length; i++) {
+        tempArray[i] = tempArray[i].replaceAll('NOLOCIMES', ';');
+        tempArray[i] = tempArray[i].trim();
+    }
+
+    tempArray = removeEmptyEntriesFromArray(tempArray);
+    return tempArray;
 }
 
 function splitBySingleQuote(string) {
@@ -1781,7 +1817,8 @@ HELP<br>\
 Reserved Keywords:<br>\
 -----------------------------<br>\
 INNER, JOIN, SELECT, INSERT, INTO, UPDATE, DELETE, CREATE, DROP, TABLE, SHOW, TABLES, DESCRIBE, HELP, SET,<br>\
-WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER, =, !=, <>, >=, <=, >, <, * `(back ticks)<br>\
+WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER,<br>\
+=, !=, <>, >=, <=, >, <, * `(back ticks), NOLOCIMES<br>\
 <br>\
 Notes:<br>\
 -----------------------------<br>\
@@ -1858,4 +1895,35 @@ if (spaidDataDiv.innerHTML === "") {
     sqlQuery("INSERT INTO pets (name, pettype, ownerID) VALUES (`jeany`, `guinea pig`, `3`);");
     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`sherman`, `male`, `dog`, `2`);");
     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`freddie`, `male`, `dog`, `1`);");
+
+    let combinedSQLStatement = 'UPDATE pets SET sex = `male`, name = `gene` WHERE name =`gina`;\
+SELECT * FROM pets;\
+UPDATE pets SET sex = `male`, ownerID = `5` WHERE pettype = `guinea pig`;\
+ALTER TABLE pets ADD weight NUMBER;\
+UPDATE pets SET weight = `70` WHERE name = `sherman`;\
+DESCRIBE pets;\
+SELECT owners.PRIMARY_KEY, pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;\
+INSERT INTO petDirectory SELECT pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;\
+DESCRIBE petDirectory;\
+SELECT * FROM petDirectory;\
+ALTER TABLE petDirectory CHANGE pets_ownerID ownerID STRING;\
+ALTER TABLE petDirectory CHANGE pets_name name STRING;\
+ALTER TABLE petDirectory CHANGE owners_firstname owner STRING;\
+SHOW TABLES;\
+INSERT INTO directory SELECT * FROM petDirectory;\
+SHOW TABLES;\
+DROP TABLE petDirectory;\
+SHOW TABLES;\
+ALTER TABLE owners ADD telephone STRING;\
+UPDATE owners SET telephone = `3042321000` WHERE PRIMARY_KEY = `2`;\
+DESCRIBE owners;\
+ALTER TABLE owners CHANGE telephone telephone NUMBER;\
+DESCRIBE owners;\
+SELECT * FROM owners;\
+INSERT INTO dogsOnly SELECT * FROM pets WHERE pettype = `dog` ORDER BY ownerID DESC;\
+SELECT * FROM dogsOnly;\
+ALTER TABLE dogsOnly DROP COLUMN pettype;\
+INSERT INTO dogNames SELECT name FROM dogsOnly;\
+SHOW TABLES;'
+    sqlQuery(combinedSQLStatement);
 }
