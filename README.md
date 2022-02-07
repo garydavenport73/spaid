@@ -1,6 +1,16 @@
 # SPAID
 ## Single Page Application Including Data
 -----------------------
+## <span style='color:orange'>UPDATE: </span>What's new 2/6/2022
+
+* Webpage serialization save is fixed for style and script tags:
+    This means you can have a single html file with style tags, script tags (including spaid.js), and database all in one file which can either save over itself or save to a new copies with persistent data.  I would not recommend saving over itself at this time, but so far I have had no issues with its functionality.  I would recommend saving copies of the database, or saving the whole file to a new name.
+* Now supporting processing of multiple SQL statements separated by semicolon ;  This works in the run box in the SQL builder window or by calling the function sqlQuery();
+
+## Up next
+* Possible sync or fetch operation from local database to online backup.
+* SQL dump function for database recreation.
+
 ## Why would I want to use this?
 
 * Ordinarily a web page consists of its content, style, and functionality through HTML, CSS, and JavaScript.
@@ -29,10 +39,11 @@
 * There are a set of functions that can be called from your program.
 
 ## What functions come with 'spaid.js'?
-1. runSQL(mySQLString)
-    * Takes an SQL string as it's argument
+1. sqlQuery(mySQLString)
+    * Takes an SQL string as it's argument (<span style='color:orange'>UPDATE:</span> now accepting multiple SQL statements separated by semicolon ;.)
     * Executes the SQL statement.
     * It always returns a table-like object, which is an array of objects with key/value pairs.  (key=fieldname, value = cell value);
+    * <span style='color:orange'>UPDATE:</span> If running multiple statements, returns the last processed SQL statement's table-like object;
 
 2. loadDatabase()
     * Opens a fileDialog where the user can choose the database to load. 
@@ -47,6 +58,7 @@
     * This will take the current web page including the data, 'serialize' it (makes a copy of itself including data), and saves that file.
     * Be careful, you are allowed to overwrite the current loaded page.  It is recommended to save to a new name, then rename the file if you are satisfied with the results.
     * Note: Currently, this only works properly if 'spaid.js' is read in as a separate file.  If you include it in the html file itself in between script tags, this function will not currenlty work properly.
+    <span style='color:orange'>UPDATE:</span> The spaid.js code and any other scripting code can now be placed between script tags on the html page.  Also style tags can be used in the html file.  Since this is a new fix, I would strongly recommend not saving over itself and saving an extra copy as I continue to test the program.
 
 ## What if I don't want to see an additional window in my page?
 You can use the interpreter to build a database, then hide it using the following css:
@@ -109,8 +121,8 @@ You can use the interpreter to build a database, then hide it using the followin
 - `save database` - which will save a copy of the JSON datbase like object which is hidden in the div.
 - `load database` - which will load in the database to the hidden div for use in the web page.
 - `show/hide database` - which will toggle the hidden div containing the JSON database-like object.
-- `an input box` - you put SQL statments in there.
-- `run button` - which will execute the SQL statments.
+- `an input box` - you put SQL statments in there.  <span style='color:orange'>UPDATE:</span> Now accepts multiple SQL statements separated by semicolon ;.
+- `run button` - which will execute the SQL statements.
 - `a show/hide results button` which toggles a tabular format showing the results of the SQL statments.
 
 <img src=screenshot2.png>
@@ -213,7 +225,7 @@ Reserved Keywords:
 -----------------------------
 INNER, JOIN, SELECT, INSERT, INTO, UPDATE, DELETE, CREATE, DROP, TABLE, SHOW, TABLES, DESCRIBE, HELP, SET,
 WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER, 
-=, !=, <>, >=, <=, >, <, * `(back ticks), NOLOCIMES
+=, !=, <>, >=, <=, >, <, * `(back ticks), <span style='color:orange'>UPDATE:</span> NOLOCIMES
 
 Notes:
 -----------------------------
