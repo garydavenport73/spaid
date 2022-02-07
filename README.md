@@ -212,7 +212,8 @@ HELP
 Reserved Keywords:
 -----------------------------
 INNER, JOIN, SELECT, INSERT, INTO, UPDATE, DELETE, CREATE, DROP, TABLE, SHOW, TABLES, DESCRIBE, HELP, SET,
-WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER, =, !=, <>, >=, <=, >, <, * `(back ticks)
+WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER, 
+=, !=, <>, >=, <=, >, <, * `(back ticks), NOLOCIMES
 
 Notes:
 -----------------------------
