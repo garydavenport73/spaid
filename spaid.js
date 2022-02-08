@@ -304,7 +304,7 @@ function savePage() {
 
     /////////////////////////////////
 
-    saveStringToTextFile(thisDocument, "spaid", ".html");
+    saveStringToTextFile(thisDocument, "pagecopy", ".html");
 }
 
 function turnWebPageIntoString() {
