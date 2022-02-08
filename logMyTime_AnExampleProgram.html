@@ -1,0 +1,3171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogMyTime</title>
+    <style>
+        /* General Styling
+        --------------------- */
+        /* #spaid-buttons,
+        #spaid-data,
+        #spaid-result {
+            display: none;
+        } */
+        
+        * {
+            box-sizing: border-box;
+            margin: 1px;
+            padding: 1px;
+        }
+        
+        nav>ul>li>button {
+            border: none;
+        }
+        
+        #load,
+        #log,
+        #save,
+        #view {
+            background-color: paleturquoise;
+            border: 1px solid black;
+            padding: 1px;
+        }
+        
+        td,
+        th,
+        button {
+            margin: 0px;
+            padding: 0px;
+        }
+        /* NAV STYLING */
+        
+        nav ul {
+            display: flex;
+            flex-wrap: wrap;
+            /* flex-direction: column; */
+        }
+        
+        nav ul li {
+            list-style-type: none;
+            /* margin: 3px 10px; */
+        }
+        /* NAV STYLING END */
+        
+        .review {
+            width: 680px;
+            height: 300px;
+        }
+        
+        #review-select {
+            height: 30px;
+            text-size-adjust: 1em;
+        }
+        /* link styling
+        --------------------- */
+        
+        a {
+            text-decoration: none;
+        }
+        /* a:link {
+            color: blue;
+        } */
+        /* visited link */
+        /* a:visited {
+            color: black;
+        } */
+        /* mouse over link */
+        
+        a:hover {
+            background-color: yellow;
+        }
+        /* selected link */
+        /* a:active {
+            color: white;
+        } */
+        /* generic flex container styling
+        --------------------- */
+        /* .flex-container-column-default {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        s
+        .flex-container-row-default {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        } */
+        /*image styling
+        ----------------------- */
+        
+        #imageGallery img {
+            max-width: 250px;
+            border: solid 5px grey;
+            border-radius: 5px;
+        }
+        
+        figure {
+            display: inline-block;
+        }
+        /* Header styling
+        ----------------------- */
+        
+        header {
+            text-align: center;
+            background-color: aquamarine;
+        }
+        
+        header h1 {
+            padding: 10px;
+            font-size: 2rem;
+        }
+        /* .star-review-input styling */
+        
+        .star-review-input-container *:hover,
+        .star-review-input-container:hover {
+            background-color: rgba(255, 166, 0, 0.5);
+            border-radius: 10px;
+        }
+        /* .star-review-input:hover{
+            background-color: rgba(255, 166, 0, 0.5);
+            border-radius: 10px;   
+        
+          } */
+        
+        .star-review-input-container,
+        .star-review-input span {
+            display: inline-block;
+            font-size: 2rem;
+            color: orange;
+        }
+        /* .review-rating{
+              display: none;
+          } */
+        
+        .stars {
+            font-size: 2rem;
+            color: orange;
+        }
+        /* table styles here
+        --------------------- */
+        /* table {
+            color: white;
+            background-color: white;
+            border: solid 5px grey;
+        }
+        
+        table td {
+            border: 1px solid white;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        
+        table tr:nth-child(even) {
+            background-color: #1ad1ac;
+        }
+        
+        table tr:nth-child(odd) {
+            background-color: #1abc9c;
+        }
+        
+        table tr:hover {
+            background-color: darkolivegreen;
+        }
+        
+        table th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: #157965;
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+        } */
+        
+        footer {
+            position: fixed;
+            bottom: 0px;
+            left: 50%;
+            transform: translate(-50%, 0%);
+        }
+        
+        #activities,
+        #notes {
+            width: 300px;
+        }
+        
+        #main-log {
+            text-align: center;
+        }
+        
+        main {
+            background-color: mediumaquamarine;
+        }
+        
+        #view-timesheet th,
+        #view-timesheet td {
+            /* max-width: 200px; */
+            background-color: beige;
+            word-wrap: break-word;
+            border: 1px solid black;
+        }
+        
+        .total-row {
+            background-color: transparent !important;
+            border: none !important;
+            text-decoration: underline !important;
+        }
+        
+        .annoying-message {
+            color: darkolivegreen;
+        }
+        /* #view-timesheet {
+        
+        } */
+        
+        #view-timesheet table {
+            max-width: 100%;
+        }
+        
+        #view-timesheet table tr:first-child {
+            background-color: blue;
+        }
+        
+        #main-view table {
+            margin-left: auto;
+            margin-right: auto;
+            width: 80%;
+            max-width: 600px;
+        }
+        
+        #main-view>* {
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+            text-align: center;
+        }
+        
+        #copied-time-sheet {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: cornsilk;
+            padding: 10px;
+        }
+        
+        #copied-json-database {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            width: 80%;
+            height: 400px;
+            margin: 10%;
+        }
+        
+        #view-timesheet td:first-child {
+            font-size: 0.1em;
+            background-color: grey;
+        }
+        
+        #view-timesheet tr:last-child {
+            background-color: orange;
+        }
+        /* responsive rules here
+        --------------------- */
+        
+        @media screen and (max-width: 450px) {
+            /* * {
+                transition: ease all .2s;
+            } */
+            /* NAV STYLING */
+            /* nav>ul {
+                flex-direction: column;
+                align-items: center;
+            } */
+            /* NAV STYLING END */
+            /* HEADER STYLING END */
+            #view-timesheet th,
+            #view-timesheet td {
+                max-width: 75px;
+                font-size: .8em;
+            }
+            #view-timesheet td:first-child,
+            #view-timesheet td:last-child {
+                font-size: .7em;
+            }
+            #main-view table {
+                width: 100%;
+            }
+            /* #view-timesheet td:nth-child(2) {
+                max-width: 40px;
+                background-color: orange;
+            }
+            #view-timesheet th:nth-child(2) {
+                font-size: .65em;
+                max-width: 40px;
+                background-color: orange;
+                content: "min";
+            } */
+            header h1 {
+                padding: 5px;
+                font-size: 1rem;
+            }
+            /* HEADER STYLING END */
+            /* .nestburger~h2 {
+                display: inherit;
+            }
+            .nestburger {
+                display: inherit;
+            } */
+            #copied-json-database {
+                width: 100%;
+                margin: 0px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>LogMyTime</h1>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+            <li class="nestburger">&#9776</li>
+            <li>
+                <Button id='home' onclick='showMain(this.id)'>Home</Button>
+            </li>
+            <!-- <li>
+                <Button id='load' onclick='showMain(this.id)'>Load Database</Button>
+            </li> -->
+            <li>
+                <Button id='load' onclick="{document.getElementById('spaid-load-db').click();showMain('home');}">Load Time Sheet</Button>
+            </li>
+
+            <li>
+                <Button id='log' onclick='showMain(this.id)'>Log Time</Button>
+            </li>
+            <li>
+                <Button id='save' onclick="saveTimeSheet();">Save Time Sheet</Button>
+            </li>
+            <li>
+                <Button id='view' onclick='showMain(this.id)'>View Time Sheet</Button>
+            </li>
+            <!-- <li>
+                <Button id='send-database' onclick='showMain(this.id)'>Send Database</Button>
+            </li>
+            <li>
+                <Button id='send-timesheet' onclick='showMain(this.id)'>Send Time Sheet</Button>
+            </li> -->
+            <li>
+                <Button id='copy-csv-timesheet' onclick='{copyCSVToClipBoard();showMain(this.id);}'>Copy CSV Time Sheet to Clipboard</Button>
+            </li>
+
+            <li>
+                <Button id='copy-database-to-clipboard' onclick='{copyDataBaseToClipBoard();showMain(this.id);}'>Copy Database to Clipboard</Button>
+            </li>
+
+            <li>
+                <Button id='email-csv-timesheet' onclick='emailCSVTimeSheet();'>Email CSV Time Sheet</Button>
+            </li>
+
+            <li>
+                <Button id='email-json-database' onclick='emailJSONDataBase();'>Email Database</Button>
+            </li>
+
+        </ul>
+    </nav>
+    <!-- Navigation Bar End -->
+    <main id="main-home">
+        <h2>Home:</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse consectetur quam laudantium aut repudiandae in hic fugit officiis veniam adipisci nam nulla, amet sed est recusandae, perspiciatis libero eveniet odio! Expedita quis minima sit officiis
+            vero repellendus, distinctio ullam eos suscipit tempore, veniam fugit iure commodi reprehenderit enim molestiae dolorem explicabo, at molestias consectetur esse. Illo non neque quisquam necessitatibus! Atque consectetur adipisci nihil, repellendus
+            veniam repellat, laboriosam cumque at quia itaque, ipsum fuga quas asperiores nostrum. Ad qui et, sequi fuga optio quam tempora voluptatibus nemo atque laudantium velit? Molestiae magni a vitae ducimus odio ut atque itaque ratione corrupti,
+            alias facilis pariatur, omnis facere quas soluta commodi officiis quos, nostrum accusantium esse suscipit. Odio veniam numquam quibusdam neque. Nihil eius, dicta ut dignissimos dolorem corrupti consectetur tempore, beatae id eaque a, veritatis
+            repudiandae debitis minus itaque placeat mollitia illum sint accusamus. Ratione, ipsa reprehenderit officia ullam minus delectus.</p>
+    </main>
+
+    <main id="main-load">
+        <h2>Load Database:</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse consectetur quam laudantium aut repudiandae in hic fugit officiis veniam adipisci nam nulla, amet sed est recusandae, perspiciatis libero eveniet odio! Expedita quis minima sit officiis
+            vero repellendus, distinctio ullam eos suscipit tempore, veniam fugit iure commodi reprehenderit enim molestiae dolorem explicabo, at molestias consectetur esse. Illo non neque quisquam necessitatibus! Atque consectetur adipisci nihil, repellendus
+            veniam repellat, laboriosam cumque at quia itaque, ipsum fuga quas asperiores nostrum. Ad qui et, sequi fuga optio quam tempora voluptatibus nemo atque laudantium velit? Molestiae magni a vitae ducimus odio ut atque itaque ratione corrupti,
+            alias facilis pariatur, omnis facere quas soluta commodi officiis quos, nostrum accusantium esse suscipit. Odio veniam numquam quibusdam neque. Nihil eius, dicta ut dignissimos dolorem corrupti consectetur tempore, beatae id eaque a, veritatis
+            repudiandae debitis minus itaque placeat mollitia illum sint accusamus. Ratione, ipsa reprehenderit officia ullam minus delectus.</p>
+    </main>
+
+    <main id="main-log">
+        <form id='log-form'>
+            <h2>Log Time:</h2>
+
+            <label for="activities">activity:</label>
+            <div> <select name="activities" id="activities"></select></div>
+
+            <label for="activity-date">Date of Activity:</label>
+            <div>
+                <input type="date" id="activity-date" name="activity-date">
+            </div>
+
+            <div> <label for='minutes'>Time in minutes:</label>
+                <input type="number" id="minutes" name="minutes" min="0" max="1440">
+            </div>
+
+            <div>
+                <textarea name="notes" id="notes" cols="30" rows="10" placeholder="Your notes here or description of activity here."></textarea>
+            </div>
+        </form>
+        <div>
+            <button id='button-log'>Log Time</button>
+        </div>
+        <!-- <h3 class='annoying-message'>(...and don't forget to save the timesheet by clicking save.)</h3> -->
+
+    </main>
+
+    <main id="main-save">
+        <h2>Save Database:</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse consectetur quam laudantium aut repudiandae in hic fugit officiis veniam adipisci nam nulla, amet sed est recusandae, perspiciatis libero eveniet odio! Expedita quis minima sit officiis
+            vero repellendus, distinctio ullam eos suscipit tempore, veniam fugit iure commodi reprehenderit enim molestiae dolorem explicabo, at molestias consectetur esse. Illo non neque quisquam necessitatibus! Atque consectetur adipisci nihil, repellendus
+            veniam repellat, laboriosam cumque at quia itaque, ipsum fuga quas asperiores nostrum. Ad qui et, sequi fuga optio quam tempora voluptatibus nemo atque laudantium velit? Molestiae magni a vitae ducimus odio ut atque itaque ratione corrupti,
+            alias facilis pariatur, omnis facere quas soluta commodi officiis quos, nostrum accusantium esse suscipit. Odio veniam numquam quibusdam neque. Nihil eius, dicta ut dignissimos dolorem corrupti consectetur tempore, beatae id eaque a, veritatis
+            repudiandae debitis minus itaque placeat mollitia illum sint accusamus. Ratione, ipsa reprehenderit officia ullam minus delectus.</p>
+    </main>
+
+    <main id="main-view">
+        <h2>View Time Sheet:</h2>
+        <div>
+            <label for="start-date">Start Date:</label><input type="date" id="start-date" name="start-date">
+        </div>
+        <div>
+            <label for="end-date">End Date:</label><input type="date" id="end-date" name="end-date">
+        </div>
+
+        <div id='view-timesheet'></div>
+
+        <h3 class='annoying-message'>(...and don't forget to save the timesheet by clicking save.)</h3>
+    </main>
+
+    <main id="main-send-database">
+        <h2>Send Database:</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse consectetur quam laudantium aut repudiandae in hic fugit officiis veniam adipisci nam nulla, amet sed est recusandae, perspiciatis libero eveniet odio! Expedita quis minima sit officiis
+            vero repellendus, distinctio ullam eos suscipit tempore, veniam fugit iure commodi reprehenderit enim molestiae dolorem explicabo, at molestias consectetur esse. Illo non neque quisquam necessitatibus! Atque consectetur adipisci nihil, repellendus
+            veniam repellat, laboriosam cumque at quia itaque, ipsum fuga quas asperiores nostrum. Ad qui et, sequi fuga optio quam tempora voluptatibus nemo atque laudantium velit? Molestiae magni a vitae ducimus odio ut atque itaque ratione corrupti,
+            alias facilis pariatur, omnis facere quas soluta commodi officiis quos, nostrum accusantium esse suscipit. Odio veniam numquam quibusdam neque. Nihil eius, dicta ut dignissimos dolorem corrupti consectetur tempore, beatae id eaque a, veritatis
+            repudiandae debitis minus itaque placeat mollitia illum sint accusamus. Ratione, ipsa reprehenderit officia ullam minus delectus.</p>
+    </main>
+
+    <main id="main-send-timesheet">
+        <h2>Send Time Sheet:</h2>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Esse consectetur quam laudantium aut repudiandae in hic fugit officiis veniam adipisci nam nulla, amet sed est recusandae, perspiciatis libero eveniet odio! Expedita quis minima sit officiis
+            vero repellendus, distinctio ullam eos suscipit tempore, veniam fugit iure commodi reprehenderit enim molestiae dolorem explicabo, at molestias consectetur esse. Illo non neque quisquam necessitatibus! Atque consectetur adipisci nihil, repellendus
+            veniam repellat, laboriosam cumque at quia itaque, ipsum fuga quas asperiores nostrum. Ad qui et, sequi fuga optio quam tempora voluptatibus nemo atque laudantium velit? Molestiae magni a vitae ducimus odio ut atque itaque ratione corrupti,
+            alias facilis pariatur, omnis facere quas soluta commodi officiis quos, nostrum accusantium esse suscipit. Odio veniam numquam quibusdam neque. Nihil eius, dicta ut dignissimos dolorem corrupti consectetur tempore, beatae id eaque a, veritatis
+            repudiandae debitis minus itaque placeat mollitia illum sint accusamus. Ratione, ipsa reprehenderit officia ullam minus delectus.</p>
+    </main>
+
+    <main id="main-copy-csv-timesheet">
+        <h2>CSV Formatted Time Sheet:</h2>
+        <h3 class='annoying-message'>Make sure to view your time sheet to set the end and start dates.</h3>
+        <p><pre id="copied-time-sheet">Copied time sheet should go here.</pre></p>
+    </main>
+
+    <main id="main-copy-database-to-clipboard">
+        <h2>JSON Database:</h2>
+        <textarea readonly id="copied-json-database"><pre>Copied time sheet should go here.</pre></textarea>
+    </main>
+
+
+    <main id="main-email-csv-timesheet">
+        <h2>Control-V into your mail program.</h2>
+    </main>
+
+    <main id="main-email-json-database">
+        <h2>Control-V into your mail program.</h2>
+    </main>
+
+    <!-- <main id="main-email-csv-timesheet">
+        <h2>CSV Formatted Time Sheet:</h2>
+        <h3 class='annoying-message'>Make sure to view your time sheet to set the end and start dates.</h3>
+        <p><pre id="copied-time-sheet">Copied time sheet should go here.</pre></p>
+    </main>
+
+    <main id="main-email-database">
+        <h2>JSON Database:</h2>
+        <textarea readonly id="copied-json-database"><pre>Copied time sheet should go here.</pre></textarea>
+    </main> -->
+
+    <footer>LogMyTime &copy; 2021</footer>
+
+    <script>
+        //  Example Database Structure
+        //  
+        // {
+        //     "table1Name": [{
+        //             "field1_name": value1   \ 
+        //             "field2_name": value2,   \  //these are rows of data
+        //             "field3_name": value3    /
+        //         },
+        //         {
+        //             "field1_name": value1   \ 
+        //             "field2_name": value2,   \  //these are rows of data
+        //             "field3_name": value3    /
+        //         },
+        //         {
+        //             "field1_name": value1   \ 
+        //             "field2_name": value2,   \  //these are rows of data
+        //             "field3_name": value3    /
+        //         }
+        //     ],
+        //     "table2Name": [{
+        //             "field1_name": value1   \ 
+        //             "field2_name": value2,   \  //these are rows of data
+        //             "field3_name": value3    /
+        //         },
+        //         {
+        //             "field1_name": value1   \ 
+        //             "field2_name": value2,   \  //these are rows of data
+        //             "field3_name": value3    /
+        //         },
+        //         {
+        //             "field1_name": value1   \ 
+        //             "field2_name": value2,   \  //these are rows of data
+        //             "field3_name": value3    /
+        //         }
+        //     ]
+        // }
+        //
+        //
+        //
+        // Notes:
+        // the order is very important
+        // <>
+        // !=
+        // >=
+        // >
+        // <=
+        // <
+        // =
+
+        let dbObject = {};
+        let dbMetaData = {};
+        dbMetaData["CURRENT_FILENAME"] = '';
+
+        if (document.getElementById('spaid-data') == null) {
+            //alert('no spaid-data div found, creating it!');
+
+            spaidDataDiv = document.createElement('div');
+            spaidDataDiv.setAttribute('id', 'spaid-data');
+            spaidDataDiv.style.display = 'none';
+            spaidDataDiv.innerHTML = "";
+
+            spaidButtonsDiv = document.createElement('div');
+            spaidButtonsDiv.setAttribute('id', 'spaid-buttons');
+
+            spaidResultDiv = document.createElement('div');
+            spaidResultDiv.setAttribute('id', 'spaid-result');
+            spaidResultDiv.innerHTML = '<hr>Run SQL statement above to see results.<br>Type HELP for example statements and info.<hr>';
+            // spaidResultDiv.style.display = 'none';
+
+            saveButton = document.createElement('button');
+            saveButton.setAttribute('id', 'spaid-save');
+            saveButton.innerHTML = 'save page with data';
+
+            loadDBButton = document.createElement('button');
+            loadDBButton.setAttribute('id', 'spaid-load-db');
+            loadDBButton.innerHTML = 'load database';;
+
+            saveDBButton = document.createElement('button');
+            saveDBButton.setAttribute('id', 'spaid-save-db');
+            saveDBButton.innerHTML = 'save database';
+
+            showButton = document.createElement('button');
+            showButton.setAttribute('id', 'spaid-show');
+            showButton.innerHTML = 'show/hide database';
+
+            sqlInput = document.createElement('input');
+            sqlInput.setAttribute('id', 'spaid-input');
+            sqlInput.setAttribute('placeholder', '[ENTER SQL STATEMENT]')
+
+            runButton = document.createElement('button');
+            runButton.setAttribute('id', 'spaid-run');
+            runButton.innerHTML = 'run';
+
+            showResultButton = document.createElement('button');
+            showResultButton.setAttribute('id', 'spaid-show-result');
+            showResultButton.innerHTML = 'show/hide result';
+
+            document.body.prepend(spaidDataDiv);
+            spaidButtonsDiv.appendChild(saveButton);
+            spaidButtonsDiv.appendChild(loadDBButton)
+            spaidButtonsDiv.appendChild(saveDBButton);
+            spaidButtonsDiv.appendChild(showButton);
+            spaidButtonsDiv.appendChild(sqlInput);
+            spaidButtonsDiv.appendChild(runButton);
+            spaidButtonsDiv.appendChild(showResultButton);
+            document.body.prepend(spaidResultDiv);
+            document.body.prepend(spaidButtonsDiv);
+
+        } else {
+
+            spaidDataDiv = document.getElementById('spaid-data');
+            spaidResultDiv = document.getElementById('spaid-result');
+            saveButton = document.getElementById('spaid-save');
+            showButton = document.getElementById('spaid-show');
+            loadDBButton = document.getElementById('spaid-load-db');
+            saveDBButton = document.getElementById('spaid-save-db');
+            sqlInput = document.getElementById('spaid-input');
+            runButton = document.getElementById('spaid-run');
+            showResultButton = document.getElementById('spaid-show-result');
+            readInDatabaseFromDiv();
+
+        }
+
+        saveButton.addEventListener('click', savePage);
+        loadDBButton.addEventListener('click', loadDatabase);
+        saveDBButton.addEventListener('click', _saveDatabase);
+        showButton.addEventListener('click', toggleDataVisible);
+        runButton.addEventListener('click', runSQL);
+        sqlInput.addEventListener('change', () => {
+            runButton.focus()
+        });
+        showResultButton.addEventListener('click', toggleResultVisible);
+
+        function _saveDatabase() {
+            saveDatabase();
+        }
+
+        //SPAID functions
+
+        function runSQL() {
+            let strSQL = document.getElementById('spaid-input').value;
+
+            resultDiv = document.getElementById('spaid-result');
+
+            thisResult = sqlQuery(strSQL); //could be error string or array
+
+            tableName = thisResult["TABLE_NAME"];
+
+            resultDiv.innerHTML = '<hr>';
+            resultDiv.innerHTML += '<br';
+            resultDiv.innerHTML += 'SQL statement processed: ' + strSQL + '<br>';
+            resultDiv.innerHTML += 'Table name: ' + tableName + '<br>';
+            resultDiv.innerHTML += '<hr>';
+
+            let formattedTable = formatTable2(thisResult); //will check to see if string
+
+            if (formattedTable.includes("ERROR")) {
+                resultDiv.innerHTML += formattedTable;
+            } else {
+                resultDiv.innerHTML += (formattedTable).replaceAll('undefined', '-').replaceAll(null, '-');
+            }
+            resultDiv.innerHTML += '<hr>';
+
+        }
+
+        function formatTable2(arrayOfObjectsTable) {
+
+            try {
+                if ((typeof(arrayOfObjectsTable) === "string") && (arrayOfObjectsTable.includes("ERROR"))) {
+                    return "<pre><table><tbody><tr><th>ERROR:</th></tr><tr><td>" + arrayOfObjectsTable + "</td></tr></tbody></table></pre>";
+                } else {
+                    thisTable = arrayOfObjectsTable;
+
+                    let headerArray = [];
+
+                    //build headerArray
+
+                    if ((thisTable["TABLE_NAME"].includes("_METADATA")) || (thisTable["TABLE_NAME"] === "SHOW TABLES")) { //how to display the metadata table
+                        for (const key in thisTable) {
+                            if (Object.hasOwnProperty.call(thisTable, key)) {
+                                if (typeof(thisTable[key]) != "object") {
+                                    headerArray.push(key);
+
+                                }
+                            }
+                        }
+                    } else {
+                        for (const key in thisTable) {
+                            if (Object.hasOwnProperty.call(thisTable, key)) {
+                                if (typeof(thisTable[key]) != "object") {
+                                    if ((key === "TABLE_NAME") || (key === "NEXT_PRIMARY_KEY")) {
+                                        //do nothing
+                                    } else {
+                                        headerArray.push(key);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    console.log("");
+                    console.log("-".repeat(32));
+                    console.log("table:" + thisTable["TABLE_NAME"]);
+                    let tempString = "";
+                    tempStringHtml = "<pre><table>"; //start table
+                    tempStringHtml += "<tr>"; //start header row
+                    for (let j = 0; j < headerArray.length; j++) {
+                        tempString += headerArray[j] + " ";
+                        tempStringHtml += '<th>' + headerArray[j] + '</th>';
+                    }
+
+                    console.log("-".repeat(32));
+                    console.log(tempString);
+                    console.log("-".repeat(32));
+                    tempStringHtml += '</tr>' //finish header row
+
+                    tempString = "";
+                    for (let i = 0; i < thisTable.length; i++) { //go through every index in table and build table rows
+                        tempStringHtml += '<tr>';
+                        for (let j = 0; j < headerArray.length; j++) { //go through every index of header array
+                            tempString += thisTable[i][headerArray[j]] + " ";
+                            tempStringHtml += '<td>' + thisTable[i][headerArray[j]] + '</td>';
+                        }
+                        console.log(tempString);
+                        tempString = "";
+
+                        tempStringHtml += '</tr>';
+                    }
+                    tempStringHtml += '</table></pre>';
+
+                    let formattedTable = tempStringHtml;
+
+                    return formattedTable;
+                }
+
+            } catch (error) {
+                return "<pre><table><tbody><tr><th>ERROR</th></tr><tr><td>" + "ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack + "</td></tr></tbody></table></pre>";
+
+            }
+        }
+
+        //function savePage() {
+        //    let thisDocument = new XMLSerializer().serializeToString(document.documentElement);
+        //    saveStringToTextFile(thisDocument, "spaid", ".html");
+        //}
+        function savePage() {
+            let thisDocument = new XMLSerializer().serializeToString(document.documentElement);
+            //split by style tags
+            let styleTempArray = [];
+            // replace </style> with <style>
+            thisDocument = thisDocument.replaceAll("<\/style>", "<style>");
+            // split by <style>
+            styleTempArray = thisDocument.split('<style>');
+            console.log(styleTempArray);
+            // that leaves ______,________,_______
+
+            //   _______,___thisStuff_____,_______
+
+            // styleTempArray[1] = styleTempArray[1].replaceAll('&gt;', '>');
+            // styleTempArray[1] = styleTempArray[1].replaceAll('&lt;', '<');
+            // styleTempArray[1] = styleTempArray[1].replaceAll('&amp;', '&');
+
+            for (let i = 0; i < styleTempArray.length; i++) {
+                console.log("styleTempArray.length", styleTempArray.length);
+                console.log(i, "(i + 1) % 2", (i + 1) % 2);
+                if ((i + 1) % 2 === 0) {
+                    styleTempArray[i] = styleTempArray[i].replaceAll('&gt;', '>');
+                    styleTempArray[i] = styleTempArray[i].replaceAll('&lt;', '<');
+                    styleTempArray[i] = styleTempArray[i].replaceAll('&amp;', '&');
+                }
+            }
+            // make replacements in thisStuff
+            // make every even <style> -> </style>
+            thisDocument = styleTempArray[0] + '<style>' + styleTempArray[1] + '<\/style>' + styleTempArray[2];
+            thisDocument = '';
+            for (let i = 0; i < styleTempArray.length - 1; i++) {
+                if (i % 2 == 0) {
+                    //
+                    thisDocument += styleTempArray[i] + '<style>';
+                } else {
+                    thisDocument += styleTempArray[i] + '<\/style>';
+                }
+            }
+            thisDocument += styleTempArray[styleTempArray.length - 1];
+            //
+            //split by style tags
+            let scriptTempArray = [];
+
+            // replace &lt;script> with <style>
+            thisDocument = thisDocument.replaceAll("<\/script>", "<script>");
+
+            // split by <style>
+            scriptTempArray = thisDocument.split('<script>');
+            console.log(scriptTempArray);
+
+            for (let i = 0; i < scriptTempArray.length; i++) {
+                console.log("scriptTempArray.length", scriptTempArray.length);
+                console.log(i, "(i + 1) % 2", (i + 1) % 2);
+                if ((i + 1) % 2 === 0) {
+                    scriptTempArray[i] = scriptTempArray[i].replaceAll('&gt;', '>');
+                    scriptTempArray[i] = scriptTempArray[i].replaceAll('&lt;', '<');
+                    scriptTempArray[i] = scriptTempArray[i].replaceAll('&amp;', '&');
+                }
+            }
+            //____<s>__</s>____<s>__</s>_____
+            //____,_____,______,_____,______
+
+            thisDocument = '';
+            for (let i = 0; i < scriptTempArray.length - 1; i++) {
+
+                if (i % 2 == 0) {
+                    //
+                    thisDocument += scriptTempArray[i] + '<script>';
+                } else {
+                    thisDocument += scriptTempArray[i] + '<\/script>';
+                }
+            }
+            thisDocument += scriptTempArray[scriptTempArray.length - 1];
+
+            //thisDocument = scriptTempArray[0] + '<script>' + scriptTempArray[1] + '<\/script>' + scriptTempArray[2];
+            console.log(thisDocument);
+
+            /////////////////////////////////
+
+            saveStringToTextFile(thisDocument, "pagecopy", ".html");
+        }
+
+        function turnWebPageIntoString() {
+            let thisDocument = new XMLSerializer().serializeToString(document.documentElement);
+            let styleTempArray = [];
+            thisDocument = thisDocument.replaceAll("<\/style>", "<style>");
+            styleTempArray = thisDocument.split('<style>');
+            for (let i = 0; i < styleTempArray.length; i++) {
+                if ((i + 1) % 2 === 0) {
+                    styleTempArray[i] = styleTempArray[i].replaceAll('&gt;', '>');
+                    styleTempArray[i] = styleTempArray[i].replaceAll('&lt;', '<');
+                    styleTempArray[i] = styleTempArray[i].replaceAll('&amp;', '&');
+                }
+            }
+            thisDocument = '';
+            for (let i = 0; i < styleTempArray.length - 1; i++) {
+                if (i % 2 == 0) {
+                    thisDocument += styleTempArray[i] + '<style>';
+                } else {
+                    thisDocument += styleTempArray[i] + '<\/style>';
+                }
+            }
+            thisDocument += styleTempArray[styleTempArray.length - 1];
+            let scriptTempArray = [];
+            thisDocument = thisDocument.replaceAll("<\/script>", "<script>");
+            scriptTempArray = thisDocument.split('<script>');
+            for (let i = 0; i < scriptTempArray.length; i++) {
+                if ((i + 1) % 2 === 0) {
+                    scriptTempArray[i] = scriptTempArray[i].replaceAll('&gt;', '>');
+                    scriptTempArray[i] = scriptTempArray[i].replaceAll('&lt;', '<');
+                    scriptTempArray[i] = scriptTempArray[i].replaceAll('&amp;', '&');
+                }
+            }
+            thisDocument = '';
+            for (let i = 0; i < scriptTempArray.length - 1; i++) {
+                if (i % 2 == 0) {
+                    thisDocument += scriptTempArray[i] + '<script>';
+                } else {
+                    thisDocument += scriptTempArray[i] + '<\/script>';
+                }
+            }
+            thisDocument += scriptTempArray[scriptTempArray.length - 1];
+            return thisDocument;
+        }
+
+        function saveDatabase(filename = '', addDate = false) {
+
+            let baseName = '';
+            let extension = '';
+
+            //no filename specified as argument and noned defined in database
+            if ((filename === '') && (dbMetaData["CURRENT_FILENAME"] === '')) {
+                baseName = "database";
+                extension = ".json";
+                addDate = true;
+
+                // either filename or database filename specified, in this case its the filename argument which
+                // will take precedent over existing filename since it was specified
+            } else if (filename != '') {
+                //console.log(filename);
+                let tempArray = filename.split("."); //checking to see if filename is basename or basename + extension
+                if (tempArray.length === 1) { //no extension
+                    baseName = filename;
+                    extension = '.json';
+                }
+                if (tempArray.length > 1) { //extension present
+                    baseName = tempArray[0]; //use first token before first '.';
+                    extension = "." + tempArray[tempArray.length - 1]; //use last token after '.'
+                }
+
+                // either filename or database filename specified, in this case its the database metadata filename
+            } else { //} if(dbMetaData!=''){
+
+                filename = dbMetaData["CURRENT_FILENAME"];
+                let tempArray = filename.split(".");
+                if (tempArray.length === 1) {
+                    baseName = filename;
+                    extension = '.json';
+                }
+                if (tempArray.length > 1) {
+                    baseName = tempArray[0]; //use first token before first '.';
+                    extension = "." + tempArray[tempArray.length - 1]; //use last token after '.'
+                }
+            }
+            saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
+            //I believe I should most likely be changing name of database here
+            //dbMetaData["CURRENT_FILENAME"] = baseName + extension;
+        }
+
+        // function saveDatabase() {
+        //     saveStringToTextFile(spaidDataDiv.innerHTML, "database", ".json", true);
+        // }
+
+        function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addDate = false) {
+            let saveFileName = fileName;
+            if (addDate === true) {
+                //make a string representing the date to add on to the filename
+                let dateString = (new Date()).toLocaleString();
+                dateString = "_" + dateString.replaceAll("/", "_").replaceAll(",", "_").replaceAll(" ", "_").replaceAll(":", "_");
+                //insert into filename
+                saveFileName = saveFileName + dateString + fileType;
+            } else {
+                saveFileName = saveFileName + fileType;
+            }
+            let blobVersionOfText = new Blob([str1], {
+                type: "text/plain"
+            });
+            let urlToBlob = window.URL.createObjectURL(blobVersionOfText);
+            let downloadLink = document.createElement("a");
+            downloadLink.style.display = "none";
+            downloadLink.download = saveFileName;
+            downloadLink.href = urlToBlob;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            downloadLink.parentElement.removeChild(downloadLink);
+
+
+            if (confirm("Would you like to update the filename of the current database to " + saveFileName + "?") == true) {
+                dbMetaData["CURRENT_FILENAME"] = saveFileName;
+            } else {
+                //pass
+            }
+        }
+
+        function loadDatabase() {
+            let fileContents = "";
+            let inputTypeIsFile = document.createElement('input');
+            inputTypeIsFile.type = "file";
+            inputTypeIsFile.addEventListener("change", function() {
+                let inputFile = inputTypeIsFile.files[0];
+                dbMetaData["CURRENT_FILENAME"] = inputFile.name;
+                let fileReader = new FileReader();
+                fileReader.onload = function(fileLoadedEvent) {
+                    dbObject = JSON.parse(fileLoadedEvent.target.result);
+                    updateDataDiv();
+                };
+                fileReader.readAsText(inputFile, "UTF-8");
+            });
+            inputTypeIsFile.click();
+        }
+
+        function toggleDataVisible() {
+            if (spaidDataDiv.style.display == 'none') {
+                spaidDataDiv.style.display = 'inherit';
+            } else {
+                spaidDataDiv.style.display = 'none';;
+            }
+        }
+
+        function toggleResultVisible() {
+            if (spaidResultDiv.style.display == 'none') {
+                spaidResultDiv.style.display = 'inherit';
+            } else {
+                spaidResultDiv.style.display = 'none';;
+            }
+        }
+
+        function readInDatabaseFromDiv() {
+            jsonData = spaidDataDiv.innerHTML;
+            console.log(jsonData);
+            if (jsonData != "") {
+                dbObject = JSON.parse(jsonData);
+            }
+        }
+
+
+        function attachMetaDataToTable(someTable, metaData) {
+            //use by select all to add properties to the table
+            //so that when it is returned metadata is available even
+            //if the return is not a table in the database, but a 
+            //select where query for example
+            for (const key in metaData) {
+                if (Object.hasOwnProperty.call(metaData, key)) {
+                    someTable[key] = metaData[key];
+                }
+            }
+            return someTable;
+        }
+
+        function _selectAllFrom(tableName) {
+
+            //get a copy of the datatable from the database
+            let tempTable = [];
+            for (let i = 0; i < dbObject[tableName].length; i++) {
+                tempTable.push(JSON.parse(JSON.stringify(dbObject[tableName][i])));
+            }
+
+            //get a copy of the metadata from the database
+            if (tableName.includes("_METADATA")) {
+                //this is a special request
+                //the metadata table does not have an entry of itself
+                let metaDataEntry = JSON.parse(JSON.stringify(tempTable[0]));
+                for (const key in metaDataEntry) {
+                    if (Object.hasOwnProperty.call(metaDataEntry, key)) {
+                        tempTable[key] = metaDataEntry[key];
+                    }
+                }
+                tempTable["TABLE_NAME"] = tableName;
+            } else {
+                let metaData = JSON.parse(JSON.stringify(dbObject[tableName + "_METADATA"][0]));
+                //attach metadata to this copy
+                tempTable = attachMetaDataToTable(tempTable, metaData);
+            }
+            //console.log(tempTable);
+            return tempTable;
+        }
+
+        function columnsFilter(thisTable, columns = []) {
+
+            //make a new table with only fields in column
+            //attach only metadata corresponding fields to table
+            //return the table
+
+            let tempTable = [];
+            let tempRow = {};
+
+            for (let i = 0; i < thisTable.length; i++) { //loop through every row in table
+                tempRow = {};
+                for (let j = 0; j < columns.length; j++) { //loop through every column
+                    if (thisTable[i].hasOwnProperty(columns[j])) { //build the row for the new table
+                        tempRow[columns[j]] = thisTable[i][columns[j]];
+                        tempTable[columns[j]] = thisTable[columns[j]]; //add the metadata, very inefficient
+                    }
+                }
+                tempTable.push(JSON.parse(JSON.stringify(tempRow)));
+            }
+
+            tempTable["TABLE_NAME"] = thisTable["TABLE_NAME"];
+            return tempTable;
+        }
+
+        function orderByFilter(thisTable, field, direction = "ASC") {
+            function compare(a, b) {
+                if (a[sortField] < b[sortField]) {
+                    return -1;
+                }
+                if (a[sortField] > b[sortField]) {
+                    return 1;
+                }
+                return 0;
+            }
+            sortField = field;
+            thisTable.sort(compare);
+            if (direction === "DESC") {
+                thisTable.reverse();
+            }
+
+            return thisTable;
+        }
+
+        function _innerJoin(table1, table2, table1Field, table2Field) {
+            tempTable1 = [];
+            tempTable2 = [];
+            joinedTable = [];
+
+            //make a copy of table 1 with new field names  table1_column1, table1_column2, etc
+            for (let i = 0; i < table1.length; i++) {
+                rowObject = JSON.parse(JSON.stringify(table1[i]));
+
+                for (const key in rowObject) {
+                    newFieldName = table1["TABLE_NAME"] + "_" + key; //make the new field name
+                    rowObject[newFieldName] = rowObject[key]; //add the field name as property and value as key
+                    delete rowObject[key]; //delete the old column data
+                    //attach metadata to the table array
+                    tempTable1[newFieldName] = table1[key]; //very inefficient, but straightforward, repeats/overrwrites
+                    joinedTable[newFieldName] = table1[key]; //same with joined table which will contain all columns
+                }
+
+                tempTable1.push(rowObject);
+            }
+
+            //make a copy of table 2 with new field names  table2_column1, table2_column2, etc
+            for (let i = 0; i < table2.length; i++) {
+                rowObject = JSON.parse(JSON.stringify(table2[i]));
+
+                for (const key in rowObject) {
+                    newFieldName = table2["TABLE_NAME"] + "_" + key; //make the new field name
+                    rowObject[newFieldName] = rowObject[key]; //add the field name as property and value as key
+                    delete rowObject[key]; //delete the old column data
+                    //attach metadata to the table array
+                    tempTable2[newFieldName] = table2[key]; //very inefficient, but straightforward, repeats/overrwrites
+                    joinedTable[newFieldName] = table2[key]; //same with joined table which will contain all columns
+                }
+
+                tempTable2.push(rowObject);
+            }
+
+            //We now have 2 tables with associated string or number values attached and new headings with same data
+
+            //these are the arguments passed through to join on
+            table1Field = table1["TABLE_NAME"] + "_" + table1Field; //getting these tablenames as attached properties 
+            table2Field = table2["TABLE_NAME"] + "_" + table2Field;
+
+            for (let i = 0; i < tempTable1.length; i++) { //loop through allentries in table1
+                for (let j = 0; j < tempTable2.length; j++) { //loop through all entries in table2
+                    rowObject = {}
+                    if ((tempTable1[i].hasOwnProperty(table1Field)) && (tempTable2[j].hasOwnProperty(table2Field))) {
+                        if ((tempTable1[i][table1Field] === tempTable2[j][table2Field])) { //if there is a match add add objects together and add to table
+
+                            rowObject = JSON.parse(JSON.stringify({...tempTable1[i],
+                                ...tempTable2[j]
+                            }));
+
+                            joinedTable.push(rowObject);
+                        }
+                    }
+
+                }
+            }
+
+            joinedTable["TABLE_NAME"] = table1["TABLE_NAME"] + "INNERJOIN" + table2["TABLE_NAME"]; //renaming this table
+
+            // console.log("/////////////CHECKING KEYS HERE/////////////////");
+            // for (const key in joinedTable) {
+            //     if (Object.hasOwnProperty.call(joinedTable, key)) {
+            //         console.log('column: ' + key + '    dataType: ' + joinedTable[key]);
+            //     }
+            // }
+            // console.log("/////////////END CHECKING KEYS//////////////////");
+
+            return joinedTable;
+        }
+
+        function whereFilter(thisTable, compareField, operator, compareValue) {
+
+            // make new empty table
+            let tempTable = [];
+
+            // see if compare value is string or number
+            // if number convert to number
+
+            if (thisTable[compareField] === "NUMBER") {
+                compareValue = Number(compareValue);
+            }
+
+            // if condition is met in table, add that row to new table
+
+            if (operator === '=') {
+                for (let i = 0; i < thisTable.length; i++) {
+                    if (thisTable[i].hasOwnProperty(compareField)) {
+                        if (thisTable[i][compareField] === compareValue) {
+                            tempTable.push(JSON.parse(JSON.stringify(thisTable[i])));
+                        }
+                    }
+                }
+            } else if ((operator === "!=") || (operator === "<>")) {
+                for (let i = 0; i < thisTable.length; i++) {
+                    if (thisTable[i].hasOwnProperty(compareField)) {
+                        if (thisTable[i][compareField] != compareValue) {
+                            tempTable.push(JSON.parse(JSON.stringify(thisTable[i])));
+                        }
+                    }
+                }
+            } else if (operator === '>') {
+                for (let i = 0; i < thisTable.length; i++) {
+                    if (thisTable[i].hasOwnProperty(compareField)) {
+                        if (thisTable[i][compareField] > compareValue) {
+                            tempTable.push(JSON.parse(JSON.stringify(thisTable[i])));
+                        }
+                    }
+                }
+            } else if (operator === '>=') {
+                for (let i = 0; i < thisTable.length; i++) {
+                    if (thisTable[i].hasOwnProperty(compareField)) {
+                        if (thisTable[i][compareField] >= compareValue) {
+                            tempTable.push(JSON.parse(JSON.stringify(thisTable[i])));
+                        }
+                    }
+                }
+            } else if (operator === '<') {
+                for (let i = 0; i < thisTable.length; i++) {
+                    if (thisTable[i].hasOwnProperty(compareField)) {
+                        if (thisTable[i][compareField] < compareValue) {
+                            tempTable.push(JSON.parse(JSON.stringify(thisTable[i])));
+                        }
+                    }
+                }
+            } else if (operator === '<=') {
+                for (let i = 0; i < thisTable.length; i++) {
+                    if (thisTable[i].hasOwnProperty(compareField)) {
+                        if (thisTable[i][compareField] <= compareValue) {
+                            tempTable.push(JSON.parse(JSON.stringify(thisTable[i])));
+                        }
+                    }
+                }
+            }
+
+            tempTable = transferMetadata(tempTable, thisTable);
+
+            return tempTable;
+        }
+
+        function transferMetadata(table, donorTable) {
+
+            for (const key in donorTable) {
+                if (Object.hasOwnProperty.call(donorTable, key)) {
+                    if (typeof(donorTable[key]) != "object") {
+                        if (key != "NEXT_PRIMARY_KEY") {
+                            //console.log("key " + key + "  value " + thisTable[key] + "type of" + typeof(thisTable[key]));
+
+                            table[key] = donorTable[key];
+
+                        }
+                    }
+                }
+            }
+            return (table);
+
+        }
+
+        function _showTables() {
+            let tempTable = [];
+            let tempRowObject = {};
+            for (let tableName in dbObject) {
+                tempRowObject["TABLE_NAME"] = tableName;
+                tempTable.push(JSON.parse(JSON.stringify(tempRowObject)));
+            }
+            tempTable["TABLE_NAME"] = 'SHOW TABLES';
+            return tempTable;
+        }
+
+        function updateDataDiv() {
+            spaidDataDiv.innerHTML = JSON.stringify(dbObject);
+        }
+
+        /// MAIN FUNCTION THAT FINDS THE RIGHT FUNCTION TO CALL, 
+        /// ThGETS
+        /// ITS RETURN VALUE AND RETURNS IT BACK.  ALWAYS RETURNS
+        /// A TABLE LIKE OBJECT, ARRAY OF OBJECTS, EXCEPT FOR DROP
+        /// THE TABLE LIKE OBJECT IS AN
+        ///     array of objects
+        ///     additionally it has properties TABLE_NAME NEXT_PRIMARY_KEY and column name
+        ///         the values are a tablename string, an integer, and each column name is string or number
+        ///         
+        /// TABLE, WHICH RETURNS UNDEFINED
+
+
+        // main function that parses the query string and then calls the appropriate function.
+        //      the appropriate function returns a table (an array of objects) with attached properties of metadata
+        //      this table (and array of objects) is returned with attached metadata as properties.
+        //      the idea is that although we are returning an indexed array of objects, the array itself 
+        //      is an object which can have its own properties, so the tablename, next primary key for autoincrementing
+        //      and column names and types are attached as the tables properties.
+        //
+        //  the function takes a sql statement as its argument
+        //  the function returns an index array of objects with attached properties
+
+        function sqlQuery(strSQL) {
+            let sqlStatementsArray = splitSQLStatementsBySemicolon(strSQL);
+            let tempTable = [];
+            for (let i = 0; i < sqlStatementsArray.length; i++) {
+                tempTable = _sqlQuery(sqlStatementsArray[i]);
+            }
+            return tempTable;
+        }
+
+        function _sqlQuery(strSQL) {
+
+            let dbMetaDataBackup = JSON.parse(JSON.stringify(dbMetaData));
+            let dbObjectBackup = JSON.parse(JSON.stringify(dbObject));
+
+            console.log(strSQL);
+            //NOTE ORDER IS IMPORTANT
+
+            strSQL = strSQL.trim();
+
+            if (strSQL[strSQL.length - 1] === ";") {
+                strSQL = strSQL.slice(0, -1);
+            }
+
+            let thisTable = [];
+
+            if ((strSQL.includes("INSERT")) && (strSQL.includes("SELECT"))) {
+                console.log("proces  INSERT SELECT"); //also will process inner join
+                thisTable = processInsertSelect(strSQL);
+
+            } else if (strSQL.includes("INNER")) {
+                console.log("process INNER JOIN");
+                thisTable = processInnerJoin(strSQL);
+
+            } else if (strSQL.includes("SELECT")) {
+                console.log("process SELECT statement");
+                thisTable = processSelectStatement(strSQL);
+
+            } else if (strSQL.includes("INSERT")) {
+                console.log("process INSERT INTO");
+                thisTable = processInsertInto(strSQL);
+
+            } else if (strSQL.includes("UPDATE")) {
+                console.log("process UPDATE statement");
+                thisTable = processUpdate(strSQL);
+
+            } else if (strSQL.includes("DELETE")) {
+                console.log("process DELETE statement");
+                thisTable = processDelete(strSQL);
+
+            } else if (strSQL.includes("CREATE")) {
+                console.log("process CREATE table statement");
+                thisTable = processCreateTable(strSQL);
+
+            } else if ((strSQL.includes("DROP")) && (!strSQL.includes("ALTER"))) {
+                console.log("process DROP TABLE statement");
+                thisTable = processDropTable(strSQL);
+
+            } else if (strSQL.includes("SHOW")) {
+                console.log("process SHOW TABLES statement");
+                thisTable = processShowTables();
+
+            } else if (strSQL.includes("DESCRIBE")) {
+                console.log("process DESCRIBE TABLE statement");
+                thisTable = processDescribeTable(strSQL);
+
+            } else if (strSQL.includes("HELP")) {
+                console.log("process HELP statement");
+                thisTable = processHelp(strSQL);
+
+            } else if ((strSQL.includes("ALTER")) && (strSQL.includes("TABLE")) && (strSQL.includes("CHANGE"))) {
+                console.log("process ALTER TABLE CHANGE statement");
+                thisTable = processAlterTableChange(strSQL);
+
+            } else if ((strSQL.includes("ALTER")) && (strSQL.includes("TABLE")) && (strSQL.includes("ADD"))) {
+                console.log("process ALTER TABLE ADD statement");
+                thisTable = processAlterTableAddColumn(strSQL);
+
+            } else if ((strSQL.includes("ALTER")) && (strSQL.includes("TABLE")) && (strSQL.includes("DROP"))) {
+                console.log("process ALTER TABLE DROP statement");
+                thisTable = processAlterTableDropColumn(strSQL);
+
+            } else {
+                console.log('sql statement not understood');
+                thisTable = "ERROR:\n - sql statement not understood, could not be parsed.";
+            }
+
+            if ((typeof(thisTable) === 'string') && (thisTable.includes("ERROR"))) { //indicates an error
+                dbMetaData = JSON.parse(JSON.stringify(dbMetaDataBackup));
+                dbObject = JSON.parse(JSON.stringify(dbObjectBackup));
+                updateDataDiv();
+                thisTable += "\n dbObject and dbMetaData reset to values before attempted SQL operation."
+                console.log(thisTable);
+            }
+
+            return thisTable;
+
+        }
+
+        function processAlterTableDropColumn(strSQL) {
+            //will parse something like - ALTER TABLE table_name DROP COLUMN column_name;
+            //it calls the paramaterized function and passes its return value back
+            try {
+                let tempTable = [];
+                let tokens = tokenizeStringBySpace(strSQL);
+                let tableName = tokens[2];
+                let columnName = getTokenAfter(tokens, "COLUMN");
+                tempTable = _alterTableDropColumn(tableName, columnName);
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+
+        }
+
+        function _alterTableDropColumn(tableName, columnName) {
+            try {
+                tempTable = dbObject[tableName]; //an array of objects
+                // go through table, and at each line remove the property
+                for (i = 0; i < tempTable.length; i++) {
+                    if (columnName in tempTable[i]) { //if the property is in the object
+                        delete tempTable[i][columnName];
+                    }
+                }
+
+                // remove that column from the table's metadata entry
+                metaDataTable = dbObject[tableName + "_METADATA"];
+
+                if (columnName in metaDataTable[0]) {
+                    delete metaDataTable[0][columnName];
+                }
+
+                //update visually
+                updateDataDiv();
+
+                return sqlQuery("SELECT * FROM " + tableName);
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+
+        }
+
+        function processAlterTableAddColumn(strSQL) {
+            //will parse something like - ALTER TABLE table_name ADD column_name datatype;
+            //it calls the paramaterized function and passes its return value back
+
+            try {
+                let tempTable = [];
+                let tokens = tokenizeStringBySpace(strSQL);
+                let tableName = tokens[2];
+                let endString = getStringAfter(strSQL, "ADD");
+                let tokens2 = tokenizeStringBySpace(endString);
+                let columnName = tokens2[0];
+                let dataType = tokens2[1];
+                tempTable = _alterTableAddColumn(tableName, columnName, dataType);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+
+
+        }
+
+        function _alterTableAddColumn(tableName, columnName, dataType) {
+
+            try {
+                if (columnName in dbObject[tableName + "_METADATA"][0]) {
+                    console.log(tableName + " already has column with name " + columnName + ".");
+                } else {
+                    dbObject[tableName + "_METADATA"][0][columnName] = dataType;
+                }
+                updateDataDiv();
+                return sqlQuery("SELECT * FROM " + tableName);
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+
+        }
+
+        function processAlterTableChange(strSQL) {
+            //will parse something like - //ALTER TABLE table_name CHANGE pets_name name STRING;
+            //it calls the paramaterized function and passes its return value back
+            try {
+                let tempTable = [];
+                let tokens = tokenizeStringBySpace(strSQL);
+                let tableName = tokens[2];
+                let endString = getStringAfter(strSQL, "CHANGE");
+                let tokens2 = tokenizeStringBySpace(endString);
+                let originalName = tokens2[0];
+                let newName = tokens2[1];
+                let dataType = tokens2[2];
+                //call the parameterized function and get its return value
+                tempTable = _alterTableChange(tableName, originalName, newName, dataType);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function _alterTableChange(tableName, originalName, newName, dataType) {
+            try {
+
+                //change datatype
+                let thisTable = dbObject[tableName];
+
+                if (dataType === "STRING") {
+                    for (let i = 0; i < thisTable.length; i++) { //change all table entries to new datatype
+                        if (originalName in thisTable[i]) {
+                            thisTable[i][originalName] = thisTable[i][originalName].toString();
+                        }
+                    }
+                } else if (dataType === "NUMBER") {
+                    for (let i = 0; i < thisTable.length; i++) { //change all table entries to new datatype
+                        if (originalName in thisTable[i]) {
+                            thisTable[i][originalName] = Number(thisTable[i][originalName]);
+                        }
+                    }
+                }
+
+                //change column name, ie add new column and delete old if names are different
+                //note: allowing to be same allows updating datatype only
+                if (newName != originalName) {
+                    for (let i = 0; i < thisTable.length; i++) {
+                        if (originalName in thisTable[i]) {
+                            thisTable[i][newName] = thisTable[i][originalName];
+                            delete thisTable[i][originalName];
+                        }
+                    }
+                }
+
+                //update metadatatale
+                metaDataTable = dbObject[tableName + "_METADATA"];
+
+                //add new column name and type
+                metaDataTable[0][newName] = dataType;
+
+                //delete old column name and type if names are different
+                if (newName != originalName) {
+                    delete metaDataTable[0][originalName];
+                }
+
+                //updating visually and writing to text database storage
+                updateDataDiv();
+
+                let tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+
+        function processHelp(strSQL) {
+            try {
+                //note helpstring is global scope
+                let tempTable = [];
+                let tempObject = {
+                    'HELP': helpString
+                };
+                tempTable.push(tempObject);
+                tempTable["TABLE_NAME"] = "HELP";
+                tempTable["HELP"] = "STRING";
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+
+        }
+
+        function processShowTables(strSQL) {
+            try {
+                return _showTables();
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function processDescribeTable(strSQL) {
+            try {
+                let tempTable = [];
+                let tokens = tokenizeStringBySpace(strSQL);
+                let tableName = getTokenAfter(tokens, "DESCRIBE");
+                tempTable = _describe(tableName);
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function _describe(thisTableName) {
+            try {
+                if (thisTableName.includes("_METADATA")) {
+                    let tempTable = sqlQuery("SELECT * FROM " + thisTableName);
+                    tempTable["TABLE_NAME"] = thisTableName;
+                } else {
+                    let tempTable = sqlQuery("SELECT * FROM " + thisTableName + "_METADATA");
+                    tempTable["TABLE_NAME"] = thisTableName + "_METADATA";
+                }
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function processDropTable(strSQL) {
+            //will parse something like - DROP TABLE table_name;
+            //it calls the paramaterized function and passes its return value back
+            try {
+                let tempTable = [];
+                let tokens = tokenizeStringBySpace(strSQL);
+                tableName = getTokenAfter(tokens, "TABLE");
+                tempTable = _dropTable(tableName);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function _dropTable(tableName) {
+            try {
+                delete dbObject[tableName];
+                delete dbObject[tableName + "_METADATA"];
+                updateDataDiv();
+                //send something back
+                let tempTable = [];
+                tempTable["TABLE_NAME"] = "DROPPED " + tableName;
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function processCreateTable(strSQL) {
+            try {
+                //will parse something like - CREATE TABLE table_name (column1 datatype, column2 datatype, column3 datatype, .... );
+                //it calls the paramaterized function and passes its return value back
+                let tempTable = [];
+                let fieldNames = [];
+                let dataTypes = [];
+                let tokens = tokenizeStringBySpace(strSQL);
+                let tableName = getTokenAfter(tokens, "TABLE");
+                endString = getStringAfter(strSQL, tableName);
+                endString = endString.replace("(", " ");
+                endString = endString.replace(")", " ");
+                tokenPairs = splitByCommasAndCleanWhiteSpace(endString);
+                let tempArray = []
+                for (let i = 0; i < tokenPairs.length; i++) {
+                    tempArray = tokenizeStringBySpace(tokenPairs[i]);
+                    fieldNames[i] = tempArray[0];
+                    dataTypes[i] = tempArray[1];
+                }
+                tempTable = _createTable(tableName, fieldNames, dataTypes);
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+
+        }
+
+        function _createTable(tableName, fieldNames = [], dataTypes = []) {
+            try {
+                tempTable = [];
+                //make an empty entry into the database
+                dbObject[tableName] = [];
+
+                //make a metatable entry into the database
+                dbObject[tableName + "_METADATA"] = [];
+
+                //place metadata in the table's metadata table
+                metaData = {};
+                metaData["TABLE_NAME"] = tableName;
+                metaData["NEXT_PRIMARY_KEY"] = 1;
+                metaData["PRIMARY_KEY"] = "NUMBER";
+
+                //loop through field names and datatype and add to metadata
+                for (let i = 0; i < fieldNames.length; i++) {
+                    metaData[fieldNames[i]] = dataTypes[i];
+                }
+
+                //make the metadatatable
+                dbObject[tableName + "_METADATA"][0] = JSON.parse(JSON.stringify(metaData));
+
+                //update visually
+                updateDataDiv();
+
+                //return the table just made
+                tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function processDelete(strSQL) {
+            try {
+                // will parse something like-
+                // DELETE FROM table_name WHERE condition;
+                // DELETE FROM table_name WHERE column=` some value   `;
+                // it calls the paramaterized function and passes its return value back;
+
+                let tempTable = [];
+
+                let tokens = tokenizeStringBySpace(strSQL);
+                tableName = getTokenAfter(tokens, "FROM"); //got tableName!
+
+                //get compareField and operator
+                let lastString = getStringAfter(strSQL, "WHERE");
+
+                let stopIndex = lastString.indexOf("`");
+                firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
+
+                firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
+
+                //get compare field and operator
+                let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
+
+                let compareField = tempTokens3[0];
+                let operator = tempTokens3[1];
+
+                //get compare value
+                compareValue = readBackTicks(lastString)[0];
+
+                if (dbObject[tableName][compareField] === "NUMBER") {
+                    compareValue = Number(compareValue);
+                }
+
+                //alert(compareValue);
+
+                if (compareValue === undefined) {
+                    //do nothing
+                } else {
+                    tempTable = _deleteFromTable(tableName, compareField, operator, compareValue);
+                }
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+
+        }
+
+        function _deleteFromTable(tableName, compareField, operator = "=", compareValue) {
+            try {
+
+                tempTable = [];
+                metaData = dbObject[tableName + "_METADATA"][0];
+
+                //get datatype of compareValue so it can be compared to stored value
+                if (metaData[compareField] === "NUMBER") {
+                    compareValue = Number(compareValue);
+                }
+
+                if (operator === "=") {
+                    for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                        if (dbObject[tableName][i][compareField] === compareValue) {
+                            dbObject[tableName].splice(i, 1);
+                        }
+                    }
+                } else if ((operator === "!=") || (operator === "<>")) {
+                    for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                        if (dbObject[tableName][i][compareField] != compareValue) {
+                            dbObject[tableName].splice(i, 1);
+                        }
+                    }
+                } else if (operator === ">") {
+                    for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                        if (dbObject[tableName][i][compareField] > compareValue) {
+                            dbObject[tableName].splice(i, 1);
+                        }
+                    }
+                } else if (operator === ">=") {
+                    for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                        if (dbObject[tableName][i][compareField] >= compareValue) {
+                            dbObject[tableName].splice(i, 1);
+                        }
+                    }
+                } else if (operator === "<") {
+                    for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                        if (dbObject[tableName][i][compareField] < compareValue) {
+                            dbObject[tableName].splice(i, 1);
+                        }
+                    }
+                } else if (operator === "<=") {
+                    for (let i = dbObject[tableName].length - 1; i <= 0; i--) {
+                        if (dbObject[tableName][i][compareField] === compareValue) {
+                            dbObject[tableName].splice(i, 1);
+                        }
+                    }
+                }
+                updateDataDiv();
+
+                tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function trimArrayElements(myArray) {
+            for (let i = 0; i < myArray.length; i++) { //trim both side of each token
+                myArray[i] = myArray[i].trim();
+            }
+            return myArray;
+        }
+
+        function processUpdate(strSQL) {
+            try {
+
+                //will parse something like - 
+                //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE condition;
+
+                //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE something >= `something`;  remove ticks from where clause just in case->done
+                //it calls the paramaterized function and passes its return value back
+
+                tempTable = [];
+                //strSQL = addWhiteSpaceAroundOperators(strSQL);
+
+                //get tableName
+                let tempTokens1 = tokenizeStringBySpace(strSQL);
+                tableName = getTokenAfter(tempTokens1, "UPDATE"); //got tableName!
+
+
+                //get compareField and operator
+                let lastString = getStringAfter(strSQL, "WHERE");
+
+                let stopIndex = lastString.indexOf("`");
+                firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
+
+                firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
+
+                //no get first tick and go from that space
+                //lastString = addWhiteSpaceAroundOperators(lastString);
+                let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
+
+                let compareField = tempTokens3[0];
+                let operator = tempTokens3[1];
+
+                //get compare value
+
+
+                compareValue = readBackTicks(lastString)[0];
+
+                let middleString = getStringBetween(strSQL, "SET", "WHERE");
+                middleString = middleString.trim();
+
+                let updatePairs = splitByBackTicks(middleString);
+
+                //remove the equal sign from first and every other token, at the end
+                for (let i = 0; i < updatePairs.length; i = i + 2) {
+                    updatePairs[i] = updatePairs[i].slice(0, -1);
+                }
+
+                //remove a comma from beginning if present
+                for (let i = 0; i < updatePairs.length; i = i + 2) {
+                    if (updatePairs[i][0] === ",") {
+                        updatePairs[i] = updatePairs[i].slice(1);
+                    }
+                }
+
+                for (let i = 0; i < updatePairs.length; i = i + 2) { //trim only odd 
+                    updatePairs[i] = updatePairs[i].trim();
+                }
+
+                let fieldNames = [];
+                let values = [];
+
+                console.log(updatePairs);
+                for (let i = 0; i < updatePairs.length / 2; i++) {
+                    fieldNames[i] = updatePairs[i * 2];
+                    //values[i] = updatePairs[(i * 2) + 1];  //no longer this half of 'pairs' see below using backticks
+                }
+
+                values = readBackTicks(middleString);
+
+                tempTable = _update(tableName, fieldNames, values, compareField, operator, compareValue);
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function _update(tableName, fieldNames = [], values = [], compareField, operator = "=", compareValue) {
+            try {
+                tempTable = [];
+                metaData = dbObject[tableName + "_METADATA"][0];
+
+                //get datatype of compareValue so it can be compared to stored value
+                if (metaData[compareField] === "NUMBER") {
+                    compareValue = Number(compareValue);
+                }
+
+                if (fieldNames.length != values.length) {
+                    let tempTable = [];
+                    tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
+                    return tempTable;
+
+                } else {
+                    if (operator === "=") {
+                        for (let i = 0; i < dbObject[tableName].length; i++) {
+                            if (dbObject[tableName][i][compareField] === compareValue) {
+                                for (let j = 0; j < fieldNames.length; j++) {
+                                    if (metaData[fieldNames[j]] === "NUMBER") {
+                                        dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                                    } else {
+                                        dbObject[tableName][i][fieldNames[j]] = values[j];
+                                    }
+
+                                }
+                            }
+                        }
+                    } else if ((operator === "!=") || (operator === "<>")) {
+                        for (let i = 0; i < dbObject[tableName].length; i++) {
+                            if (dbObject[tableName][i][compareField] != compareValue) {
+                                for (let j = 0; j < fieldNames.length; j++) {
+                                    if (metaData[fieldNames[j]] === "NUMBER") {
+                                        dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                                    } else {
+                                        dbObject[tableName][i][fieldNames[j]] = values[j];
+                                    }
+                                }
+                            }
+                        }
+                    } else if (operator === ">") {
+                        for (let i = 0; i < dbObject[tableName].length; i++) {
+                            if (dbObject[tableName][i][compareField] > compareValue) {
+                                for (let j = 0; j < fieldNames.length; j++) {
+                                    if (metaData[fieldNames[j]] === "NUMBER") {
+                                        dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                                    } else {
+                                        dbObject[tableName][i][fieldNames[j]] = values[j];
+                                    }
+                                }
+                            }
+                        }
+                    } else if (operator === ">=") {
+                        for (let i = 0; i < dbObject[tableName].length; i++) {
+                            if (dbObject[tableName][i][compareField] >= compareValue) {
+                                for (let j = 0; j < fieldNames.length; j++) {
+                                    if (metaData[fieldNames[j]] === "NUMBER") {
+                                        dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                                    } else {
+                                        dbObject[tableName][i][fieldNames[j]] = values[j];
+                                    }
+                                }
+                            }
+                        }
+                    } else if (operator === "<") {
+                        for (let i = 0; i < dbObject[tableName].length; i++) {
+                            if (dbObject[tableName][i][compareField] < compareValue) {
+                                for (let j = 0; j < fieldNames.length; j++) {
+                                    if (metaData[fieldNames[j]] === "NUMBER") {
+                                        dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                                    } else {
+                                        dbObject[tableName][i][fieldNames[j]] = values[j];
+                                    }
+                                }
+                            }
+                        }
+                    } else if (operator === "<=") {
+                        for (let i = 0; i < dbObject[tableName].length; i++) {
+                            if (dbObject[tableName][i][compareField] <= compareValue) {
+                                for (let j = 0; j < fieldNames.length; j++) {
+                                    if (metaData[fieldNames[j]] === "NUMBER") {
+                                        dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                                    } else {
+                                        dbObject[tableName][i][fieldNames[j]] = values[j];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    updateDataDiv();
+
+                    tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+                    return tempTable;
+                }
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function processInsertInto(strSQL) {
+            try {
+                //will parse something like - INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
+                //it calls the paramaterized function and passes its return value back
+
+                tempTable = [];
+
+                strSQL = strSQL.replace("(", " ( "); //only replaces first
+                strSQL = strSQL.replace(")", " ) "); //only replaces first
+
+                let tempTokens = tokenizeStringBySpace(strSQL);
+                let tableName = getTokenAfter(tempTokens, "INTO"); //got tableName!
+
+                let middleString = getStringBetween(strSQL, "(", ")");
+
+                columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
+
+
+                lastString = getStringAfter(strSQL, "VALUES");
+                lastString = lastString.replace("(", " "); //replace only first in string
+
+                let position = lastString.lastIndexOf(')');
+                lastString = lastString.substring(0, position) + " " + lastString.substring(position + 1); //replace only last )
+
+                lastString = lastString.trim(); //trim edges
+
+                values = readBackTicks(lastString);
+
+                tempTable = _insertInto(tableName, columns, values);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function readBackTicks(myString) {
+            let tickLocations = [];
+            let myArray = [];
+            let tempString = "";
+            for (let i = 0; i < myString.length; i++) {
+                if (myString[i] === "`") {
+                    tickLocations.push(i);
+                }
+            }
+            for (let i = 0; i < tickLocations.length / 2; i++) {
+                tempString = myString.substring(tickLocations[i * 2] + 1, tickLocations[(i * 2) + 1]);
+                myArray.push(tempString);
+            }
+            return myArray;
+        }
+
+        function _insertInto(tableName, fieldNames = [], values = []) {
+            try {
+                if (fieldNames.length != values.length) {
+                    let tempTable = [];
+                    tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
+                    return tempTable;
+                } else {
+                    tempTable = [];
+
+                    //get a copy of the metadata from the database
+                    let metaData = JSON.parse(JSON.stringify(dbObject[tableName + "_METADATA"][0]));
+                    let thisPrimaryKey = metaData["NEXT_PRIMARY_KEY"];
+                    //build row entry which is an object
+                    let tempObject = {};
+                    tempObject['PRIMARY_KEY'] = thisPrimaryKey; //
+                    for (let i = 0; i < fieldNames.length; i++) {
+                        //check to see what type of data type field is
+                        if (metaData[fieldNames[i]] === "NUMBER") {
+                            tempObject[fieldNames[i]] = Number(values[i]);
+                        } else {
+                            tempObject[fieldNames[i]] = values[i];
+                        }
+                    }
+                    //add the entry to the table
+                    dbObject[tableName].push(JSON.parse(JSON.stringify(tempObject)));
+                    //advance the primary key in the table's metadata
+                    dbObject[tableName + "_METADATA"][0]["NEXT_PRIMARY_KEY"] = thisPrimaryKey + 1;
+
+                    //update visually
+                    updateDataDiv();
+
+                    //return the table just modified
+                    tempTable = sqlQuery("SELECT * FROM " + tableName);
+                    //console.log(tempTable);
+
+                    return tempTable;
+                }
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function processInsertSelect(strSQL) {
+            try {
+                //will parse something like these:
+                //
+                //INSERT INTO copiedTable SELECT * FROM myTable;
+                //INSERT INTO dogOwners SELECT * FROM petTable WHERE pets_pettype = "dog";
+                //INSERT INTO someTable SELECT owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID
+                //
+                //it calls the paramaterized function and passes its return value back
+
+                let tempTable = [];
+
+                let tokens = tokenizeStringBySpace(strSQL);
+                let newTableName = getTokenAfter(tokens, "INTO");
+
+                //remove the insert into tablename part and process select or inner join to get table
+                strSQL = strSQL.replace("INSERT", "");
+                strSQL = strSQL.replace("INTO", "");
+                strSQL = strSQL.replace(newTableName, "");
+                strSQL = strSQL.trim();
+
+                //important step choose inner join vs ordinary select statement
+                if (tokens.includes("INNER")) { //process inner join
+                    tempTable = processInnerJoin(strSQL);
+                } else { //process ordinary select statement
+                    tempTable = processSelectStatement(strSQL);
+                }
+
+                //add primary keys to this table
+                for (let i = 0; i < tempTable.length; i++) {
+                    tempTable[i]["PRIMARY_KEY"] = i + 1;
+                }
+                //add the table to the database
+                dbObject[newTableName] = JSON.parse(JSON.stringify(tempTable));
+                //get the metadata from the returned joined table
+                let metaData = {};
+                for (const key in tempTable) {
+                    if (Object.hasOwnProperty.call(tempTable, key)) {
+                        if (typeof(tempTable[key]) != "object") { //skip row object entries and next primary key
+                            if (key != "NEXT_PRIMARY_KEY") {
+                                metaData[key] = tempTable[key];
+                            }
+                        }
+                    }
+                }
+                //revise metadata to match
+                metaData["TABLE_NAME"] = newTableName;
+                metaData["PRIMARY_KEY"] = "NUMBER";
+                metaData["NEXT_PRIMARY_KEY"] = tempTable.length + 1;
+                //create the metadata table
+                dbObject[newTableName + "_METADATA"] = [];
+                //add the metadata row entry to the table
+                dbObject[newTableName + "_METADATA"][0] = JSON.parse(JSON.stringify(metaData));
+                //update visually, add to text database
+                updateDataDiv();
+
+                tempTable = sqlQuery("SELECT * FROM " + newTableName);
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        function processInnerJoin(strSQL) {
+            try {
+                tempTable = [];
+                let field1 = "";
+                let field2 = "";
+
+                // SELECT Orders.OrderID, Customers.CustomerName FROM Orders INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID;
+
+                strSQL = addWhiteSpaceAroundOperators(strSQL);
+
+                let middleString = getStringBetween(strSQL, "SELECT", "FROM");
+
+                middleString = middleString.replaceAll(".", "_");
+                let columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
+
+                //get table1 name   got tableNames!
+                //get table2 name
+                tokens = tokenizeStringBySpace(strSQL);
+                tokens = removeCommaEntriesFromArray(tokens);
+                let table1Name = getTokenAfter(tokens, "FROM");
+                let table2Name = getTokenAfter(tokens, "JOIN");
+
+                //get field1 name
+                //console.log(tokens)
+                let tokenLeft = getTokenAfter(tokens, "ON");
+                let tokenRight = getTokenAfter(tokens, "=");
+
+                let tokenLeftArray = tokenLeft.split(".");
+                let tokenRightArray = tokenRight.split(".");
+
+                if (tokenLeftArray[0] === table1Name) {
+                    field1 = tokenLeftArray[1];
+                    field2 = tokenRightArray[1];
+                } else {
+                    field1 = tokenRightArray[1];
+                    field2 = tokenLeftArray[1];
+                }
+                //get field2 name
+                //get columns       (done)
+
+                //table1 = _selectAllFrom table1name
+
+                let table1 = _selectAllFrom(table1Name);
+                let table2 = _selectAllFrom(table2Name);
+                //table2 = _selectAllFrom table2name
+
+                tempTable = _innerJoin(table1, table2, field1, field2); //check that fields are appropriate type in innerJoin function *******
+
+                if (columns[0] != "*") {
+                    tempTable = columnsFilter(tempTable, columns);
+                }
+
+                //-> not available in this inner join function use ON instead
+                // if (strSQL.includes("WHERE")) { //check for where clause
+                //     console.log(tokens);
+                // }
+
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        //SELECT column1, column2, ... FROM table_name WHERE column <>`something` ORDER BY column ASC|DESC;<br>\
+        function processSelectStatement(strSQL) {
+            try {
+                tempTable = [];
+                //strSQL = addWhiteSpaceAroundOperators(strSQL); //NEED TO DO AWAY WITH ************
+                strSQL = addWhiteSpaceFirstOperator(strSQL);
+                // get an array of columns
+                let columns = []
+                    //   get string between SELECT and FROM
+                    //   remove whitespace
+                    //   split by commas
+                    //   this is the columns array
+                let middleString = getStringBetween(strSQL, "SELECT", "FROM");
+                columns = splitByCommasAndCleanWhiteSpace(middleString); //Got columns!
+
+                // get table name
+                let tokens = tokenizeStringBySpace(strSQL);
+
+                let tableName = getTokenAfter(tokens, "FROM"); //Got tableName!
+
+                tempTable = _selectAllFrom(tableName);
+
+                if (columns[0] != "*") {
+                    tempTable = columnsFilter(tempTable, columns);
+                }
+
+                if (strSQL.includes("WHERE")) {
+                    whereIndex = tokens.indexOf("WHERE");
+                    let compareField = tokens[whereIndex + 1];
+                    let operator = tokens[whereIndex + 2];
+                    let compareValue = readBackTicks(strSQL)[0];
+                    tempTable = whereFilter(tempTable, compareField, operator, compareValue);
+                }
+
+                if (strSQL.includes("ORDER")) {
+                    let orderIndex = tokens.indexOf("ORDER");
+                    orderByField = tokens[orderIndex + 2]; //got order by field!
+                    console.log(orderByField);
+                    if (tokens.includes("DESC")) {
+                        direction = "DESC";
+                    } else {
+                        direction = "ASC";
+                    }
+                    tempTable = orderByFilter(tempTable, orderByField, direction);
+                }
+                console.log(tempTable);
+                return tempTable;
+            } catch (error) {
+                let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+                return thisError;
+            }
+        }
+
+        //////  STRING FUNCTIONS FOR HELP IN PARSING SQL STATMENTS /////////
+        function removeEmptyEntriesFromArray(myArray) {
+            for (let i = myArray.length - 1; i >= 0; i--) {
+                if (myArray[i] === "") {
+                    myArray.splice(i, 1);
+                }
+            }
+            return myArray;
+        }
+
+        function removeCommaEntriesFromArray(myArray) {
+            for (let i = myArray.length - 1; i >= 0; i--) {
+                if (myArray[i] === ",") {
+                    myArray.splice(i, 1);
+                }
+            }
+            return myArray;
+        }
+
+        function removeEntriesFromArray(myArray, entry) {
+            for (let i = myArray.length - 1; i >= 0; i--) {
+                if (myArray[i] === entry) {
+                    myArray.splice(i, 1);
+                }
+            }
+            return myArray;
+        }
+
+        function getStringBetween(completeString, startString, endString) {
+            let middleString = completeString.substring(
+                completeString.indexOf(startString) + startString.length,
+                completeString.indexOf(endString)
+            );
+            return middleString;
+        }
+
+        function getStringAfter(completeString, thisString) {
+            let endString = completeString.substring(completeString.lastIndexOf(thisString) + thisString.length);
+            return endString;
+        }
+
+        function tokenizeStringBySpace(string) {
+            let myArray = string.split(" ");
+            myArray = removeEmptyEntriesFromArray(myArray);
+            return myArray;
+        }
+
+        function cleanWhiteSpaceInArrayElements(myArray) {
+            for (let i = 0; i < myArray.length; i++) {
+                myArray[i] = myArray[i].trim()
+            }
+            return myArray;
+        }
+
+        function splitByCommasAndCleanWhiteSpace(string) {
+            let myArray = string.split(",");
+            myArray = cleanWhiteSpaceInArrayElements(myArray);
+            return myArray;
+        }
+
+        function collapseParenthesis(myArray) {
+            for (let i = 0; i < myArray.length; i++) {
+                myArray[i] = myArray[i].replaceAll(" ( ", "(");
+                myArray[i] = myArray[i].replaceAll(" ) ", ")");
+            }
+            return myArray;
+        }
+
+        function splitByBackTicks(string) {
+            let myArray = string.split("`");
+            //myArray = collapseParenthesis(myArray);
+            myArray = cleanWhiteSpaceInArrayElements(myArray);
+            myArray = removeCommaEntriesFromArray(myArray);
+            myArray = removeEmptyEntriesFromArray(myArray);
+
+            console.log("***********SPLIT BACKTICK************** WITH single comma reemove and empty remove")
+            console.log(myArray);
+            return myArray;
+        }
+
+        function onlySplitByBackTicks(thisString) {
+            let myArray = thisString.split("`");
+            return myArray;
+        }
+
+        //return array of sql statements split by ; outside of back-ticks
+        function splitSQLStatementsBySemicolon(sqlStatementsSeparatedBySemicolon) {
+
+            let tempArray = [];
+            tempArray = sqlStatementsSeparatedBySemicolon.split('`');
+            //go through elements in array, and only replace ; in odd elements;
+            for (let i = 0; i < tempArray.length; i++) {
+                if ((i + 1) % 2 === 0) {
+                    tempArray[i] = tempArray[i].replaceAll(';', "NOLOCIMES");
+                }
+            }
+
+            //rejoin back into string
+            sqlStatementsSeparatedBySemicolon = tempArray.join('`');
+            //split by ;
+            tempArray = [];
+            tempArray = sqlStatementsSeparatedBySemicolon.split(';');
+
+            //go through each sql statement and replace the ; in between ticks
+            for (let i = 0; i < tempArray.length; i++) {
+                tempArray[i] = tempArray[i].replaceAll('NOLOCIMES', ';');
+                tempArray[i] = tempArray[i].trim();
+            }
+
+            tempArray = removeEmptyEntriesFromArray(tempArray);
+            return tempArray;
+        }
+
+        function splitBySingleQuote(string) {
+            let myArray = string.split("'");
+            myArray = cleanWhiteSpaceInArrayElements(myArray);
+            console.log(myArray);
+            return myArray;
+        }
+
+        function getTokenAfter(myArray, string) {
+            let index = 0;
+            for (let i = 0; i < myArray.length; i++) {
+                if (myArray[i] === string) {
+                    index = i
+                }
+            }
+            lastindex = myArray.length - 1;
+            if (index + 1 > lastindex) {
+                return -1;
+            } else {
+                return myArray[index + 1];
+            }
+        }
+
+        function addWhiteSpaceAroundOperators(myString) {
+            // the order is very important
+            // <>
+            // !=
+            // >=
+            // >
+            // <=
+            // <
+            // =
+
+            if (myString.includes("<>") === true) {
+                myString = myString.replaceAll("<>", " <> ");
+            } else if (myString.includes("!=") === true) {
+                myString = myString.replaceAll("!=", " != ");
+            } else if (myString.includes(">=") === true) {
+                myString = myString.replaceAll(">=", " >= ");
+            } else if (myString.includes(">") === true) {
+                myString = myString.replaceAll(">", " > ");
+            } else if (myString.includes("<=") === true) {
+                myString = myString.replaceAll("<=", " <= ");
+            } else if (myString.includes("<") === true) {
+                myString = myString.replaceAll("<", " < ");
+            } else if (myString.includes("=") === true) {
+                myString = myString.replaceAll("=", " = ");
+            }
+
+            return myString;
+        }
+
+        function addWhiteSpaceFirstOperator(myString) {
+            // the order is very important
+            // <>
+            // !=
+            // >=
+            // >
+            // <=
+            // <
+            // =
+
+            if (myString.includes("<>") === true) {
+                myString = myString.replace("<>", " <> ");
+            } else if (myString.includes("!=") === true) {
+                myString = myString.replace("!=", " != ");
+            } else if (myString.includes(">=") === true) {
+                myString = myString.replace(">=", " >= ");
+            } else if (myString.includes(">") === true) {
+                myString = myString.replace(">", " > ");
+            } else if (myString.includes("<=") === true) {
+                myString = myString.replace("<=", " <= ");
+            } else if (myString.includes("<") === true) {
+                myString = myString.replace("<", " < ");
+            } else if (myString.includes("=") === true) {
+                myString = myString.replace("=", " = ");
+            }
+
+            return myString;
+        }
+
+        let helpString = "<pre><br>\
+Available datatypes are STRING or NUMBER.<br>\
+<br>\
+Available SQL statements:<br>\
+-----------------------------<br>\
+CREATE TABLE table_name (column1 datatype, column2 datatype, column3 datatype...);<br>\
+SHOW TABLES;<br>\
+DESCRIBE table_name;<br>\
+DROP TABLE table_name;<br>\
+ALTER TABLE table_name ADD column_name datatype;<br>\
+ALTER TABLE table_name DROP COLUMN column_name;<br>\
+ALTER TABLE table_name CHANGE samename samename newdatatype;<br>\
+ALTER TABLE table_name CHANGE oldname newname samedatatype:<br>\
+ALTER TABLE table_name CHANGE oldname newname newdatatype;<br>\
+INSERT INTO table_name (column1, column2, column3, ...) VALUES (`value1`, `value2`, `value3`, ...);<br>\
+UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE condition;<br>\
+DELETE FROM table_name WHERE condition;<br>\
+SELECT * FROM table_name;<br>\
+SELECT column1, column2, ...FROM table_name;<br>\
+SELECT column1, column2, ... FROM table_name WHERE condition;<br>\
+SELECT column1, column2, ... FROM table_name ORDER BY column ASC|DESC;<br>\
+SELECT column1, column2, ... FROM table1 INNER JOIN table2 ON table1.column_name = table2.column_name;<br>\
+INSERT INTO newtable [a SELECT statement];<br>\
+HELP<br>\
+<br>\
+Reserved Keywords:<br>\
+-----------------------------<br>\
+INNER, JOIN, SELECT, INSERT, INTO, UPDATE, DELETE, CREATE, DROP, TABLE, SHOW, TABLES, DESCRIBE, HELP, SET,<br>\
+WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER,<br>\
+=, !=, <>, >=, <=, >, <, * `(back ticks), NOLOCIMES, ERROR<br>\
+<br>\
+Notes:<br>\
+-----------------------------<br>\
+ Datatypes are STRING and NUMBER.<br>\
+ ; not needed.<br>\
+ use `backticks` around all values whether STRING OR NUMBER<br>\
+ CAPITALIZATION of keywords is required.<br>\
+ All tables are autoincremented starting at 1.<br>\
+ Column name of primary key is PRIMARY_KEY.<br>\
+ INNER JOIN will give back combined column names, but can be renamed<br>\
+<br>\
+Examples/Tutorial:<br>\
+-----------------------------<br>\
+CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);<br>\
+INSERT INTO owners (firstname, lastname, email) VALUES (`John`, `Jones`, `john@gmail.com`);<br>\
+INSERT INTO owners (firstname, lastname, email, age) VALUES (`David`, `Davis`, `ddavis@gmail.com`,`73`);<br>\
+INSERT INTO owners (firstname, lastname, email) VALUES (`Justin`, `Thyme`, `justint@gmail.com`);<br>\
+CREATE TABLE pets (name STRING, sex STRING, pettype STRING, ownerID NUMBER);<br>\
+SHOW TABLES;<br>\
+SELECT * FROM owners;<br>\
+SELECT * FROM pets;<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`fido`, `female`, `dog`, `3`);<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`cuddles`, `female`, `cat`, `3`);<br>\
+INSERT INTO pets (name, pettype, ownerID) VALUES (`gina`, `guinea pig`, `3`);<br>\
+INSERT INTO pets (name, pettype, ownerID) VALUES (`jeany`, `guinea pig`, `3`);<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`sherman`, `male`, `dog`, `2`);<br>\
+INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`freddie`, `male`, `dog`, `1`);<br>\
+UPDATE pets SET sex = `male`, name = `gene` WHERE name =`gina`;<br>\
+SELECT * FROM pets;<br>\
+UPDATE pets SET sex = `male`, ownerID = `5` WHERE pettype = `guinea pig`;<br>\
+ALTER TABLE pets ADD weight NUMBER;<br>\
+UPDATE pets SET weight = `70` WHERE name = `sherman`;<br>\
+DESCRIBE pets;<br>\
+SELECT owners.PRIMARY_KEY, pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;<br>\
+INSERT INTO petDirectory SELECT pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;<br>\
+DESCRIBE petDirectory;<br>\
+SELECT * FROM petDirectory;<br>\
+ALTER TABLE petDirectory CHANGE pets_ownerID ownerID STRING;<br>\
+ALTER TABLE petDirectory CHANGE pets_name name STRING;<br>\
+ALTER TABLE petDirectory CHANGE owners_firstname owner STRING;<br>\
+SHOW TABLES;<br>\
+INSERT INTO directory SELECT * FROM petDirectory;<br>\
+SHOW TABLES;<br>\
+DROP TABLE petDirectory;<br>\
+SHOW TABLES;<br>\
+ALTER TABLE owners ADD telephone STRING;<br>\
+UPDATE owners SET telephone = `3042321000` WHERE PRIMARY_KEY = `2`;<br>\
+DESCRIBE owners;<br>\
+ALTER TABLE owners CHANGE telephone telephone NUMBER;<br>\
+DESCRIBE owners;<br>\
+SELECT * FROM owners;<br>\
+INSERT INTO dogsOnly SELECT * FROM pets WHERE pettype = `dog` ORDER BY ownerID DESC;<br>\
+SELECT * FROM dogsOnly;<br>\
+ALTER TABLE dogsOnly DROP COLUMN pettype;<br>\
+INSERT INTO dogNames SELECT name FROM dogsOnly;<br>\
+SHOW TABLES;<br>\
+</pre>";
+
+        //////////THIS CAN BE COMMENTED OUT BELOW BUT IS HERE FOR DEMONSTRATION
+
+        // if (spaidDataDiv.innerHTML === "") {
+        //     alert("Right now, sample data is being loading for demonstration purposes.  Just comment out the end of the Javascript file to disable this.");
+        //     sqlQuery("CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);");
+        //     sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES (`John`, `Jones`, `john@gmail.com`);");
+        //     sqlQuery("INSERT INTO owners (firstname, lastname, email, age) VALUES (`David`, `Davis`, `ddavis@gmail.com`,`73`);");
+        //     sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES (`Justin`, `Thyme`, `justint@gmail.com`);");
+        //     sqlQuery("CREATE TABLE pets (name STRING, sex STRING, pettype STRING, ownerID NUMBER);");
+        //     sqlQuery("SHOW TABLES;");
+        //     sqlQuery("SELECT * FROM owners;");
+        //     sqlQuery("SELECT * FROM pets;");
+        //     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`fido`, `female`, `dog`, `3`);");
+        //     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`cuddles`, `female`, `cat`, `3`);");
+        //     sqlQuery("INSERT INTO pets (name, pettype, ownerID) VALUES (`gina`, `guinea pig`, `3`);");
+        //     sqlQuery("INSERT INTO pets (name, pettype, ownerID) VALUES (`jeany`, `guinea pig`, `3`);");
+        //     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`sherman`, `male`, `dog`, `2`);");
+        //     sqlQuery("INSERT INTO pets (name, sex, pettype, ownerID) VALUES (`freddie`, `male`, `dog`, `1`);");
+
+        //     let combinedSQLStatement = 'UPDATE pets SET sex = `male`, name = `gene` WHERE name =`gina`;\
+        // SELECT * FROM pets;\
+        // UPDATE pets SET sex = `male`, ownerID = `5` WHERE pettype = `guinea pig`;\
+        // ALTER TABLE pets ADD weight NUMBER;\
+        // UPDATE pets SET weight = `70` WHERE name = `sherman`;\
+        // DESCRIBE pets;\
+        // SELECT owners.PRIMARY_KEY, pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;\
+        // INSERT INTO petDirectory SELECT pets.ownerID, owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID;\
+        // DESCRIBE petDirectory;\
+        // SELECT * FROM petDirectory;\
+        // ALTER TABLE petDirectory CHANGE pets_ownerID ownerID STRING;\
+        // ALTER TABLE petDirectory CHANGE pets_name name STRING;\
+        // ALTER TABLE petDirectory CHANGE owners_firstname owner STRING;\
+        // SHOW TABLES;\
+        // INSERT INTO directory SELECT * FROM petDirectory;\
+        // SHOW TABLES;\
+        // DROP TABLE petDirectory;\
+        // SHOW TABLES;\
+        // ALTER TABLE owners ADD telephone STRING;\
+        // UPDATE owners SET telephone = `3042321000` WHERE PRIMARY_KEY = `2`;\
+        // DESCRIBE owners;\
+        // ALTER TABLE owners CHANGE telephone telephone NUMBER;\
+        // DESCRIBE owners;\
+        // SELECT * FROM owners;\
+        // INSERT INTO dogsOnly SELECT * FROM pets WHERE pettype = `dog` ORDER BY ownerID DESC;\
+        // SELECT * FROM dogsOnly;\
+        // ALTER TABLE dogsOnly DROP COLUMN pettype;\
+        // INSERT INTO dogNames SELECT name FROM dogsOnly;\
+        // SHOW TABLES;'
+        //     sqlQuery(combinedSQLStatement);
+        // }
+    </script>
+    <script>
+        // -----------------------------------------------------------------------------
+
+        //NESTBURGER START
+
+        let nestburgers = document.getElementsByClassName("nestburger");
+        for (let nestburger of nestburgers) {
+            nestburger.addEventListener("click", (evt) => {
+                toggleNest(evt.target)
+            });
+            // anchortag.addEventListener('click', (evt) => { collapseOrExpand(evt); });
+        }
+        // nestburger.children[0].addEventListener("click", (evt) => { hideNest(evt) });
+
+        function toggleNest(burger) {
+            let siblings = burger.parentElement.children;
+            for (let sibling of siblings) {
+                if (sibling === burger) {
+                    //alert("found self!");
+                }
+                //else if (sibling.classList.contains("nestburger")) {
+                //if sibling is a netburger, do nothing
+                //alert("a sibling is a netburger!")
+                //}
+                else {
+                    if (sibling.style.display === "none") {
+                        sibling.style.display = "inherit";
+                    } else {
+                        sibling.style.display = "none";
+                    }
+                }
+            }
+        }
+
+        // function showNest(burger) {
+        //     console.log(burger);
+        //     console.log(burger.parentElement);
+        //     let siblings = burger.parentElement.children;
+        //     for (let sibling of siblings) {
+        //         if (sibling === burger) {
+        //             //alert("found self!");
+        //         }
+        //         //else if (sibling.classList.contains("nestburger")) {
+        //         //if sibling is a netburger, do nothing
+        //         //alert("a sibling is a netburger!")
+        //         //}
+        //         else {
+        //             sibling.style.display = "inherit";
+        //         }
+        //     }
+        // }
+
+        // function hideNest(burger) {
+        //     let siblings = burger.parentElement.children;
+        //     for (let sibling of siblings) {
+        //         if (sibling === burger) {
+        //             //alert("found self!");
+        //         }
+        //         //else if (sibling.classList.contains("nestburger")) {
+        //         //if sibling is a netburger, do nothing
+        //         //alert("a sibling is a netburger!")
+        //         //}
+        //         else {
+        //             sibling.style.display = "none";
+        //         }
+        //     }
+        // }
+
+        // function flipNestBurgers() {
+        //     let nestburgers = document.getElementsByClassName("nestburger");
+        //     for (nestburger of nestburgers) {
+        //         toggleNest(nestburger);
+        //     }
+        // }
+
+        // function hideNestBurgers() {
+        //     let nestburgers = document.getElementsByClassName("nestburger");
+        //     for (nestburger of nestburgers) {
+        //         hideNest(nestburger);
+        //     }
+        // }
+
+        // function showNestBurgers() {
+        //     let nestburgers = document.getElementsByClassName("nestburger");
+        //     for (nestburger of nestburgers) {
+        //         showNest(nestburger);
+        //     }
+        // }
+
+        // --------------------Star Review Input Code -------------------------------
+        let starReviewInputContainers = document.getElementsByClassName("star-review-input-container");
+
+        for (let container of starReviewInputContainers) { //go through all stars and add event listener
+            let stars = container.children;
+            for (let star of stars) {
+                star.addEventListener("click", (evt) => {
+                    changeStarBarColor(evt);
+                })
+            }
+        }
+
+        function changeStarBarColor(evt) {
+            let starReviewInputContainer = evt.target.parentElement; //parent container
+            //all containers in document
+            let allStarReviewInputContainers = document.getElementsByClassName("star-review-input-container");
+            //find out which parent container contains the clicked star zero indexed
+            let parentIndex = 0;
+            for (let i = 0; i < allStarReviewInputContainers.length; i++) {
+                if (allStarReviewInputContainers[i] === starReviewInputContainer) {
+                    parentIndex = i;
+                }
+            }
+            //find which star was clicked, zero indexed
+            let stars = starReviewInputContainer.children;
+            starIndex = 0;
+            for (let i = 0; i < stars.length - 1; i++) { //-1 bc last "star" is hidden input
+                if (stars[i] === evt.target) {
+                    // alert(i);
+                    starIndex = i;
+                }
+            }
+            // if starIndex is zero (ie first star already checked, then uncheck)
+            if (starIndex === 0) {
+                if (stars[stars.length - 1].value === "1") { //star is already checked
+                    //therefore uncheck
+                    starIndex = -1;
+                }
+            }
+            // go through stars and change them to empty of full after star is clicked
+            for (let i = 0; i < stars.length - 1; i++) { //-1 bc last "star" is hidden input
+                if (i <= starIndex) {
+                    stars[i].innerHTML = "&#9733"; //fill in star
+                } else {
+                    stars[i].innerHTML = "&#9734"; //empty star
+                }
+                //set the rating line to show the value chosen
+                document.getElementsByClassName("review-rating")[parentIndex].innerHTML = "Your Rating: " + (starIndex + 1).toString() + " Stars";
+                //last "star" is a hidden input set to the value
+                stars[stars.length - 1].value = (starIndex + 1).toString();
+            }
+        }
+
+
+        //
+        let currentFilename = "";
+
+        function showMain(clicked_id) {
+            //alert(clicked_id);
+            mains = document.getElementsByTagName('main');
+            for (let main of mains) {
+                main.style.display = 'none';
+            }
+            let mainID = "main-" + clicked_id;
+            document.getElementById(mainID).style.display = 'inherit';
+            if (mainID === "main-view") {
+                buildTimeSheetTable();
+            }
+            if (mainID === "main-copy-database-to-clipboard") {
+
+                (document.getElementById("copied-json-database")).select();
+            }
+
+
+        }
+
+        function convertTimeStampToUTCDateValue(timestamp) {
+            myDate = new Date(timestamp);
+            // let year = myDate.getUTCFullYear().toString();
+            // let month = (myDate.getUTCMonth() + 1).toString(); //months start at 0 so add 1
+            // if (month.length === 1) {
+            //     month = "0" + month; //add a 0 for single digit months
+            // }
+            // let date = myDate.getUTCDate().toString();
+            // if (date.length === 1) {
+            //     date = "0" + date; //add a 0 for single digit dates
+            // }
+            let year = myDate.getFullYear().toString();
+            let month = (myDate.getMonth() + 1).toString(); //months start at 0 so add 1
+            if (month.length === 1) {
+                month = "0" + month; //add a 0 for single digit months
+            }
+            let date = myDate.getDate().toString();
+            if (date.length === 1) {
+                date = "0" + date; //add a 0 for single digit dates
+            }
+            myDateString = year + "-" + month + "-" + date;
+            return myDateString;
+        }
+
+        function setDateString(year, month, date) {
+
+            month = month + 1;
+            strMonth = month.toString();
+            if (strMonth.length === 1) {
+                strMonth = "0" + strMonth; //add a 0 for single digit months
+            }
+
+            strDate = date.toString();
+
+            if (strDate.length === 1) {
+                strDate = "0" + strDate; //add a 0 for single digit dates
+            }
+
+            let myDateString = year.toString() + "-" + strMonth + "-" + strDate;
+            return myDateString;
+        }
+
+        function getTodaysYear() {
+            let milliseconds = Date.now()
+            let todaysDateObject = new Date(milliseconds);
+            let year = todaysDateObject.getFullYear();
+            return year;
+        }
+
+        function getTodaysMonth() {
+            let milliseconds = Date.now()
+            let todaysDateObject = new Date(milliseconds);
+            let month = todaysDateObject.getMonth();
+            return month;
+        }
+
+        function getTodaysDate() {
+            let milliseconds = Date.now()
+            let todaysDateObject = new Date(milliseconds);
+            let date = todaysDateObject.getDate();
+            return date;
+        }
+
+        function daysInMonth(month, year) {
+            let myDateObject = new Date(year, month, 0);
+            let date = myDateObject.getDate();
+            return date;
+        }
+
+        //////////////////////////////////////////////////////////////////////////
+        function logTime() {
+            let activityType = activities.value;
+            let activityMinutes = document.getElementById('minutes');
+            //alert(activityMinutes);
+            let activityNotes = document.getElementById('notes');
+            //alert(activityNotes);
+
+            activityDate = document.getElementById('activity-date');
+
+            let strSQL = "INSERT INTO entries (type, minutes, date, notes) VALUES (`" + activityType + "`, `" + activityMinutes.value + "`, `" + activityDate.valueAsNumber + "`, `" + activityNotes.value + "`);";
+            //alert(strSQL)
+            sqlQuery(strSQL);
+
+            // document.getElementById('log-form').reset();
+            activityNotes.value = "";
+            activityMinutes.value = "";
+
+
+            askToSaveTimeSheet();
+
+
+            //document.getElementById('activity-date').value = strCheckDate;
+            //buildTimeSheetTable();
+        }
+
+
+        //buildTimeSheetTable();
+
+        function buildTimeSheetTable() {
+            let thisStartDate = startDate.valueAsNumber;
+            //alert(thisStartDate);
+
+            let thisEndDate = endDate.valueAsNumber;
+            //alert(thisEndDate);
+
+            let totalMinutes = 0;
+
+            let strSQL = "INSERT INTO timeSheet SELECT lineTitles.title, entries.PRIMARY_KEY, entries.minutes, entries.date, entries.notes FROM lineTitles INNER JOIN entries ON lineTitles.line = entries.type;";
+            sqlQuery(strSQL);
+            thisResult = sqlQuery("SELECT * FROM timeSheet ORDER BY entries_date;");
+            let strHTML = "<table><tbody>";
+            let strTimeSheet = "";
+            let csvTimeSheet = "";
+
+
+            // if (thisResult.length > 0) {
+            //     strHTML += "<tr>";
+            //     for (const key in thisResult[0]) {
+            //         if (key != "PRIMARY_KEY") {
+            //             if (Object.hasOwnProperty.call(thisResult[0], key)) {
+            //                 // let tempArray = key.split("_")[1];
+            //                 strHTML += "<th>";
+            //                 strHTML += key.split("_")[1];
+            //                 strHTML += "</th>";
+            //             }
+            //         }
+            //     }
+            //     strHTML += "</tr>";
+            // }
+
+            strHTML += "<tr><th></th><th>activity</th><th>min</th><th>date</th><th>notes</th></tr>";
+            csvTimeSheet += "\"activity\",\"minutes\",\"date\",\"notes\"\n";
+            strTimeSheet += "TimeSheet\n";
+            let myLine = "-".repeat(64) + "\n";
+            strTimeSheet += myLine;
+            for (let i = 0; i < thisResult.length; i++) {
+                strHTML += "<tr>";
+
+
+                if ((thisResult[i]["entries_date"] >= thisStartDate) && (thisResult[i]["entries_date"] <= thisEndDate)) {
+                    strHTML += "<td><button class='delete-timesheet-row' id= " + "entries_PRIMARY_KEY_" + thisResult[i]["entries_PRIMARY_KEY"].toString() + ">X</button></td>";
+
+                    for (const key in thisResult[i]) {
+
+                        if ((key != "PRIMARY_KEY") && (key != "entries_PRIMARY_KEY")) {
+                            if (Object.hasOwnProperty.call(thisResult[i], key)) {
+
+                                strHTML += "<td>";
+                                strTimeSheet += key.split("_")[1];
+                                strTimeSheet += "\n";
+                                strTimeSheet += myLine;
+                                if (key === "entries_date") {
+                                    let tempDate = new Date(thisResult[i][key]); //.split(" ");
+                                    let tempArray = tempDate.toUTCString().split(" ");
+                                    strHTML += tempArray[0] + " " + tempArray[1] + " " + tempArray[2] + " " + tempArray[3];
+                                    csvTimeSheet += "\"" + tempArray[0] + " " + tempArray[1] + " " + tempArray[2] + " " + tempArray[3] + "\","
+                                    strTimeSheet += tempArray[0] + " " + tempArray[1] + " " + tempArray[2] + " " + tempArray[3] + "\n";
+
+                                } else {
+                                    strHTML += thisResult[i][key].toString();
+                                    csvTimeSheet += "\"" + thisResult[i][key].toString().replaceAll("\"", "\"\"") + "\","
+                                    strTimeSheet += thisResult[i][key].toString() + "\n";
+                                }
+                                if (key === "entries_minutes") {
+                                    totalMinutes += thisResult[i][key];
+                                }
+                                strHTML += "</td>";
+                            }
+                        }
+                    }
+                }
+                csvTimeSheet = csvTimeSheet.substring(0, csvTimeSheet.length - 1); //take off last comma;
+                csvTimeSheet += "\n";
+                strHTML += "</tr>";
+            }
+            strHTML += "<tr class='total-row'><td class='total-row'></td><td class='total-row'>TOTAL:</td><td class='total-row'>" + totalMinutes.toString() + "</td><td class='total-row'></td><td class='total-row'></td></tr>";
+            strHTML += "</tbody></table>";
+            csvTimeSheet += "\"Total Minutes\",\"" + totalMinutes.toString() + "\",,\n";
+
+            strTimeSheet += "Total Minutes: " + totalMinutes.toString();
+            timeSheetTableDiv.innerHTML = strHTML; //).replaceAll('undefined', '-').replaceAll(null, '-');
+            console.log(strTimeSheet);
+            console.log(csvTimeSheet);
+
+
+            let deleteButtons = document.getElementsByClassName('delete-timesheet-row');
+
+            for (let i = 0; i < deleteButtons.length; i++) {
+                deleteButtons[i].addEventListener('click', deleteTimeSheetRow);
+            }
+
+
+            //timeSheetTableDiv.innerHTML = "hello world";
+            returnObject = {};
+            returnObject["column-format"] = strTimeSheet;
+            returnObject["html-format"] = strHTML;
+            returnObject["csv-format"] = csvTimeSheet;
+            return returnObject;
+        }
+
+        function deleteTimeSheetRow(buttonID) {
+            let entries_PRIMARY_KEY_string = buttonID.target.id;
+            //alert(entries_PRIMARY_KEY_string);
+            //alert(entries_PRIMARY_KEY_string.split("_")[3]);
+            let entries_PRIMARY_KEY = entries_PRIMARY_KEY_string.split("_")[3];
+            //alert(entries_PRIMARY_KEY);
+
+            strSQL = "DELETE FROM entries WHERE PRIMARY_KEY = `" + entries_PRIMARY_KEY + "`;";
+
+            //alert(strSQL);
+
+            if (confirm('Are you sure you want to delete this row from the timesheet?')) {
+                sqlQuery(strSQL);
+                buildTimeSheetTable();
+                askToSaveTimeSheet();
+
+            } else {
+                //do nothing
+            }
+
+
+        }
+
+        function askToSaveTimeSheet() {
+            if (confirm('Processed.  Save time sheet?')) {
+                saveTimeSheet();
+            } else {
+                // Do nothing!
+            }
+        }
+
+        function copyCSVToClipBoard() {
+            let myCSV = (buildTimeSheetTable())["csv-format"];
+            copyStringToClipboard(myCSV);
+            console.log(myCSV);
+            //alert("Your CSV time sheet was copied to the clipboard.");
+            document.getElementById('copied-time-sheet').innerHTML = myCSV;
+        }
+
+        function copyDataBaseToClipBoard() {
+            //copyStringToClipboard(document.getElementById('spaid-data').innerHTML);
+            document.getElementById('copied-json-database').innerHTML = spaidDataDiv.innerHTML;
+            copyStringToClipboard(spaidDataDiv.innerHTML);
+        }
+
+
+        function emailCSVTimeSheet() {
+
+            copyCSVToClipBoard();
+            showMain('email-csv-timesheet');
+
+            alert("The content is being converted and copied to the clipboard.")
+
+            let email = 'destination@amedisys.com'; //message.emailId;
+            let subject = 'CSV TimeSheet'; //message.subject;
+            let emailBody = "PASTE HERE NOW"; //readableTextString.substring(0,1000);//+message.from;
+
+            document.location = "mailto:" + email + "?subject=" + subject + "&body=" + emailBody;
+        }
+
+        function emailJSONDataBase() {
+
+
+            copyDataBaseToClipBoard();
+            showMain('email-json-database');
+            let email = 'destination@amedisys.com'; //message.emailId;
+            let subject = 'CSV TimeSheet'; //message.subject;
+            let emailBody = "PASTE HERE NOW"; //readableTextString.substring(0,1000);//+message.from;
+
+            document.location = "mailto:" + email + "?subject=" + subject + "&body=" + emailBody;
+
+        }
+
+
+        function saveTimeSheet() {
+            let monthNameArray = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            //alert(dbMetaData["CURRENT_FILENAME"]);
+            if (dbMetaData["CURRENT_FILENAME"] === "") {
+                dbMetaData["CURRENT_FILENAME"] = monthNameArray[getTodaysMonth()] + "_" + getTodaysYear().toString() + "_Timesheet_0" + ".json";
+                //create a filename
+            }
+
+            currentFilenameTokens = dbMetaData["CURRENT_FILENAME"].split("_");
+            timeSheetSaveNumber = parseInt(((currentFilenameTokens[(currentFilenameTokens.length) - 1]).split("."))[0]);
+            if (isNaN(timeSheetSaveNumber)) {
+                currentFilenameTokens = dbMetaData["CURRENT_FILENAME"].split(".");
+                tempString = currentFilenameTokens[0] + "_1.json";
+                dbMetaData["CURRENT_FILENAME"] = tempString;
+            } else {
+                try {
+                    timeSheetSaveNumber = timeSheetSaveNumber + 1;
+                    let tempString = "";
+                    for (let i = 0; i < currentFilenameTokens.length - 1; i++) {
+                        console.log(currentFilenameTokens[i]);
+                        tempString = tempString + currentFilenameTokens[i] + "_";
+                    }
+                    tempString = tempString + timeSheetSaveNumber.toString() + ".json";
+                    dbMetaData["CURRENT_FILENAME"] = tempString;
+                } catch {
+                    currentFilenameTokens = dbMetaData["CURRENT_FILENAME"].split(".");
+                    tempString = currentFilenameTokens[0] + "_1_.json";
+                    dbMetaData["CURRENT_FILENAME"] = tempString;
+                }
+            }
+
+            saveStringToTextFile(spaidDataDiv.innerHTML, dbMetaData["CURRENT_FILENAME"], '', false);
+        }
+
+
+
+        // myDate = new Date();
+
+        // alert(typeof(myDate));
+        // alert("Date as number " + myDate);
+
+        //checkDate = new Date(myDate);
+        //alert("checking date convert back " + checkDate);
+
+
+
+        showMain('home');
+
+        // alert(spaidDataDiv.innerHTML);
+        // alert(spaidDataDiv.innerHTML === "");
+
+        console.log(spaidDataDiv.innerHTML);
+
+
+        let tempStringForTesting = spaidDataDiv.innerHTML;
+
+
+        if (tempStringForTesting === "") {
+
+            alert("Right now, initial data is being added to the database because the 'data-div' is empty.  After first run, this will not run unless the database is emptied for some reason.");
+            sqlQuery("CREATE TABLE lineTitles (line NUMBER, title STRING);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`12`, `Team Meetings: Documentation Prep/Completion`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`13`, `Team Meetings: Participation`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`15`, `Plan Oversight`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`16`, `Management`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`17`, `Plan of Care Oversight.`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`22`, `Chart Audits`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`23`, `Policy, Program, and Function Advisement.`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`25`, `Liaison Activities`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`29`, `Education`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`36`, `Administrative Time: Leadership Calls`);");
+            sqlQuery("INSERT INTO lineTitles (line, title) VALUES (`37`, `Administrative Time: IT Service Calls`);");
+            sqlQuery("CREATE TABLE entries (type NUMBER, minutes NUMBER, date NUMBER, notes STRING);");
+
+            let activities = document.getElementById('activities');
+
+            let lineTitlesTable = sqlQuery("SELECT * FROM lineTitles");
+
+            for (let i = 0; i < lineTitlesTable.length; i++) {
+                let opt = document.createElement('option');
+                opt.value = lineTitlesTable[i]['line'];
+                opt.innerHTML = lineTitlesTable[i]['title'];
+                activities.appendChild(opt);
+            }
+        }
+
+
+
+
+        let buttonLog = document.getElementById('button-log');
+        buttonLog.addEventListener('click', logTime);
+
+        ///////////////set default time to today at midnight on load///////////////
+        // year = new Date().getFullYear().toString();
+        // month = ((new Date().getMonth()) + 1).toString();
+        // if (month.length === 1) {
+        //     month = "0" + month;
+        // }
+        // date = new Date().getDate().toString();
+        // if (date.length === 1) {
+        //     date = "0" + date;
+        // }
+        // document.getElementById('activity-date').value = year + "-" + month + "-" + date;
+
+
+        /////////////SETS DATE TO TODAYS DATE BY DEFAULT
+
+        // alert(Date.now());
+        // alert(typeof(Date.now()));
+        let nowDate = Date.now();
+        let tomorrowDate = nowDate + 86400000;
+
+        let activityDate = document.getElementById('activity-date');
+        activityDate.value = convertTimeStampToUTCDateValue(nowDate);
+
+
+        let startDate = document.getElementById('start-date');
+        let startDateString = setDateString(getTodaysYear(), getTodaysMonth(), 1);
+
+        //alert(startDateString);
+        startDate.value = startDateString;
+
+
+        let endDate = document.getElementById('end-date');
+        let endDateString = setDateString(getTodaysYear(), getTodaysMonth(), daysInMonth(getTodaysMonth(), getTodaysYear()));
+
+        //alert(endDateString);
+        endDate.value = endDateString;
+
+        startDate.addEventListener('change', buildTimeSheetTable);
+        endDate.addEventListener('change', buildTimeSheetTable);
+        let timeSheetTableDiv = document.getElementById('view-timesheet');
+        buildTimeSheetTable();
+
+        let timeSheetSaveNumber = 0;
+        let currentFilenameTokens = [];
+    </script>
+</body>
+
+</html>

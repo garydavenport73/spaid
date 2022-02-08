@@ -42,7 +42,9 @@
 1. sqlQuery(mySQLString)
     * Takes an SQL string as it's argument (<span style='color:orange'>UPDATE:</span> now accepting multiple SQL statements separated by semicolon ;.)
     * Executes the SQL statement.
-    * It always returns a table-like object, which is an array of objects with key/value pairs.  (key=fieldname, value = cell value);
+    * It always returns a table-like object, which is an array of objects with key/value pairs.  (key=fieldname, value = cell value); unless...
+    * there is an error and it will return a string error message.
+    (this is the currenty behavior but may be changed).
     * <span style='color:orange'>UPDATE:</span> If running multiple statements, returns the last processed SQL statement's table-like object;
 
 2. loadDatabase()
@@ -225,7 +227,7 @@ Reserved Keywords:
 -----------------------------
 INNER, JOIN, SELECT, INSERT, INTO, UPDATE, DELETE, CREATE, DROP, TABLE, SHOW, TABLES, DESCRIBE, HELP, SET,
 WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER, 
-=, !=, <>, >=, <=, >, <, * `(back ticks), <span style='color:orange'>UPDATE:</span> NOLOCIMES
+=, !=, <>, >=, <=, >, <, * `(back ticks), <span style='color:orange'>UPDATE:</span> NOLOCIMES, ERROR added to list.
 
 Notes:
 -----------------------------

@@ -1,0 +1,2 @@
+add fetch to load database
+add sync to remote save database

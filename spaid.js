@@ -126,6 +126,7 @@ loadDBButton.addEventListener('click', loadDatabase);
 saveDBButton.addEventListener('click', _saveDatabase);
 showButton.addEventListener('click', toggleDataVisible);
 runButton.addEventListener('click', runSQL);
+sqlInput.addEventListener('change', () => { runButton.focus() });
 showResultButton.addEventListener('click', toggleResultVisible);
 
 function _saveDatabase() {
@@ -136,9 +137,10 @@ function _saveDatabase() {
 
 function runSQL() {
     let strSQL = document.getElementById('spaid-input').value;
+
     resultDiv = document.getElementById('spaid-result');
 
-    thisResult = sqlQuery(strSQL);
+    thisResult = sqlQuery(strSQL); //could be error string or array
 
     tableName = thisResult["TABLE_NAME"];
 
@@ -148,77 +150,91 @@ function runSQL() {
     resultDiv.innerHTML += 'Table name: ' + tableName + '<br>';
     resultDiv.innerHTML += '<hr>';
 
-    resultDiv.innerHTML += (formatTable2(thisResult)).replaceAll('undefined', '-').replaceAll(null, '-');
+    let formattedTable = formatTable2(thisResult); //will check to see if string
 
+    if (formattedTable.includes("ERROR")) {
+        resultDiv.innerHTML += formattedTable;
+    } else {
+        resultDiv.innerHTML += (formattedTable).replaceAll('undefined', '-').replaceAll(null, '-');
+    }
     resultDiv.innerHTML += '<hr>';
 
 }
 
 function formatTable2(arrayOfObjectsTable) {
 
-    thisTable = arrayOfObjectsTable;
+    try {
+        if ((typeof(arrayOfObjectsTable) === "string") && (arrayOfObjectsTable.includes("ERROR"))) {
+            return "<pre><table><tbody><tr><th>ERROR:</th></tr><tr><td>" + arrayOfObjectsTable + "</td></tr></tbody></table></pre>";
+        } else {
+            thisTable = arrayOfObjectsTable;
 
-    let headerArray = [];
+            let headerArray = [];
 
-    //build headerArray
+            //build headerArray
 
-    if ((thisTable["TABLE_NAME"].includes("_METADATA")) || (thisTable["TABLE_NAME"] === "SHOW TABLES")) { //how to display the metadata table
-        for (const key in thisTable) {
-            if (Object.hasOwnProperty.call(thisTable, key)) {
-                if (typeof(thisTable[key]) != "object") {
-                    headerArray.push(key);
+            if ((thisTable["TABLE_NAME"].includes("_METADATA")) || (thisTable["TABLE_NAME"] === "SHOW TABLES")) { //how to display the metadata table
+                for (const key in thisTable) {
+                    if (Object.hasOwnProperty.call(thisTable, key)) {
+                        if (typeof(thisTable[key]) != "object") {
+                            headerArray.push(key);
 
+                        }
+                    }
                 }
-            }
-        }
-    } else {
-        for (const key in thisTable) {
-            if (Object.hasOwnProperty.call(thisTable, key)) {
-                if (typeof(thisTable[key]) != "object") {
-                    if ((key === "TABLE_NAME") || (key === "NEXT_PRIMARY_KEY")) {
-                        //do nothing
-                    } else {
-                        headerArray.push(key);
+            } else {
+                for (const key in thisTable) {
+                    if (Object.hasOwnProperty.call(thisTable, key)) {
+                        if (typeof(thisTable[key]) != "object") {
+                            if ((key === "TABLE_NAME") || (key === "NEXT_PRIMARY_KEY")) {
+                                //do nothing
+                            } else {
+                                headerArray.push(key);
+                            }
+                        }
                     }
                 }
             }
+
+            console.log("");
+            console.log("-".repeat(32));
+            console.log("table:" + thisTable["TABLE_NAME"]);
+            let tempString = "";
+            tempStringHtml = "<pre><table>"; //start table
+            tempStringHtml += "<tr>"; //start header row
+            for (let j = 0; j < headerArray.length; j++) {
+                tempString += headerArray[j] + " ";
+                tempStringHtml += '<th>' + headerArray[j] + '</th>';
+            }
+
+            console.log("-".repeat(32));
+            console.log(tempString);
+            console.log("-".repeat(32));
+            tempStringHtml += '</tr>' //finish header row
+
+            tempString = "";
+            for (let i = 0; i < thisTable.length; i++) { //go through every index in table and build table rows
+                tempStringHtml += '<tr>';
+                for (let j = 0; j < headerArray.length; j++) { //go through every index of header array
+                    tempString += thisTable[i][headerArray[j]] + " ";
+                    tempStringHtml += '<td>' + thisTable[i][headerArray[j]] + '</td>';
+                }
+                console.log(tempString);
+                tempString = "";
+
+                tempStringHtml += '</tr>';
+            }
+            tempStringHtml += '</table></pre>';
+
+            let formattedTable = tempStringHtml;
+
+            return formattedTable;
         }
+
+    } catch (error) {
+        return "<pre><table><tbody><tr><th>ERROR</th></tr><tr><td>" + "ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack + "</td></tr></tbody></table></pre>";
+
     }
-
-    console.log("");
-    console.log("-".repeat(32));
-    console.log("table:" + thisTable["TABLE_NAME"]);
-    let tempString = "";
-    tempStringHtml = "<pre><table>"; //start table
-    tempStringHtml += "<tr>"; //start header row
-    for (let j = 0; j < headerArray.length; j++) {
-        tempString += headerArray[j] + " ";
-        tempStringHtml += '<th>' + headerArray[j] + '</th>';
-    }
-
-    console.log("-".repeat(32));
-    console.log(tempString);
-    console.log("-".repeat(32));
-    tempStringHtml += '</tr>' //finish header row
-
-    tempString = "";
-    for (let i = 0; i < thisTable.length; i++) { //go through every index in table and build table rows
-        tempStringHtml += '<tr>';
-        for (let j = 0; j < headerArray.length; j++) { //go through every index of header array
-            tempString += thisTable[i][headerArray[j]] + " ";
-            tempStringHtml += '<td>' + thisTable[i][headerArray[j]] + '</td>';
-        }
-        console.log(tempString);
-        tempString = "";
-
-        tempStringHtml += '</tr>';
-    }
-    tempStringHtml += '</table></pre>';
-
-    formattedTable = tempStringHtml;
-
-    return formattedTable;
-
 }
 
 //function savePage() {
@@ -761,6 +777,9 @@ function sqlQuery(strSQL) {
 
 function _sqlQuery(strSQL) {
 
+    let dbMetaDataBackup = JSON.parse(JSON.stringify(dbMetaData));
+    let dbObjectBackup = JSON.parse(JSON.stringify(dbObject));
+
     console.log(strSQL);
     //NOTE ORDER IS IMPORTANT
 
@@ -830,6 +849,15 @@ function _sqlQuery(strSQL) {
 
     } else {
         console.log('sql statement not understood');
+        thisTable = "ERROR:\n - sql statement not understood, could not be parsed.";
+    }
+
+    if ((typeof(thisTable) === 'string') && (thisTable.includes("ERROR"))) { //indicates an error
+        dbMetaData = JSON.parse(JSON.stringify(dbMetaDataBackup));
+        dbObject = JSON.parse(JSON.stringify(dbObjectBackup));
+        updateDataDiv();
+        thisTable += "\n dbObject and dbMetaData reset to values before attempted SQL operation."
+        console.log(thisTable);
     }
 
     return thisTable;
@@ -839,330 +867,421 @@ function _sqlQuery(strSQL) {
 function processAlterTableDropColumn(strSQL) {
     //will parse something like - ALTER TABLE table_name DROP COLUMN column_name;
     //it calls the paramaterized function and passes its return value back
-    let tempTable = [];
-    let tokens = tokenizeStringBySpace(strSQL);
-    let tableName = tokens[2];
-    let columnName = getTokenAfter(tokens, "COLUMN");
-    tempTable = _alterTableDropColumn(tableName, columnName);
-    return tempTable;
+    try {
+        let tempTable = [];
+        let tokens = tokenizeStringBySpace(strSQL);
+        let tableName = tokens[2];
+        let columnName = getTokenAfter(tokens, "COLUMN");
+        tempTable = _alterTableDropColumn(tableName, columnName);
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
+
 }
 
 function _alterTableDropColumn(tableName, columnName) {
-    tempTable = dbObject[tableName]; //an array of objects
-    // go through table, and at each line remove the property
-    for (i = 0; i < tempTable.length; i++) {
-        if (columnName in tempTable[i]) { //if the property is in the object
-            delete tempTable[i][columnName];
+    try {
+        tempTable = dbObject[tableName]; //an array of objects
+        // go through table, and at each line remove the property
+        for (i = 0; i < tempTable.length; i++) {
+            if (columnName in tempTable[i]) { //if the property is in the object
+                delete tempTable[i][columnName];
+            }
         }
+
+        // remove that column from the table's metadata entry
+        metaDataTable = dbObject[tableName + "_METADATA"];
+
+        if (columnName in metaDataTable[0]) {
+            delete metaDataTable[0][columnName];
+        }
+
+        //update visually
+        updateDataDiv();
+
+        return sqlQuery("SELECT * FROM " + tableName);
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
 
-    // remove that column from the table's metadata entry
-    metaDataTable = dbObject[tableName + "_METADATA"];
-
-    if (columnName in metaDataTable[0]) {
-        delete metaDataTable[0][columnName];
-    }
-
-    //update visually
-    updateDataDiv();
-
-    return sqlQuery("SELECT * FROM " + tableName);
 }
 
 function processAlterTableAddColumn(strSQL) {
     //will parse something like - ALTER TABLE table_name ADD column_name datatype;
     //it calls the paramaterized function and passes its return value back
 
-    let tempTable = [];
-    let tokens = tokenizeStringBySpace(strSQL);
-    let tableName = tokens[2];
-    let endString = getStringAfter(strSQL, "ADD");
-    let tokens2 = tokenizeStringBySpace(endString);
-    let columnName = tokens2[0];
-    let dataType = tokens2[1];
-    tempTable = _alterTableAddColumn(tableName, columnName, dataType);
+    try {
+        let tempTable = [];
+        let tokens = tokenizeStringBySpace(strSQL);
+        let tableName = tokens[2];
+        let endString = getStringAfter(strSQL, "ADD");
+        let tokens2 = tokenizeStringBySpace(endString);
+        let columnName = tokens2[0];
+        let dataType = tokens2[1];
+        tempTable = _alterTableAddColumn(tableName, columnName, dataType);
 
-    return tempTable;
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
+
+
 }
 
 function _alterTableAddColumn(tableName, columnName, dataType) {
-    if (columnName in dbObject[tableName + "_METADATA"][0]) {
-        console.log(tableName + " already has column with name " + columnName + ".");
-    } else {
-        dbObject[tableName + "_METADATA"][0][columnName] = dataType;
+
+    try {
+        if (columnName in dbObject[tableName + "_METADATA"][0]) {
+            console.log(tableName + " already has column with name " + columnName + ".");
+        } else {
+            dbObject[tableName + "_METADATA"][0][columnName] = dataType;
+        }
+        updateDataDiv();
+        return sqlQuery("SELECT * FROM " + tableName);
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-    updateDataDiv();
-    return sqlQuery("SELECT * FROM " + tableName);
+
 }
 
 function processAlterTableChange(strSQL) {
     //will parse something like - //ALTER TABLE table_name CHANGE pets_name name STRING;
     //it calls the paramaterized function and passes its return value back
-    let tempTable = [];
-    let tokens = tokenizeStringBySpace(strSQL);
-    let tableName = tokens[2];
-    let endString = getStringAfter(strSQL, "CHANGE");
-    let tokens2 = tokenizeStringBySpace(endString);
-    let originalName = tokens2[0];
-    let newName = tokens2[1];
-    let dataType = tokens2[2];
-    //call the parameterized function and get its return value
-    tempTable = _alterTableChange(tableName, originalName, newName, dataType);
+    try {
+        let tempTable = [];
+        let tokens = tokenizeStringBySpace(strSQL);
+        let tableName = tokens[2];
+        let endString = getStringAfter(strSQL, "CHANGE");
+        let tokens2 = tokenizeStringBySpace(endString);
+        let originalName = tokens2[0];
+        let newName = tokens2[1];
+        let dataType = tokens2[2];
+        //call the parameterized function and get its return value
+        tempTable = _alterTableChange(tableName, originalName, newName, dataType);
 
-    return tempTable;
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
 }
 
 function _alterTableChange(tableName, originalName, newName, dataType) {
-    //change datatype
-    let thisTable = dbObject[tableName];
+    try {
 
-    if (dataType === "STRING") {
-        for (let i = 0; i < thisTable.length; i++) { //change all table entries to new datatype
-            if (originalName in thisTable[i]) {
-                thisTable[i][originalName] = thisTable[i][originalName].toString();
+        //change datatype
+        let thisTable = dbObject[tableName];
+
+        if (dataType === "STRING") {
+            for (let i = 0; i < thisTable.length; i++) { //change all table entries to new datatype
+                if (originalName in thisTable[i]) {
+                    thisTable[i][originalName] = thisTable[i][originalName].toString();
+                }
+            }
+        } else if (dataType === "NUMBER") {
+            for (let i = 0; i < thisTable.length; i++) { //change all table entries to new datatype
+                if (originalName in thisTable[i]) {
+                    thisTable[i][originalName] = Number(thisTable[i][originalName]);
+                }
             }
         }
-    } else if (dataType === "NUMBER") {
-        for (let i = 0; i < thisTable.length; i++) { //change all table entries to new datatype
-            if (originalName in thisTable[i]) {
-                thisTable[i][originalName] = Number(thisTable[i][originalName]);
+
+        //change column name, ie add new column and delete old if names are different
+        //note: allowing to be same allows updating datatype only
+        if (newName != originalName) {
+            for (let i = 0; i < thisTable.length; i++) {
+                if (originalName in thisTable[i]) {
+                    thisTable[i][newName] = thisTable[i][originalName];
+                    delete thisTable[i][originalName];
+                }
             }
         }
-    }
 
-    //change column name, ie add new column and delete old if names are different
-    //note: allowing to be same allows updating datatype only
-    if (newName != originalName) {
-        for (let i = 0; i < thisTable.length; i++) {
-            if (originalName in thisTable[i]) {
-                thisTable[i][newName] = thisTable[i][originalName];
-                delete thisTable[i][originalName];
-            }
+        //update metadatatale
+        metaDataTable = dbObject[tableName + "_METADATA"];
+
+        //add new column name and type
+        metaDataTable[0][newName] = dataType;
+
+        //delete old column name and type if names are different
+        if (newName != originalName) {
+            delete metaDataTable[0][originalName];
         }
+
+        //updating visually and writing to text database storage
+        updateDataDiv();
+
+        let tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-
-    //update metadatatale
-    metaDataTable = dbObject[tableName + "_METADATA"];
-
-    //add new column name and type
-    metaDataTable[0][newName] = dataType;
-
-    //delete old column name and type if names are different
-    if (newName != originalName) {
-        delete metaDataTable[0][originalName];
-    }
-
-    //updating visually and writing to text database storage
-    updateDataDiv();
-
-    let tempTable = sqlQuery("SELECT * FROM " + tableName);
-
-    return tempTable;
 }
 
 
 function processHelp(strSQL) {
-    //note helpstring is global scope
-    let tempTable = [];
-    let tempObject = { 'HELP': helpString };
-    tempTable.push(tempObject);
-    tempTable["TABLE_NAME"] = "HELP";
-    tempTable["HELP"] = "STRING";
-    return tempTable;
+    try {
+        //note helpstring is global scope
+        let tempTable = [];
+        let tempObject = { 'HELP': helpString };
+        tempTable.push(tempObject);
+        tempTable["TABLE_NAME"] = "HELP";
+        tempTable["HELP"] = "STRING";
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
+
 }
 
 function processShowTables(strSQL) {
-    return _showTables();
+    try {
+        return _showTables();
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
 }
 
 function processDescribeTable(strSQL) {
-    let tempTable = [];
-    let tokens = tokenizeStringBySpace(strSQL);
-    let tableName = getTokenAfter(tokens, "DESCRIBE");
-    tempTable = _describe(tableName);
-    return tempTable;
+    try {
+        let tempTable = [];
+        let tokens = tokenizeStringBySpace(strSQL);
+        let tableName = getTokenAfter(tokens, "DESCRIBE");
+        tempTable = _describe(tableName);
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
 }
 
 function _describe(thisTableName) {
-    if (thisTableName.includes("_METADATA")) {
-        let tempTable = sqlQuery("SELECT * FROM " + thisTableName);
-        tempTable["TABLE_NAME"] = thisTableName;
-    } else {
-        let tempTable = sqlQuery("SELECT * FROM " + thisTableName + "_METADATA");
-        tempTable["TABLE_NAME"] = thisTableName + "_METADATA";
+    try {
+        if (thisTableName.includes("_METADATA")) {
+            let tempTable = sqlQuery("SELECT * FROM " + thisTableName);
+            tempTable["TABLE_NAME"] = thisTableName;
+        } else {
+            let tempTable = sqlQuery("SELECT * FROM " + thisTableName + "_METADATA");
+            tempTable["TABLE_NAME"] = thisTableName + "_METADATA";
+        }
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-    return tempTable;
 }
 
 function processDropTable(strSQL) {
     //will parse something like - DROP TABLE table_name;
     //it calls the paramaterized function and passes its return value back
-    let tempTable = [];
-    let tokens = tokenizeStringBySpace(strSQL);
-    tableName = getTokenAfter(tokens, "TABLE");
-    tempTable = _dropTable(tableName);
+    try {
+        let tempTable = [];
+        let tokens = tokenizeStringBySpace(strSQL);
+        tableName = getTokenAfter(tokens, "TABLE");
+        tempTable = _dropTable(tableName);
 
-    return tempTable;
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
 }
 
 function _dropTable(tableName) {
-    delete dbObject[tableName];
-    delete dbObject[tableName + "_METADATA"];
-    updateDataDiv();
-    //send something back
-    let tempTable = [];
-    tempTable["TABLE_NAME"] = "DROPPED " + tableName;
+    try {
+        delete dbObject[tableName];
+        delete dbObject[tableName + "_METADATA"];
+        updateDataDiv();
+        //send something back
+        let tempTable = [];
+        tempTable["TABLE_NAME"] = "DROPPED " + tableName;
 
-    return tempTable;
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
 }
 
 function processCreateTable(strSQL) {
-    //will parse something like - CREATE TABLE table_name (column1 datatype, column2 datatype, column3 datatype, .... );
-    //it calls the paramaterized function and passes its return value back
-    let tempTable = [];
-    let fieldNames = [];
-    let dataTypes = [];
-    let tokens = tokenizeStringBySpace(strSQL);
-    let tableName = getTokenAfter(tokens, "TABLE");
-    endString = getStringAfter(strSQL, tableName);
-    endString = endString.replace("(", " ");
-    endString = endString.replace(")", " ");
-    tokenPairs = splitByCommasAndCleanWhiteSpace(endString);
-    let tempArray = []
-    for (let i = 0; i < tokenPairs.length; i++) {
-        tempArray = tokenizeStringBySpace(tokenPairs[i]);
-        fieldNames[i] = tempArray[0];
-        dataTypes[i] = tempArray[1];
+    try {
+        //will parse something like - CREATE TABLE table_name (column1 datatype, column2 datatype, column3 datatype, .... );
+        //it calls the paramaterized function and passes its return value back
+        let tempTable = [];
+        let fieldNames = [];
+        let dataTypes = [];
+        let tokens = tokenizeStringBySpace(strSQL);
+        let tableName = getTokenAfter(tokens, "TABLE");
+        endString = getStringAfter(strSQL, tableName);
+        endString = endString.replace("(", " ");
+        endString = endString.replace(")", " ");
+        tokenPairs = splitByCommasAndCleanWhiteSpace(endString);
+        let tempArray = []
+        for (let i = 0; i < tokenPairs.length; i++) {
+            tempArray = tokenizeStringBySpace(tokenPairs[i]);
+            fieldNames[i] = tempArray[0];
+            dataTypes[i] = tempArray[1];
+        }
+        tempTable = _createTable(tableName, fieldNames, dataTypes);
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-    tempTable = _createTable(tableName, fieldNames, dataTypes);
-    return tempTable;
+
 }
 
 function _createTable(tableName, fieldNames = [], dataTypes = []) {
-    tempTable = [];
-    //make an empty entry into the database
-    dbObject[tableName] = [];
+    try {
+        tempTable = [];
+        //make an empty entry into the database
+        dbObject[tableName] = [];
 
-    //make a metatable entry into the database
-    dbObject[tableName + "_METADATA"] = [];
+        //make a metatable entry into the database
+        dbObject[tableName + "_METADATA"] = [];
 
-    //place metadata in the table's metadata table
-    metaData = {};
-    metaData["TABLE_NAME"] = tableName;
-    metaData["NEXT_PRIMARY_KEY"] = 1;
-    metaData["PRIMARY_KEY"] = "NUMBER";
+        //place metadata in the table's metadata table
+        metaData = {};
+        metaData["TABLE_NAME"] = tableName;
+        metaData["NEXT_PRIMARY_KEY"] = 1;
+        metaData["PRIMARY_KEY"] = "NUMBER";
 
-    //loop through field names and datatype and add to metadata
-    for (let i = 0; i < fieldNames.length; i++) {
-        metaData[fieldNames[i]] = dataTypes[i];
+        //loop through field names and datatype and add to metadata
+        for (let i = 0; i < fieldNames.length; i++) {
+            metaData[fieldNames[i]] = dataTypes[i];
+        }
+
+        //make the metadatatable
+        dbObject[tableName + "_METADATA"][0] = JSON.parse(JSON.stringify(metaData));
+
+        //update visually
+        updateDataDiv();
+
+        //return the table just made
+        tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-
-    //make the metadatatable
-    dbObject[tableName + "_METADATA"][0] = JSON.parse(JSON.stringify(metaData));
-
-    //update visually
-    updateDataDiv();
-
-    //return the table just made
-    tempTable = sqlQuery("SELECT * FROM " + tableName);
-
-    return tempTable;
 }
 
 function processDelete(strSQL) {
-    // will parse something like-
-    // DELETE FROM table_name WHERE condition;
-    // DELETE FROM table_name WHERE column=` some value   `;
-    // it calls the paramaterized function and passes its return value back;
+    try {
+        // will parse something like-
+        // DELETE FROM table_name WHERE condition;
+        // DELETE FROM table_name WHERE column=` some value   `;
+        // it calls the paramaterized function and passes its return value back;
 
-    let tempTable = [];
+        let tempTable = [];
 
-    let tokens = tokenizeStringBySpace(strSQL);
-    tableName = getTokenAfter(tokens, "FROM"); //got tableName!
+        let tokens = tokenizeStringBySpace(strSQL);
+        tableName = getTokenAfter(tokens, "FROM"); //got tableName!
 
-    //get compareField and operator
-    let lastString = getStringAfter(strSQL, "WHERE");
+        //get compareField and operator
+        let lastString = getStringAfter(strSQL, "WHERE");
 
-    let stopIndex = lastString.indexOf("`");
-    firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
+        let stopIndex = lastString.indexOf("`");
+        firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
 
-    firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
+        firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
 
-    //get compare field and operator
-    let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
+        //get compare field and operator
+        let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
 
-    let compareField = tempTokens3[0];
-    let operator = tempTokens3[1];
+        let compareField = tempTokens3[0];
+        let operator = tempTokens3[1];
 
-    //get compare value
-    compareValue = readBackTicks(lastString)[0];
+        //get compare value
+        compareValue = readBackTicks(lastString)[0];
 
-    if (dbObject[tableName][compareField] === "NUMBER") {
-        compareValue = Number(compareValue);
+        if (dbObject[tableName][compareField] === "NUMBER") {
+            compareValue = Number(compareValue);
+        }
+
+        //alert(compareValue);
+
+        if (compareValue === undefined) {
+            //do nothing
+        } else {
+            tempTable = _deleteFromTable(tableName, compareField, operator, compareValue);
+        }
+
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
 
-    //alert(compareValue);
-
-    if (compareValue === undefined) {
-        //do nothing
-    } else {
-        tempTable = _deleteFromTable(tableName, compareField, operator, compareValue);
-    }
-
-    return tempTable;
 }
 
 function _deleteFromTable(tableName, compareField, operator = "=", compareValue) {
-    tempTable = [];
-    metaData = dbObject[tableName + "_METADATA"][0];
+    try {
 
-    //get datatype of compareValue so it can be compared to stored value
-    if (metaData[compareField] === "NUMBER") {
-        compareValue = Number(compareValue);
+        tempTable = [];
+        metaData = dbObject[tableName + "_METADATA"][0];
+
+        //get datatype of compareValue so it can be compared to stored value
+        if (metaData[compareField] === "NUMBER") {
+            compareValue = Number(compareValue);
+        }
+
+        if (operator === "=") {
+            for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                if (dbObject[tableName][i][compareField] === compareValue) {
+                    dbObject[tableName].splice(i, 1);
+                }
+            }
+        } else if ((operator === "!=") || (operator === "<>")) {
+            for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                if (dbObject[tableName][i][compareField] != compareValue) {
+                    dbObject[tableName].splice(i, 1);
+                }
+            }
+        } else if (operator === ">") {
+            for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                if (dbObject[tableName][i][compareField] > compareValue) {
+                    dbObject[tableName].splice(i, 1);
+                }
+            }
+        } else if (operator === ">=") {
+            for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                if (dbObject[tableName][i][compareField] >= compareValue) {
+                    dbObject[tableName].splice(i, 1);
+                }
+            }
+        } else if (operator === "<") {
+            for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
+                if (dbObject[tableName][i][compareField] < compareValue) {
+                    dbObject[tableName].splice(i, 1);
+                }
+            }
+        } else if (operator === "<=") {
+            for (let i = dbObject[tableName].length - 1; i <= 0; i--) {
+                if (dbObject[tableName][i][compareField] === compareValue) {
+                    dbObject[tableName].splice(i, 1);
+                }
+            }
+        }
+        updateDataDiv();
+
+        tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-
-    if (operator === "=") {
-        for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
-            if (dbObject[tableName][i][compareField] === compareValue) {
-                dbObject[tableName].splice(i, 1);
-            }
-        }
-    } else if ((operator === "!=") || (operator === "<>")) {
-        for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
-            if (dbObject[tableName][i][compareField] != compareValue) {
-                dbObject[tableName].splice(i, 1);
-            }
-        }
-    } else if (operator === ">") {
-        for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
-            if (dbObject[tableName][i][compareField] > compareValue) {
-                dbObject[tableName].splice(i, 1);
-            }
-        }
-    } else if (operator === ">=") {
-        for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
-            if (dbObject[tableName][i][compareField] >= compareValue) {
-                dbObject[tableName].splice(i, 1);
-            }
-        }
-    } else if (operator === "<") {
-        for (let i = dbObject[tableName].length - 1; i >= 0; i--) {
-            if (dbObject[tableName][i][compareField] < compareValue) {
-                dbObject[tableName].splice(i, 1);
-            }
-        }
-    } else if (operator === "<=") {
-        for (let i = dbObject[tableName].length - 1; i <= 0; i--) {
-            if (dbObject[tableName][i][compareField] === compareValue) {
-                dbObject[tableName].splice(i, 1);
-            }
-        }
-    }
-    updateDataDiv();
-
-    tempTable = sqlQuery("SELECT * FROM " + tableName);
-
-    return tempTable;
 }
 
 function trimArrayElements(myArray) {
@@ -1173,204 +1292,219 @@ function trimArrayElements(myArray) {
 }
 
 function processUpdate(strSQL) {
+    try {
 
-    //will parse something like - 
-    //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE condition;
+        //will parse something like - 
+        //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE condition;
 
-    //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE something >= `something`;  remove ticks from where clause just in case->done
-    //it calls the paramaterized function and passes its return value back
+        //UPDATE table_name SET column1 = `value1`, column2 = `value2`, ... WHERE something >= `something`;  remove ticks from where clause just in case->done
+        //it calls the paramaterized function and passes its return value back
 
-    tempTable = [];
-    //strSQL = addWhiteSpaceAroundOperators(strSQL);
+        tempTable = [];
+        //strSQL = addWhiteSpaceAroundOperators(strSQL);
 
-    //get tableName
-    let tempTokens1 = tokenizeStringBySpace(strSQL);
-    tableName = getTokenAfter(tempTokens1, "UPDATE"); //got tableName!
-
-
-    //get compareField and operator
-    let lastString = getStringAfter(strSQL, "WHERE");
-
-    let stopIndex = lastString.indexOf("`");
-    firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
-
-    firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
-
-    //no get first tick and go from that space
-    //lastString = addWhiteSpaceAroundOperators(lastString);
-    let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
-
-    let compareField = tempTokens3[0];
-    let operator = tempTokens3[1];
-
-    //get compare value
+        //get tableName
+        let tempTokens1 = tokenizeStringBySpace(strSQL);
+        tableName = getTokenAfter(tempTokens1, "UPDATE"); //got tableName!
 
 
-    compareValue = readBackTicks(lastString)[0];
+        //get compareField and operator
+        let lastString = getStringAfter(strSQL, "WHERE");
 
-    let middleString = getStringBetween(strSQL, "SET", "WHERE");
-    middleString = middleString.trim();
+        let stopIndex = lastString.indexOf("`");
+        firstTwoThirdsOfLastString = lastString.substring(0, stopIndex);
 
-    let updatePairs = splitByBackTicks(middleString);
+        firstTwoThirdsOfLastString = addWhiteSpaceFirstOperator(firstTwoThirdsOfLastString);
 
-    //remove the equal sign from first and every other token, at the end
-    for (let i = 0; i < updatePairs.length; i = i + 2) {
-        updatePairs[i] = updatePairs[i].slice(0, -1);
-    }
+        //no get first tick and go from that space
+        //lastString = addWhiteSpaceAroundOperators(lastString);
+        let tempTokens3 = tokenizeStringBySpace(firstTwoThirdsOfLastString);
 
-    //remove a comma from beginning if present
-    for (let i = 0; i < updatePairs.length; i = i + 2) {
-        if (updatePairs[i][0] === ",") {
-            updatePairs[i] = updatePairs[i].slice(1);
+        let compareField = tempTokens3[0];
+        let operator = tempTokens3[1];
+
+        //get compare value
+
+
+        compareValue = readBackTicks(lastString)[0];
+
+        let middleString = getStringBetween(strSQL, "SET", "WHERE");
+        middleString = middleString.trim();
+
+        let updatePairs = splitByBackTicks(middleString);
+
+        //remove the equal sign from first and every other token, at the end
+        for (let i = 0; i < updatePairs.length; i = i + 2) {
+            updatePairs[i] = updatePairs[i].slice(0, -1);
         }
+
+        //remove a comma from beginning if present
+        for (let i = 0; i < updatePairs.length; i = i + 2) {
+            if (updatePairs[i][0] === ",") {
+                updatePairs[i] = updatePairs[i].slice(1);
+            }
+        }
+
+        for (let i = 0; i < updatePairs.length; i = i + 2) { //trim only odd 
+            updatePairs[i] = updatePairs[i].trim();
+        }
+
+        let fieldNames = [];
+        let values = [];
+
+        console.log(updatePairs);
+        for (let i = 0; i < updatePairs.length / 2; i++) {
+            fieldNames[i] = updatePairs[i * 2];
+            //values[i] = updatePairs[(i * 2) + 1];  //no longer this half of 'pairs' see below using backticks
+        }
+
+        values = readBackTicks(middleString);
+
+        tempTable = _update(tableName, fieldNames, values, compareField, operator, compareValue);
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-
-    for (let i = 0; i < updatePairs.length; i = i + 2) { //trim only odd 
-        updatePairs[i] = updatePairs[i].trim();
-    }
-
-    let fieldNames = [];
-    let values = [];
-
-    console.log(updatePairs);
-    for (let i = 0; i < updatePairs.length / 2; i++) {
-        fieldNames[i] = updatePairs[i * 2];
-        //values[i] = updatePairs[(i * 2) + 1];  //no longer this half of 'pairs' see below using backticks
-    }
-
-    values = readBackTicks(middleString);
-
-    tempTable = _update(tableName, fieldNames, values, compareField, operator, compareValue);
-    return tempTable;
 }
 
 function _update(tableName, fieldNames = [], values = [], compareField, operator = "=", compareValue) {
-    tempTable = [];
-    metaData = dbObject[tableName + "_METADATA"][0];
+    try {
+        tempTable = [];
+        metaData = dbObject[tableName + "_METADATA"][0];
 
-    //get datatype of compareValue so it can be compared to stored value
-    if (metaData[compareField] === "NUMBER") {
-        compareValue = Number(compareValue);
-    }
-
-    if (fieldNames.length != values.length) {
-        let tempTable = [];
-        tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
-        return tempTable;
-
-    } else {
-        if (operator === "=") {
-            for (let i = 0; i < dbObject[tableName].length; i++) {
-                if (dbObject[tableName][i][compareField] === compareValue) {
-                    for (let j = 0; j < fieldNames.length; j++) {
-                        if (metaData[fieldNames[j]] === "NUMBER") {
-                            dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
-                        } else {
-                            dbObject[tableName][i][fieldNames[j]] = values[j];
-                        }
-
-                    }
-                }
-            }
-        } else if ((operator === "!=") || (operator === "<>")) {
-            for (let i = 0; i < dbObject[tableName].length; i++) {
-                if (dbObject[tableName][i][compareField] != compareValue) {
-                    for (let j = 0; j < fieldNames.length; j++) {
-                        if (metaData[fieldNames[j]] === "NUMBER") {
-                            dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
-                        } else {
-                            dbObject[tableName][i][fieldNames[j]] = values[j];
-                        }
-                    }
-                }
-            }
-        } else if (operator === ">") {
-            for (let i = 0; i < dbObject[tableName].length; i++) {
-                if (dbObject[tableName][i][compareField] > compareValue) {
-                    for (let j = 0; j < fieldNames.length; j++) {
-                        if (metaData[fieldNames[j]] === "NUMBER") {
-                            dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
-                        } else {
-                            dbObject[tableName][i][fieldNames[j]] = values[j];
-                        }
-                    }
-                }
-            }
-        } else if (operator === ">=") {
-            for (let i = 0; i < dbObject[tableName].length; i++) {
-                if (dbObject[tableName][i][compareField] >= compareValue) {
-                    for (let j = 0; j < fieldNames.length; j++) {
-                        if (metaData[fieldNames[j]] === "NUMBER") {
-                            dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
-                        } else {
-                            dbObject[tableName][i][fieldNames[j]] = values[j];
-                        }
-                    }
-                }
-            }
-        } else if (operator === "<") {
-            for (let i = 0; i < dbObject[tableName].length; i++) {
-                if (dbObject[tableName][i][compareField] < compareValue) {
-                    for (let j = 0; j < fieldNames.length; j++) {
-                        if (metaData[fieldNames[j]] === "NUMBER") {
-                            dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
-                        } else {
-                            dbObject[tableName][i][fieldNames[j]] = values[j];
-                        }
-                    }
-                }
-            }
-        } else if (operator === "<=") {
-            for (let i = 0; i < dbObject[tableName].length; i++) {
-                if (dbObject[tableName][i][compareField] <= compareValue) {
-                    for (let j = 0; j < fieldNames.length; j++) {
-                        if (metaData[fieldNames[j]] === "NUMBER") {
-                            dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
-                        } else {
-                            dbObject[tableName][i][fieldNames[j]] = values[j];
-                        }
-                    }
-                }
-            }
+        //get datatype of compareValue so it can be compared to stored value
+        if (metaData[compareField] === "NUMBER") {
+            compareValue = Number(compareValue);
         }
-        updateDataDiv();
 
-        tempTable = sqlQuery("SELECT * FROM " + tableName);
+        if (fieldNames.length != values.length) {
+            let tempTable = [];
+            tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
+            return tempTable;
 
-        return tempTable;
+        } else {
+            if (operator === "=") {
+                for (let i = 0; i < dbObject[tableName].length; i++) {
+                    if (dbObject[tableName][i][compareField] === compareValue) {
+                        for (let j = 0; j < fieldNames.length; j++) {
+                            if (metaData[fieldNames[j]] === "NUMBER") {
+                                dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                            } else {
+                                dbObject[tableName][i][fieldNames[j]] = values[j];
+                            }
+
+                        }
+                    }
+                }
+            } else if ((operator === "!=") || (operator === "<>")) {
+                for (let i = 0; i < dbObject[tableName].length; i++) {
+                    if (dbObject[tableName][i][compareField] != compareValue) {
+                        for (let j = 0; j < fieldNames.length; j++) {
+                            if (metaData[fieldNames[j]] === "NUMBER") {
+                                dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                            } else {
+                                dbObject[tableName][i][fieldNames[j]] = values[j];
+                            }
+                        }
+                    }
+                }
+            } else if (operator === ">") {
+                for (let i = 0; i < dbObject[tableName].length; i++) {
+                    if (dbObject[tableName][i][compareField] > compareValue) {
+                        for (let j = 0; j < fieldNames.length; j++) {
+                            if (metaData[fieldNames[j]] === "NUMBER") {
+                                dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                            } else {
+                                dbObject[tableName][i][fieldNames[j]] = values[j];
+                            }
+                        }
+                    }
+                }
+            } else if (operator === ">=") {
+                for (let i = 0; i < dbObject[tableName].length; i++) {
+                    if (dbObject[tableName][i][compareField] >= compareValue) {
+                        for (let j = 0; j < fieldNames.length; j++) {
+                            if (metaData[fieldNames[j]] === "NUMBER") {
+                                dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                            } else {
+                                dbObject[tableName][i][fieldNames[j]] = values[j];
+                            }
+                        }
+                    }
+                }
+            } else if (operator === "<") {
+                for (let i = 0; i < dbObject[tableName].length; i++) {
+                    if (dbObject[tableName][i][compareField] < compareValue) {
+                        for (let j = 0; j < fieldNames.length; j++) {
+                            if (metaData[fieldNames[j]] === "NUMBER") {
+                                dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                            } else {
+                                dbObject[tableName][i][fieldNames[j]] = values[j];
+                            }
+                        }
+                    }
+                }
+            } else if (operator === "<=") {
+                for (let i = 0; i < dbObject[tableName].length; i++) {
+                    if (dbObject[tableName][i][compareField] <= compareValue) {
+                        for (let j = 0; j < fieldNames.length; j++) {
+                            if (metaData[fieldNames[j]] === "NUMBER") {
+                                dbObject[tableName][i][fieldNames[j]] = Number(values[j]);
+                            } else {
+                                dbObject[tableName][i][fieldNames[j]] = values[j];
+                            }
+                        }
+                    }
+                }
+            }
+            updateDataDiv();
+
+            tempTable = sqlQuery("SELECT * FROM " + tableName);
+
+            return tempTable;
+        }
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
 }
 
 function processInsertInto(strSQL) {
-    //will parse something like - INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
-    //it calls the paramaterized function and passes its return value back
+    try {
+        //will parse something like - INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
+        //it calls the paramaterized function and passes its return value back
 
-    tempTable = [];
+        tempTable = [];
 
-    strSQL = strSQL.replace("(", " ( "); //only replaces first
-    strSQL = strSQL.replace(")", " ) "); //only replaces first
+        strSQL = strSQL.replace("(", " ( "); //only replaces first
+        strSQL = strSQL.replace(")", " ) "); //only replaces first
 
-    let tempTokens = tokenizeStringBySpace(strSQL);
-    let tableName = getTokenAfter(tempTokens, "INTO"); //got tableName!
+        let tempTokens = tokenizeStringBySpace(strSQL);
+        let tableName = getTokenAfter(tempTokens, "INTO"); //got tableName!
 
-    let middleString = getStringBetween(strSQL, "(", ")");
+        let middleString = getStringBetween(strSQL, "(", ")");
 
-    columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
+        columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
 
 
-    lastString = getStringAfter(strSQL, "VALUES");
-    lastString = lastString.replace("(", " "); //replace only first in string
+        lastString = getStringAfter(strSQL, "VALUES");
+        lastString = lastString.replace("(", " "); //replace only first in string
 
-    let position = lastString.lastIndexOf(')');
-    lastString = lastString.substring(0, position) + " " + lastString.substring(position + 1); //replace only last )
+        let position = lastString.lastIndexOf(')');
+        lastString = lastString.substring(0, position) + " " + lastString.substring(position + 1); //replace only last )
 
-    lastString = lastString.trim(); //trim edges
+        lastString = lastString.trim(); //trim edges
 
-    values = readBackTicks(lastString);
+        values = readBackTicks(lastString);
 
-    tempTable = _insertInto(tableName, columns, values);
+        tempTable = _insertInto(tableName, columns, values);
 
-    return tempTable;
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
 }
 
 function readBackTicks(myString) {
@@ -1390,210 +1524,228 @@ function readBackTicks(myString) {
 }
 
 function _insertInto(tableName, fieldNames = [], values = []) {
-    if (fieldNames.length != values.length) {
-        let tempTable = [];
-        tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
-        return tempTable;
-    } else {
-        tempTable = [];
+    try {
+        if (fieldNames.length != values.length) {
+            let tempTable = [];
+            tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
+            return tempTable;
+        } else {
+            tempTable = [];
 
-        //get a copy of the metadata from the database
-        let metaData = JSON.parse(JSON.stringify(dbObject[tableName + "_METADATA"][0]));
-        let thisPrimaryKey = metaData["NEXT_PRIMARY_KEY"];
-        //build row entry which is an object
-        let tempObject = {};
-        tempObject['PRIMARY_KEY'] = thisPrimaryKey; //
-        for (let i = 0; i < fieldNames.length; i++) {
-            //check to see what type of data type field is
-            if (metaData[fieldNames[i]] === "NUMBER") {
-                tempObject[fieldNames[i]] = Number(values[i]);
-            } else {
-                tempObject[fieldNames[i]] = values[i];
+            //get a copy of the metadata from the database
+            let metaData = JSON.parse(JSON.stringify(dbObject[tableName + "_METADATA"][0]));
+            let thisPrimaryKey = metaData["NEXT_PRIMARY_KEY"];
+            //build row entry which is an object
+            let tempObject = {};
+            tempObject['PRIMARY_KEY'] = thisPrimaryKey; //
+            for (let i = 0; i < fieldNames.length; i++) {
+                //check to see what type of data type field is
+                if (metaData[fieldNames[i]] === "NUMBER") {
+                    tempObject[fieldNames[i]] = Number(values[i]);
+                } else {
+                    tempObject[fieldNames[i]] = values[i];
+                }
             }
+            //add the entry to the table
+            dbObject[tableName].push(JSON.parse(JSON.stringify(tempObject)));
+            //advance the primary key in the table's metadata
+            dbObject[tableName + "_METADATA"][0]["NEXT_PRIMARY_KEY"] = thisPrimaryKey + 1;
+
+            //update visually
+            updateDataDiv();
+
+            //return the table just modified
+            tempTable = sqlQuery("SELECT * FROM " + tableName);
+            //console.log(tempTable);
+
+            return tempTable;
         }
-        //add the entry to the table
-        dbObject[tableName].push(JSON.parse(JSON.stringify(tempObject)));
-        //advance the primary key in the table's metadata
-        dbObject[tableName + "_METADATA"][0]["NEXT_PRIMARY_KEY"] = thisPrimaryKey + 1;
-
-        //update visually
-        updateDataDiv();
-
-        //return the table just modified
-        tempTable = sqlQuery("SELECT * FROM " + tableName);
-        //console.log(tempTable);
-
-        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
 }
 
 function processInsertSelect(strSQL) {
-    //will parse something like these:
-    //
-    //INSERT INTO copiedTable SELECT * FROM myTable;
-    //INSERT INTO dogOwners SELECT * FROM petTable WHERE pets_pettype = "dog";
-    //INSERT INTO someTable SELECT owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID
-    //
-    //it calls the paramaterized function and passes its return value back
+    try {
+        //will parse something like these:
+        //
+        //INSERT INTO copiedTable SELECT * FROM myTable;
+        //INSERT INTO dogOwners SELECT * FROM petTable WHERE pets_pettype = "dog";
+        //INSERT INTO someTable SELECT owners.firstname, pets.name FROM owners INNER JOIN pets ON owners.PRIMARY_KEY = pets.ownerID
+        //
+        //it calls the paramaterized function and passes its return value back
 
-    let tempTable = [];
+        let tempTable = [];
 
-    let tokens = tokenizeStringBySpace(strSQL);
-    let newTableName = getTokenAfter(tokens, "INTO");
+        let tokens = tokenizeStringBySpace(strSQL);
+        let newTableName = getTokenAfter(tokens, "INTO");
 
-    //remove the insert into tablename part and process select or inner join to get table
-    strSQL = strSQL.replace("INSERT", "");
-    strSQL = strSQL.replace("INTO", "");
-    strSQL = strSQL.replace(newTableName, "");
-    strSQL = strSQL.trim();
+        //remove the insert into tablename part and process select or inner join to get table
+        strSQL = strSQL.replace("INSERT", "");
+        strSQL = strSQL.replace("INTO", "");
+        strSQL = strSQL.replace(newTableName, "");
+        strSQL = strSQL.trim();
 
-    //important step choose inner join vs ordinary select statement
-    if (tokens.includes("INNER")) { //process inner join
-        tempTable = processInnerJoin(strSQL);
-    } else { //process ordinary select statement
-        tempTable = processSelectStatement(strSQL);
-    }
+        //important step choose inner join vs ordinary select statement
+        if (tokens.includes("INNER")) { //process inner join
+            tempTable = processInnerJoin(strSQL);
+        } else { //process ordinary select statement
+            tempTable = processSelectStatement(strSQL);
+        }
 
-    //add primary keys to this table
-    for (let i = 0; i < tempTable.length; i++) {
-        tempTable[i]["PRIMARY_KEY"] = i + 1;
-    }
-    //add the table to the database
-    dbObject[newTableName] = JSON.parse(JSON.stringify(tempTable));
-    //get the metadata from the returned joined table
-    let metaData = {};
-    for (const key in tempTable) {
-        if (Object.hasOwnProperty.call(tempTable, key)) {
-            if (typeof(tempTable[key]) != "object") { //skip row object entries and next primary key
-                if (key != "NEXT_PRIMARY_KEY") {
-                    metaData[key] = tempTable[key];
+        //add primary keys to this table
+        for (let i = 0; i < tempTable.length; i++) {
+            tempTable[i]["PRIMARY_KEY"] = i + 1;
+        }
+        //add the table to the database
+        dbObject[newTableName] = JSON.parse(JSON.stringify(tempTable));
+        //get the metadata from the returned joined table
+        let metaData = {};
+        for (const key in tempTable) {
+            if (Object.hasOwnProperty.call(tempTable, key)) {
+                if (typeof(tempTable[key]) != "object") { //skip row object entries and next primary key
+                    if (key != "NEXT_PRIMARY_KEY") {
+                        metaData[key] = tempTable[key];
+                    }
                 }
             }
         }
+        //revise metadata to match
+        metaData["TABLE_NAME"] = newTableName;
+        metaData["PRIMARY_KEY"] = "NUMBER";
+        metaData["NEXT_PRIMARY_KEY"] = tempTable.length + 1;
+        //create the metadata table
+        dbObject[newTableName + "_METADATA"] = [];
+        //add the metadata row entry to the table
+        dbObject[newTableName + "_METADATA"][0] = JSON.parse(JSON.stringify(metaData));
+        //update visually, add to text database
+        updateDataDiv();
+
+        tempTable = sqlQuery("SELECT * FROM " + newTableName);
+
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-    //revise metadata to match
-    metaData["TABLE_NAME"] = newTableName;
-    metaData["PRIMARY_KEY"] = "NUMBER";
-    metaData["NEXT_PRIMARY_KEY"] = tempTable.length + 1;
-    //create the metadata table
-    dbObject[newTableName + "_METADATA"] = [];
-    //add the metadata row entry to the table
-    dbObject[newTableName + "_METADATA"][0] = JSON.parse(JSON.stringify(metaData));
-    //update visually, add to text database
-    updateDataDiv();
-
-    tempTable = sqlQuery("SELECT * FROM " + newTableName);
-
-    return tempTable;
 }
 
 function processInnerJoin(strSQL) {
+    try {
+        tempTable = [];
+        let field1 = "";
+        let field2 = "";
 
-    tempTable = [];
-    let field1 = "";
-    let field2 = "";
+        // SELECT Orders.OrderID, Customers.CustomerName FROM Orders INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID;
 
-    // SELECT Orders.OrderID, Customers.CustomerName FROM Orders INNER JOIN Customers ON Orders.CustomerID = Customers.CustomerID;
+        strSQL = addWhiteSpaceAroundOperators(strSQL);
 
-    strSQL = addWhiteSpaceAroundOperators(strSQL);
+        let middleString = getStringBetween(strSQL, "SELECT", "FROM");
 
-    let middleString = getStringBetween(strSQL, "SELECT", "FROM");
+        middleString = middleString.replaceAll(".", "_");
+        let columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
 
-    middleString = middleString.replaceAll(".", "_");
-    let columns = splitByCommasAndCleanWhiteSpace(middleString); //got columns!
+        //get table1 name   got tableNames!
+        //get table2 name
+        tokens = tokenizeStringBySpace(strSQL);
+        tokens = removeCommaEntriesFromArray(tokens);
+        let table1Name = getTokenAfter(tokens, "FROM");
+        let table2Name = getTokenAfter(tokens, "JOIN");
 
-    //get table1 name   got tableNames!
-    //get table2 name
-    tokens = tokenizeStringBySpace(strSQL);
-    tokens = removeCommaEntriesFromArray(tokens);
-    let table1Name = getTokenAfter(tokens, "FROM");
-    let table2Name = getTokenAfter(tokens, "JOIN");
+        //get field1 name
+        //console.log(tokens)
+        let tokenLeft = getTokenAfter(tokens, "ON");
+        let tokenRight = getTokenAfter(tokens, "=");
 
-    //get field1 name
-    //console.log(tokens)
-    let tokenLeft = getTokenAfter(tokens, "ON");
-    let tokenRight = getTokenAfter(tokens, "=");
+        let tokenLeftArray = tokenLeft.split(".");
+        let tokenRightArray = tokenRight.split(".");
 
-    let tokenLeftArray = tokenLeft.split(".");
-    let tokenRightArray = tokenRight.split(".");
+        if (tokenLeftArray[0] === table1Name) {
+            field1 = tokenLeftArray[1];
+            field2 = tokenRightArray[1];
+        } else {
+            field1 = tokenRightArray[1];
+            field2 = tokenLeftArray[1];
+        }
+        //get field2 name
+        //get columns       (done)
 
-    if (tokenLeftArray[0] === table1Name) {
-        field1 = tokenLeftArray[1];
-        field2 = tokenRightArray[1];
-    } else {
-        field1 = tokenRightArray[1];
-        field2 = tokenLeftArray[1];
+        //table1 = _selectAllFrom table1name
+
+        let table1 = _selectAllFrom(table1Name);
+        let table2 = _selectAllFrom(table2Name);
+        //table2 = _selectAllFrom table2name
+
+        tempTable = _innerJoin(table1, table2, field1, field2); //check that fields are appropriate type in innerJoin function *******
+
+        if (columns[0] != "*") {
+            tempTable = columnsFilter(tempTable, columns);
+        }
+
+        //-> not available in this inner join function use ON instead
+        // if (strSQL.includes("WHERE")) { //check for where clause
+        //     console.log(tokens);
+        // }
+
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-    //get field2 name
-    //get columns       (done)
-
-    //table1 = _selectAllFrom table1name
-
-    let table1 = _selectAllFrom(table1Name);
-    let table2 = _selectAllFrom(table2Name);
-    //table2 = _selectAllFrom table2name
-
-    tempTable = _innerJoin(table1, table2, field1, field2); //check that fields are appropriate type in innerJoin function *******
-
-    if (columns[0] != "*") {
-        tempTable = columnsFilter(tempTable, columns);
-    }
-
-    //-> not available in this inner join function use ON instead
-    // if (strSQL.includes("WHERE")) { //check for where clause
-    //     console.log(tokens);
-    // }
-
-    return tempTable;
-
 }
 
 //SELECT column1, column2, ... FROM table_name WHERE column <>`something` ORDER BY column ASC|DESC;<br>\
 function processSelectStatement(strSQL) {
-    tempTable = [];
-    //strSQL = addWhiteSpaceAroundOperators(strSQL); //NEED TO DO AWAY WITH ************
-    strSQL = addWhiteSpaceFirstOperator(strSQL);
-    // get an array of columns
-    let columns = []
-        //   get string between SELECT and FROM
-        //   remove whitespace
-        //   split by commas
-        //   this is the columns array
-    let middleString = getStringBetween(strSQL, "SELECT", "FROM");
-    columns = splitByCommasAndCleanWhiteSpace(middleString); //Got columns!
+    try {
+        tempTable = [];
+        //strSQL = addWhiteSpaceAroundOperators(strSQL); //NEED TO DO AWAY WITH ************
+        strSQL = addWhiteSpaceFirstOperator(strSQL);
+        // get an array of columns
+        let columns = []
+            //   get string between SELECT and FROM
+            //   remove whitespace
+            //   split by commas
+            //   this is the columns array
+        let middleString = getStringBetween(strSQL, "SELECT", "FROM");
+        columns = splitByCommasAndCleanWhiteSpace(middleString); //Got columns!
 
-    // get table name
-    let tokens = tokenizeStringBySpace(strSQL);
+        // get table name
+        let tokens = tokenizeStringBySpace(strSQL);
 
-    let tableName = getTokenAfter(tokens, "FROM"); //Got tableName!
+        let tableName = getTokenAfter(tokens, "FROM"); //Got tableName!
 
-    tempTable = _selectAllFrom(tableName);
+        tempTable = _selectAllFrom(tableName);
 
-    if (columns[0] != "*") {
-        tempTable = columnsFilter(tempTable, columns);
-    }
-
-    if (strSQL.includes("WHERE")) {
-        whereIndex = tokens.indexOf("WHERE");
-        let compareField = tokens[whereIndex + 1];
-        let operator = tokens[whereIndex + 2];
-        let compareValue = readBackTicks(strSQL)[0];
-        tempTable = whereFilter(tempTable, compareField, operator, compareValue);
-    }
-
-    if (strSQL.includes("ORDER")) {
-        let orderIndex = tokens.indexOf("ORDER");
-        orderByField = tokens[orderIndex + 2]; //got order by field!
-        console.log(orderByField);
-        if (tokens.includes("DESC")) {
-            direction = "DESC";
-        } else {
-            direction = "ASC";
+        if (columns[0] != "*") {
+            tempTable = columnsFilter(tempTable, columns);
         }
-        tempTable = orderByFilter(tempTable, orderByField, direction);
+
+        if (strSQL.includes("WHERE")) {
+            whereIndex = tokens.indexOf("WHERE");
+            let compareField = tokens[whereIndex + 1];
+            let operator = tokens[whereIndex + 2];
+            let compareValue = readBackTicks(strSQL)[0];
+            tempTable = whereFilter(tempTable, compareField, operator, compareValue);
+        }
+
+        if (strSQL.includes("ORDER")) {
+            let orderIndex = tokens.indexOf("ORDER");
+            orderByField = tokens[orderIndex + 2]; //got order by field!
+            console.log(orderByField);
+            if (tokens.includes("DESC")) {
+                direction = "DESC";
+            } else {
+                direction = "ASC";
+            }
+            tempTable = orderByFilter(tempTable, orderByField, direction);
+        }
+        console.log(tempTable);
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
     }
-    console.log(tempTable);
-    return tempTable;
 }
 
 //////  STRING FUNCTIONS FOR HELP IN PARSING SQL STATMENTS /////////
@@ -1818,7 +1970,7 @@ Reserved Keywords:<br>\
 -----------------------------<br>\
 INNER, JOIN, SELECT, INSERT, INTO, UPDATE, DELETE, CREATE, DROP, TABLE, SHOW, TABLES, DESCRIBE, HELP, SET,<br>\
 WHERE, VALUES, ON, PRIMARY_KEY, NEXT_PRIMARY_KEY, _METADATA, STRING, NUMBER,<br>\
-=, !=, <>, >=, <=, >, <, * `(back ticks), NOLOCIMES<br>\
+=, !=, <>, >=, <=, >, <, * `(back ticks), NOLOCIMES, ERROR<br>\
 <br>\
 Notes:<br>\
 -----------------------------<br>\
