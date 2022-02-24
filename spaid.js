@@ -129,6 +129,10 @@ runButton.addEventListener('click', runSQL);
 sqlInput.addEventListener('change', () => { runButton.focus() });
 showResultButton.addEventListener('click', toggleResultVisible);
 
+let initialDatabaseName = "database" + Date.now().toString();
+//this ensures some database name will be present, likely overwritten
+sqlQuery("NAME DATABASE `" + initialDatabaseName + "`;");
+
 function _saveDatabase() {
     saveDatabase();
 }
@@ -847,6 +851,10 @@ function _sqlQuery(strSQL) {
         console.log("process ALTER TABLE DROP statement");
         thisTable = processAlterTableDropColumn(strSQL);
 
+    } else if (strSQL.includes("NAME")) {
+        console.log("process NAME DATABASE statement");
+        thisTable = processNameDatabase(strSQL);
+
     } else {
         console.log('sql statement not understood');
         thisTable = "ERROR:\n - sql statement not understood, could not be parsed.";
@@ -862,6 +870,19 @@ function _sqlQuery(strSQL) {
 
     return thisTable;
 
+}
+
+function processNameDatabase(strSQL) {
+    try {
+        let tempTable = [];
+        let databaseName = readBackTicks(strSQL)[0]; //get filename
+        sqlQuery("CREATE TABLE DBNAME (NAME STRING);");
+        tempTable = sqlQuery("INSERT INTO DBNAME (NAME) VALUES (`" + databaseName + "`);");
+        return tempTable;
+    } catch (error) {
+        let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
+        return thisError;
+    }
 }
 
 function processAlterTableDropColumn(strSQL) {
@@ -1946,6 +1967,7 @@ Available datatypes are STRING or NUMBER.<br>\
 <br>\
 Available SQL statements:<br>\
 -----------------------------<br>\
+NAME DATABASE `myDatabaseName`;<br>\
 CREATE TABLE table_name (column1 datatype, column2 datatype, column3 datatype...);<br>\
 SHOW TABLES;<br>\
 DESCRIBE table_name;<br>\
@@ -1984,6 +2006,7 @@ Notes:<br>\
 <br>\
 Examples/Tutorial:<br>\
 -----------------------------<br>\
+NAME DATABASE `myPetInfo`;<br>\
 CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);<br>\
 INSERT INTO owners (firstname, lastname, email) VALUES (`John`, `Jones`, `john@gmail.com`);<br>\
 INSERT INTO owners (firstname, lastname, email, age) VALUES (`David`, `Davis`, `ddavis@gmail.com`,`73`);<br>\
@@ -2031,8 +2054,15 @@ SHOW TABLES;<br>\
 
 //////////THIS CAN BE COMMENTED OUT BELOW BUT IS HERE FOR DEMONSTRATION
 
-if (spaidDataDiv.innerHTML === "") {
+//if initial database name is same as above and length is 2
+
+if (
+    (Object.keys(dbObject).length === 2) &&
+    (dbObject["DBNAME"][0]["NAME"] === initialDatabaseName)
+) {
+    alert("New Database!");
     alert("Right now, sample data is being loading for demonstration purposes.  Just comment out the end of the Javascript file to disable this.");
+    sqlQuery("NAME DATABASE `myPetsDatabase`;");
     sqlQuery("CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);");
     sqlQuery("INSERT INTO owners (firstname, lastname, email) VALUES (`John`, `Jones`, `john@gmail.com`);");
     sqlQuery("INSERT INTO owners (firstname, lastname, email, age) VALUES (`David`, `Davis`, `ddavis@gmail.com`,`73`);");
