@@ -123,7 +123,7 @@ if (document.getElementById('spaid-data') == null) {
 
 saveButton.addEventListener('click', savePage);
 loadDBButton.addEventListener('click', loadDatabase);
-saveDBButton.addEventListener('click', _saveDatabase);
+saveDBButton.addEventListener('click', saveDatabase);
 showButton.addEventListener('click', toggleDataVisible);
 runButton.addEventListener('click', runSQL);
 sqlInput.addEventListener('change', () => { runButton.focus() });
@@ -132,10 +132,6 @@ showResultButton.addEventListener('click', toggleResultVisible);
 let initialDatabaseName = "database" + Date.now().toString();
 //this ensures some database name will be present, likely overwritten
 sqlQuery("NAME DATABASE `" + initialDatabaseName + "`;");
-
-function _saveDatabase() {
-    saveDatabase();
-}
 
 //SPAID functions
 
@@ -370,45 +366,12 @@ function turnWebPageIntoString() {
     return thisDocument;
 }
 
-function saveDatabase(filename = '', addDate = false) {
+function saveDatabase() {
 
-    let baseName = '';
-    let extension = '';
+    let baseName = dbObject["DBNAME"][0]["NAME"];
+    let extension = ".json";
+    let addDate = true;
 
-    //no filename specified as argument and noned defined in database
-    if ((filename === '') && (dbMetaData["CURRENT_FILENAME"] === '')) {
-        baseName = "database";
-        extension = ".json";
-        addDate = true;
-
-        // either filename or database filename specified, in this case its the filename argument which
-        // will take precedent over existing filename since it was specified
-    } else if (filename != '') {
-        //console.log(filename);
-        let tempArray = filename.split("."); //checking to see if filename is basename or basename + extension
-        if (tempArray.length === 1) { //no extension
-            baseName = filename;
-            extension = '.json';
-        }
-        if (tempArray.length > 1) { //extension present
-            baseName = tempArray[0]; //use first token before first '.';
-            extension = "." + tempArray[tempArray.length - 1]; //use last token after '.'
-        }
-
-        // either filename or database filename specified, in this case its the database metadata filename
-    } else { //} if(dbMetaData!=''){
-
-        filename = dbMetaData["CURRENT_FILENAME"];
-        let tempArray = filename.split(".");
-        if (tempArray.length === 1) {
-            baseName = filename;
-            extension = '.json';
-        }
-        if (tempArray.length > 1) {
-            baseName = tempArray[0]; //use first token before first '.';
-            extension = "." + tempArray[tempArray.length - 1]; //use last token after '.'
-        }
-    }
     saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
     //I believe I should most likely be changing name of database here
     //dbMetaData["CURRENT_FILENAME"] = baseName + extension;
@@ -420,15 +383,16 @@ function saveDatabase(filename = '', addDate = false) {
 
 function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addDate = false) {
     let saveFileName = fileName;
+    let dateString = '';
+
     if (addDate === true) {
         //make a string representing the date to add on to the filename
-        let dateString = (new Date()).toLocaleString();
+        dateString = (new Date()).toLocaleString();
         dateString = "_" + dateString.replaceAll("/", "_").replaceAll(",", "_").replaceAll(" ", "_").replaceAll(":", "_");
-        //insert into filename
-        saveFileName = saveFileName + dateString + fileType;
-    } else {
-        saveFileName = saveFileName + fileType;
     }
+
+    saveFileName = fileName + dateString + fileType;
+
     let blobVersionOfText = new Blob([str1], {
         type: "text/plain"
     });
@@ -440,13 +404,6 @@ function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addD
     document.body.appendChild(downloadLink);
     downloadLink.click();
     downloadLink.parentElement.removeChild(downloadLink);
-
-
-    if (confirm("Would you like to update the filename of the current database to " + saveFileName + "?") == true) {
-        dbMetaData["CURRENT_FILENAME"] = saveFileName;
-    } else {
-        //pass
-    }
 }
 
 function loadDatabase() {
