@@ -2009,14 +2009,13 @@ INSERT INTO dogNames SELECT name FROM dogsOnly;<br>\
 SHOW TABLES;<br>\
 </pre>";
 
-//////////THIS CAN BE COMMENTED OUT BELOW BUT IS HERE FOR DEMONSTRATION
-
 //if initial database name is same as above and length is 2
+function isBrandNewDatabase() {
+    return (Object.keys(dbObject).length === 2) && (dbObject["DBNAME"][0]["NAME"] === initialDatabaseName);
+}
 
-if (
-    (Object.keys(dbObject).length === 2) &&
-    (dbObject["DBNAME"][0]["NAME"] === initialDatabaseName)
-) {
+//////////THIS CAN BE COMMENTED OUT BELOW BUT IS HERE FOR DEMONSTRATION
+if (isBrandNewDatabase()) {
     alert("New Database!");
     alert("Right now, sample data is being loading for demonstration purposes.  Just comment out the end of the Javascript file to disable this.");
     sqlQuery("NAME DATABASE `myPetsDatabase`;");
