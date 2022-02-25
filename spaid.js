@@ -242,83 +242,8 @@ function formatTable2(arrayOfObjectsTable) {
 //    saveStringToTextFile(thisDocument, "spaid", ".html");
 //}
 function savePage() {
-    let thisDocument = new XMLSerializer().serializeToString(document.documentElement);
-    //split by style tags
-    let styleTempArray = [];
-    // replace </style> with <style>
-    thisDocument = thisDocument.replaceAll("<\/style>", "<style>");
-    // split by <style>
-    styleTempArray = thisDocument.split('<style>');
-    console.log(styleTempArray);
-    // that leaves ______,________,_______
+    let thisDocument = turnWebPageIntoString();
 
-    //   _______,___thisStuff_____,_______
-
-    // styleTempArray[1] = styleTempArray[1].replaceAll('&gt;', '>');
-    // styleTempArray[1] = styleTempArray[1].replaceAll('&lt;', '<');
-    // styleTempArray[1] = styleTempArray[1].replaceAll('&amp;', '&');
-
-    for (let i = 0; i < styleTempArray.length; i++) {
-        console.log("styleTempArray.length", styleTempArray.length);
-        console.log(i, "(i + 1) % 2", (i + 1) % 2);
-        if ((i + 1) % 2 === 0) {
-            styleTempArray[i] = styleTempArray[i].replaceAll('&gt;', '>');
-            styleTempArray[i] = styleTempArray[i].replaceAll('&lt;', '<');
-            styleTempArray[i] = styleTempArray[i].replaceAll('&amp;', '&');
-        }
-    }
-    // make replacements in thisStuff
-    // make every even <style> -> </style>
-    thisDocument = styleTempArray[0] + '<style>' + styleTempArray[1] + '<\/style>' + styleTempArray[2];
-    thisDocument = '';
-    for (let i = 0; i < styleTempArray.length - 1; i++) {
-        if (i % 2 == 0) {
-            //
-            thisDocument += styleTempArray[i] + '<style>';
-        } else {
-            thisDocument += styleTempArray[i] + '<\/style>';
-        }
-    }
-    thisDocument += styleTempArray[styleTempArray.length - 1];
-    //
-    //split by style tags
-    let scriptTempArray = [];
-
-    // replace &lt;script> with <style>
-    thisDocument = thisDocument.replaceAll("<\/script>", "<script>");
-
-    // split by <style>
-    scriptTempArray = thisDocument.split('<script>');
-    console.log(scriptTempArray);
-
-    for (let i = 0; i < scriptTempArray.length; i++) {
-        console.log("scriptTempArray.length", scriptTempArray.length);
-        console.log(i, "(i + 1) % 2", (i + 1) % 2);
-        if ((i + 1) % 2 === 0) {
-            scriptTempArray[i] = scriptTempArray[i].replaceAll('&gt;', '>');
-            scriptTempArray[i] = scriptTempArray[i].replaceAll('&lt;', '<');
-            scriptTempArray[i] = scriptTempArray[i].replaceAll('&amp;', '&');
-        }
-    }
-    //____<s>__</s>____<s>__</s>_____
-    //____,_____,______,_____,______
-
-    thisDocument = '';
-    for (let i = 0; i < scriptTempArray.length - 1; i++) {
-
-        if (i % 2 == 0) {
-            //
-            thisDocument += scriptTempArray[i] + '<script>';
-        } else {
-            thisDocument += scriptTempArray[i] + '<\/script>';
-        }
-    }
-    thisDocument += scriptTempArray[scriptTempArray.length - 1];
-
-    //thisDocument = scriptTempArray[0] + '<script>' + scriptTempArray[1] + '<\/script>' + scriptTempArray[2];
-    console.log(thisDocument);
-
-    /////////////////////////////////
 
     saveStringToTextFile(thisDocument, "pagecopy", ".html");
 }
@@ -326,8 +251,8 @@ function savePage() {
 function turnWebPageIntoString() {
     let thisDocument = new XMLSerializer().serializeToString(document.documentElement);
     let styleTempArray = [];
-    thisDocument = thisDocument.replaceAll("<\/style>", "<style>");
-    styleTempArray = thisDocument.split('<style>');
+    thisDocument = thisDocument.replaceAll("<\/style", "<style");
+    styleTempArray = thisDocument.split('<style');
     for (let i = 0; i < styleTempArray.length; i++) {
         if ((i + 1) % 2 === 0) {
             styleTempArray[i] = styleTempArray[i].replaceAll('&gt;', '>');
@@ -338,15 +263,15 @@ function turnWebPageIntoString() {
     thisDocument = '';
     for (let i = 0; i < styleTempArray.length - 1; i++) {
         if (i % 2 == 0) {
-            thisDocument += styleTempArray[i] + '<style>';
+            thisDocument += styleTempArray[i] + '<style';
         } else {
-            thisDocument += styleTempArray[i] + '<\/style>';
+            thisDocument += styleTempArray[i] + '<\/style';
         }
     }
     thisDocument += styleTempArray[styleTempArray.length - 1];
     let scriptTempArray = [];
-    thisDocument = thisDocument.replaceAll("<\/script>", "<script>");
-    scriptTempArray = thisDocument.split('<script>');
+    thisDocument = thisDocument.replaceAll("<\/script", "<script");
+    scriptTempArray = thisDocument.split('<script');
     for (let i = 0; i < scriptTempArray.length; i++) {
         if ((i + 1) % 2 === 0) {
             scriptTempArray[i] = scriptTempArray[i].replaceAll('&gt;', '>');
@@ -356,10 +281,10 @@ function turnWebPageIntoString() {
     }
     thisDocument = '';
     for (let i = 0; i < scriptTempArray.length - 1; i++) {
-        if (i % 2 == 0) {
-            thisDocument += scriptTempArray[i] + '<script>';
+        if (i % 2 === 0) {
+            thisDocument += scriptTempArray[i] + '<script';
         } else {
-            thisDocument += scriptTempArray[i] + '<\/script>';
+            thisDocument += scriptTempArray[i] + '<\/script';
         }
     }
     thisDocument += scriptTempArray[scriptTempArray.length - 1];
@@ -367,20 +292,18 @@ function turnWebPageIntoString() {
 }
 
 function saveDatabase() {
-
     let baseName = dbObject["DBNAME"][0]["NAME"];
     let extension = ".json";
     let addDate = true;
 
     saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
+
 }
 
 function saveDatabaseNoTimeStamp() {
-
     let baseName = dbObject["DBNAME"][0]["NAME"];
     let extension = ".json";
     let addDate = false;
-
     saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
 }
 
@@ -2014,6 +1937,7 @@ SHOW TABLES;<br>\
 
 //if initial database name is same as above and length is 2
 function isBrandNewDatabase() {
+    readInDatabaseFromDiv();
     return (Object.keys(dbObject).length === 2) && (dbObject["DBNAME"][0]["NAME"] === initialDatabaseName);
 }
 
