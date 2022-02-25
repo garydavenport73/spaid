@@ -373,13 +373,16 @@ function saveDatabase() {
     let addDate = true;
 
     saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
-    //I believe I should most likely be changing name of database here
-    //dbMetaData["CURRENT_FILENAME"] = baseName + extension;
 }
 
-// function saveDatabase() {
-//     saveStringToTextFile(spaidDataDiv.innerHTML, "database", ".json", true);
-// }
+function saveDatabaseNoTimeStamp() {
+
+    let baseName = dbObject["DBNAME"][0]["NAME"];
+    let extension = ".json";
+    let addDate = false;
+
+    saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
+}
 
 function saveStringToTextFile(str1, fileName = "spaid", fileType = ".html", addDate = false) {
     let saveFileName = fileName;
