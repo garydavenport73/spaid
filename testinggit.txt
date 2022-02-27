@@ -1,1 +1,0 @@
-I am checking to see if local git will commit after password/email change.
