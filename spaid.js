@@ -73,7 +73,7 @@ if (document.getElementById('spaid-data') == null) {
 
     loadDBButton = document.createElement('button');
     loadDBButton.setAttribute('id', 'spaid-load-db');
-    loadDBButton.innerHTML = 'load database';;
+    loadDBButton.innerHTML = 'load database';
 
     saveDBButton = document.createElement('button');
     saveDBButton.setAttribute('id', 'spaid-save-db');
@@ -95,6 +95,30 @@ if (document.getElementById('spaid-data') == null) {
     showResultButton.setAttribute('id', 'spaid-show-result');
     showResultButton.innerHTML = 'show/hide result';
 
+    loadDBRemoteButton = document.createElement('button');
+    loadDBRemoteButton.setAttribute('id', 'spaid-load-db-remote');
+    loadDBRemoteButton.innerHTML = 'load database remote';
+
+    saveDBRemoteButton = document.createElement('button');
+    saveDBRemoteButton.setAttribute('id', 'spaid-save-db-remote');
+    saveDBRemoteButton.innerHTML = 'save database remote';
+
+    remoteUsernameInput = document.createElement('input');
+    remoteUsernameInput.setAttribute('id', 'spaid-remote-username-input');
+    remoteUsernameInput.setAttribute('placeholder', 'remote username');
+
+    remotePasswordInput = document.createElement('input');
+    remotePasswordInput.setAttribute('id', 'spaid-remote-password-input');
+    remotePasswordInput.setAttribute('placeholder', 'remote password');
+
+    remoteURLInput = document.createElement('input');
+    remoteURLInput.setAttribute('id', 'spaid-remote-URL-input');
+    remoteURLInput.setAttribute('placeholder', 'remote URL');
+
+    remoteFilenameInput = document.createElement('input');
+    remoteFilenameInput.setAttribute('id', 'spaid-remote-filename-input');
+    remoteFilenameInput.setAttribute('placeholder', 'remote filename');
+
     document.body.prepend(spaidDataDiv);
     spaidButtonsDiv.appendChild(saveButton);
     spaidButtonsDiv.appendChild(loadDBButton)
@@ -103,6 +127,13 @@ if (document.getElementById('spaid-data') == null) {
     spaidButtonsDiv.appendChild(sqlInput);
     spaidButtonsDiv.appendChild(runButton);
     spaidButtonsDiv.appendChild(showResultButton);
+    spaidButtonsDiv.appendChild(document.createElement('br'));
+    spaidButtonsDiv.appendChild(loadDBRemoteButton);
+    spaidButtonsDiv.appendChild(saveDBRemoteButton);
+    spaidButtonsDiv.appendChild(remoteUsernameInput);
+    spaidButtonsDiv.appendChild(remotePasswordInput);
+    spaidButtonsDiv.appendChild(remoteURLInput);
+    spaidButtonsDiv.appendChild(remoteFilenameInput);
     document.body.prepend(spaidResultDiv);
     document.body.prepend(spaidButtonsDiv);
 
@@ -114,6 +145,14 @@ if (document.getElementById('spaid-data') == null) {
     showButton = document.getElementById('spaid-show');
     loadDBButton = document.getElementById('spaid-load-db');
     saveDBButton = document.getElementById('spaid-save-db');
+
+    loadDBRemoteButton = document.getElementById('spaid-load-db-remote');
+    saveDBRemoteButton = document.getElementById('spaid-save-db-remote');
+    remoteUsernameInput = document.getElementById('spaid-remote-username-input');
+    remotePasswordInput = document.getElementById('spaid-remote-password-input');
+    remoteURLInput = document.getElementById('spaid-remote-URL-input');
+    remoteFilenameInput = document.getElementById('spaid-remote-filename-input');
+
     sqlInput = document.getElementById('spaid-input');
     runButton = document.getElementById('spaid-run');
     showResultButton = document.getElementById('spaid-show-result');
@@ -124,6 +163,10 @@ if (document.getElementById('spaid-data') == null) {
 saveButton.addEventListener('click', savePage);
 loadDBButton.addEventListener('click', loadDatabase);
 saveDBButton.addEventListener('click', saveDatabase);
+loadDBRemoteButton.addEventListener('click', _loadDatabaseRemote);
+saveDBRemoteButton.addEventListener('click', _saveDatabaseRemote);
+
+
 showButton.addEventListener('click', toggleDataVisible);
 runButton.addEventListener('click', runSQL);
 sqlInput.addEventListener('change', () => { runButton.focus() });
@@ -295,8 +338,78 @@ function saveDatabase() {
     let baseName = dbObject["DBNAME"][0]["NAME"];
     let extension = ".json";
     let addDate = true;
-
     saveStringToTextFile(spaidDataDiv.innerHTML, baseName, extension, addDate);
+}
+
+function saveDatabaseRemote(username, password, url, filename, contents, timeoutMS = 2000) {
+    let http = new XMLHttpRequest();
+    http.timeout = timeoutMS;
+    //I use 'do-this' keyword in my php processing file, it may not be needed in yours
+    let params = "username=" + username + "&password=" + password + "&filename=" + filename + "&contents=" + contents + "&do-this=save-contents-to-file&using-spaid=true";
+    http.ontimeout = function(e) {
+        alert("The request timed out.");
+    };
+    http.open('POST', url, true);
+    http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    http.onreadystatechange = function() {
+        if (http.readyState == 4 && http.status == 200) {
+            console.log("Recieved the following response:");
+            console.log(http.responseText);
+            alert(http.responseText);
+        }
+    }
+    http.send(params);
+
+}
+
+function _saveDatabaseRemote(username, password, url, filename, contents, timeoutMS = 2000) {
+    username = remoteUsernameInput.value;
+    password = remotePasswordInput.value
+    url = remoteURLInput.value;
+    filename = remoteFilenameInput.value;
+    updateDataDiv(); //should be updated already, but just in case
+    contents = spaidDataDiv.innerHTML;
+    saveDatabaseRemote(username, password, url, filename, contents, timeoutMS = 2000);
+}
+
+function _loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000) {
+    username = remoteUsernameInput.value;
+    password = remotePasswordInput.value
+    url = remoteURLInput.value;
+    filename = remoteFilenameInput.value;
+    loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000);
+
+}
+
+function loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000) {
+    let http = new XMLHttpRequest();
+    http.timeout = timeoutMS; // time in milliseconds
+    let params = 'username=' + username + '&password=' + password + '&filename=' + filename + '&do-this=send-data-to-client';
+    http.ontimeout = function(e) {
+        alert("The request timed out.");
+    };
+    http.open('POST', url, true);
+    http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    http.onreadystatechange = function() {
+        if (http.readyState == 4 && http.status == 200) {
+            console.log("Recieved the following response:");
+            console.log(http.responseText);
+            try {
+                testObject = JSON.parse(http.responseText);
+                baseName = testObject["DBNAME"][0]["NAME"];
+                console.log(baseName);
+                if (baseName != "") {
+                    dbObject = JSON.parse(http.responseText);
+                    updateDataDiv();
+                    alert("Successfully loaded database with name: " + baseName);
+                }
+            } catch (error) {
+                alert("Data could not be loaded: " + error);
+            }
+
+        }
+    }
+    http.send(params);
 
 }
 
@@ -1932,6 +2045,8 @@ INSERT INTO dogsOnly SELECT * FROM pets WHERE pettype = `dog` ORDER BY ownerID D
 SELECT * FROM dogsOnly;<br>\
 ALTER TABLE dogsOnly DROP COLUMN pettype;<br>\
 INSERT INTO dogNames SELECT name FROM dogsOnly;<br>\
+SHOW TABLES;<br>\
+DELETE FROM pets WHERE sex = `male`;<br>\
 SHOW TABLES;<br>\
 </pre>";
 
