@@ -411,7 +411,7 @@ function loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000)
                     alert("Successfully loaded database with name: " + baseName);
                 }
             } catch (error) {
-                alert("Data could not be loaded: " + error);
+                alert("Data could not be loaded: \n" + error);
             }
         }
     }
