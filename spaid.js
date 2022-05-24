@@ -342,6 +342,10 @@ function saveDatabase() {
 }
 
 function saveDatabaseRemote(username, password, url, filename, contents, timeoutMS = 2000) {
+    username = encodeURIComponent(username);
+    password = encodeURIComponent(password);
+    filename = encodeURIComponent(filename);
+    contents = encodeURIComponent(contents);
     let http = new XMLHttpRequest();
     http.timeout = timeoutMS;
     //I use 'do-this' keyword in my php processing file, it may not be needed in yours
@@ -382,6 +386,9 @@ function _loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000
 }
 
 function loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000) {
+    username = encodeURIComponent(username);
+    password = encodeURIComponent(password);
+    filename = encodeURIComponent(filename);
     let http = new XMLHttpRequest();
     http.timeout = timeoutMS; // time in milliseconds
     let params = 'username=' + username + '&password=' + password + '&filename=' + filename + '&do-this=send-data-to-client';
@@ -406,7 +413,6 @@ function loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000)
             } catch (error) {
                 alert("Data could not be loaded: " + error);
             }
-
         }
     }
     http.send(params);
