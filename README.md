@@ -1,6 +1,13 @@
 # SPAID
 ## Single Page Application Including Data
 -----------------------
+
+## <span style='color:orange'>UPDATE: </span>What's new 5/23/2022
+
+* The primary focus of this application is storing the data client side.  However, now you can choose to save the data remotely.  You will need a url, username, password, and filename to save the file as.  You can save or load by entering this information in the SQL parser GUI.  See the screenshot below.  However, it is more likely that this information will be supplied in a program you are using the spaid for.  In that case, you can call the functions `saveDatabaseRemote(username, password, url, filename, contents, timeoutMS = 2000)` or `loadDatabaseRemote(username, password, url, filename, timeoutMS = 2000)`.
+
+<img src="remotescreenshot.png">
+
 ## <span style='color:orange'>UPDATE: </span>What's new 2/6/2022
 
 * Webpage serialization save is fixed for style and script tags:
