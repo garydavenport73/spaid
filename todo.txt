@@ -1,2 +1,21 @@
-add fetch to load database
-add sync to remote save database
+
+
+
+
+CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);
+INSERT INTO owners (firstname, lastname, email, age) VALUES (`John`, `Jones`, `john@gmail.com`, `43`);
+SELECT firstname FROM owners;
+
+
+finiished 
+create table
+
+select * from
+
+columns filter
+
+->results not displaying right but returning correctly.
+
+on formatTable2
+
+need to figure out how to only list rows with selected headings, and in same order as table headings

@@ -1,3 +1,112 @@
+// New Database Structure
+
+
+// let dataBase = {
+//     name: "myDataBase",
+//     tables: {
+//         table1Name: {
+//             headers: [
+//                 "field1Name",
+//                 "field2Name",
+//                 "field3Name"
+//             ],
+//             dataTypes: [
+//                 "string",
+//                 "number",
+//                 "number"
+//             ],
+//             data: [
+//                 ["yes", "no", "maybe"],
+//                 [4, 5, 6],
+//                 [7, 8, 9]
+//             ]
+//         },
+//         table2Name: {
+//             headers: [
+//                 "field1Name",
+//                 "field2Name",
+//                 "field3Name"
+//             ],
+//             dataTypes: [
+//                 "number",
+//                 "string",
+//                 "number"
+//             ],
+//             data: [
+//                 [1, 2, 3],
+//                 ["hello", "there", "world"],
+//                 [7, 8, 9]
+//             ]
+//         }
+//     }
+
+// }
+
+
+// table1Name: {
+//     name:"table1Name",
+//     NEXT_PRIMARY_KEY:5,
+//     headers: ["PRIMARY_KEY",
+//         "field1Name",
+//         "field2Name",
+//         "field3Name"
+//     ],
+//     dataTypes: [
+//         "NUMBER",
+//         "STRING",
+//         "NUMBER",
+//         "NUMBER"
+//     ],
+//     data: [
+//         {"PRIMARY_KEY": 0, "field1Name":"yes", "field2Name":"no", "field3Name":"maybe"},
+//         {"PRIMARY_KEY": 1, "field1Name": 4, "field2Name":5, "field3Name":6},
+//         {"PRIMARY_KEY": 2, "field1Name": 7, "field2Name":8, "field3Name":9}
+//     ]
+// }
+//USING THIS NEW STRUCTURE
+let dbObject = {
+    tables: {
+        DBNAME: {
+            name: "DBNAME",
+            NEXT_PRIMARY_KEY: 2,
+            headers: [
+                "PRIMARY_KEY",
+                "name"
+            ],
+            dataTypes: [
+                "STRING",
+                "STRING"
+            ],
+            data: [
+                { "PRIMARY_KEY": 0, "name": "myname" }
+            ]
+        },
+        table1Name: {
+            name: "table1Name",
+            NEXT_PRIMARY_KEY: 5,
+            headers: ["PRIMARY_KEY",
+                "field1Name",
+                "field2Name",
+                "field3Name"
+            ],
+            dataTypes: [
+                "NUMBER",
+                "STRING",
+                "NUMBER",
+                "NUMBER"
+            ],
+            data: [
+                { "PRIMARY_KEY": 0, "field1Name": "yes", "field2Name": "no", "field3Name": "maybe" },
+                { "PRIMARY_KEY": 1, "field1Name": 4, "field2Name": 5, "field3Name": 6 },
+                { "PRIMARY_KEY": 2, "field1Name": 7, "field2Name": 8, "field3Name": 9 }
+            ]
+        }
+    }
+
+}
+
+
+
 //  Example Database Structure
 //  
 // {
@@ -47,9 +156,7 @@
 // <
 // =
 
-let dbObject = {};
-let dbMetaData = {};
-dbMetaData["CURRENT_FILENAME"] = '';
+//let dbObject = dataBase2;
 
 if (document.getElementById('spaid-data') == null) {
     //alert('no spaid-data div found, creating it!');
@@ -185,7 +292,7 @@ function runSQL() {
 
     thisResult = sqlQuery(strSQL); //could be error string or array
 
-    tableName = thisResult["TABLE_NAME"];
+    tableName = thisResult["tableName"];
 
     resultDiv.innerHTML = '<hr>';
     resultDiv.innerHTML += '<br';
@@ -194,6 +301,8 @@ function runSQL() {
     resultDiv.innerHTML += '<hr>';
 
     let formattedTable = formatTable2(thisResult); //will check to see if string
+
+    console.log(formattedTable);
 
     if (formattedTable.includes("ERROR")) {
         resultDiv.innerHTML += formattedTable;
@@ -205,62 +314,48 @@ function runSQL() {
 }
 
 function formatTable2(arrayOfObjectsTable) {
+    console.log(arrayOfObjectsTable);
 
     try {
         if ((typeof(arrayOfObjectsTable) === "string") && (arrayOfObjectsTable.includes("ERROR"))) {
             return "<pre><table><tbody><tr><th>ERROR:</th></tr><tr><td>" + arrayOfObjectsTable + "</td></tr></tbody></table></pre>";
         } else {
-            thisTable = arrayOfObjectsTable;
 
-            let headerArray = [];
-
-            //build headerArray
-
-            if ((thisTable["TABLE_NAME"].includes("_METADATA")) || (thisTable["TABLE_NAME"] === "SHOW TABLES")) { //how to display the metadata table
-                for (const key in thisTable) {
-                    if (Object.hasOwnProperty.call(thisTable, key)) {
-                        if (typeof(thisTable[key]) != "object") {
-                            headerArray.push(key);
-
-                        }
-                    }
-                }
-            } else {
-                for (const key in thisTable) {
-                    if (Object.hasOwnProperty.call(thisTable, key)) {
-                        if (typeof(thisTable[key]) != "object") {
-                            if ((key === "TABLE_NAME") || (key === "NEXT_PRIMARY_KEY")) {
-                                //do nothing
-                            } else {
-                                headerArray.push(key);
-                            }
-                        }
-                    }
-                }
-            }
+            let tableName = arrayOfObjectsTable["tableName"];
+            let headers = dbObject["tables"][tableName]["headers"]; //an array
+            let data = dbObject["tables"][tableName]["data"];
 
             console.log("");
             console.log("-".repeat(32));
-            console.log("table:" + thisTable["TABLE_NAME"]);
+            console.log("table:" + tableName);
             let tempString = "";
             tempStringHtml = "<pre><table>"; //start table
             tempStringHtml += "<tr>"; //start header row
-            for (let j = 0; j < headerArray.length; j++) {
-                tempString += headerArray[j] + " ";
-                tempStringHtml += '<th>' + headerArray[j] + '</th>';
+
+            for (let header of headers) {
+                if (arrayOfObjectsTable[0].hasOwnProperty(header)) {
+                    tempString += header + " ";
+                    tempStringHtml += '<th>' + header + '</th>';
+                }
             }
+            // for (let j = 0; j < headers.length; j++) {
+            //     tempString += headerArray[j] + " ";
+            //     tempStringHtml += '<th>' + headerArray[j] + '</th>';
+            // }
 
             console.log("-".repeat(32));
             console.log(tempString);
             console.log("-".repeat(32));
             tempStringHtml += '</tr>' //finish header row
 
+
+
             tempString = "";
-            for (let i = 0; i < thisTable.length; i++) { //go through every index in table and build table rows
+            for (let i = 0; i < data.length; i++) { //go through every index in table and build table rows
                 tempStringHtml += '<tr>';
-                for (let j = 0; j < headerArray.length; j++) { //go through every index of header array
-                    tempString += thisTable[i][headerArray[j]] + " ";
-                    tempStringHtml += '<td>' + thisTable[i][headerArray[j]] + '</td>';
+                for (let j = 0; j < headers.length; j++) { //go through every index of header array
+                    tempString += data[i][headers[j]] + " ";
+                    tempStringHtml += '<td>' + data[i][headers[j]] + '</td>';
                 }
                 console.log(tempString);
                 tempString = "";
@@ -268,6 +363,25 @@ function formatTable2(arrayOfObjectsTable) {
                 tempStringHtml += '</tr>';
             }
             tempStringHtml += '</table></pre>';
+
+
+
+            // tempString = "";
+            // for (let i = 0; i < thisTable.length; i++) { //go through every index in table and build table rows
+            //     tempStringHtml += '<tr>';
+            //     for (let j = 0; j < headerArray.length; j++) { //go through every index of header array
+            //         tempString += thisTable[i][headerArray[j]] + " ";
+            //         tempStringHtml += '<td>' + thisTable[i][headerArray[j]] + '</td>';
+            //     }
+            //     console.log(tempString);
+            //     tempString = "";
+
+            //     tempStringHtml += '</tr>';
+            // }
+            // tempStringHtml += '</table></pre>';
+
+
+
 
             let formattedTable = tempStringHtml;
 
@@ -507,35 +621,55 @@ function attachMetaDataToTable(someTable, metaData) {
 }
 
 function _selectAllFrom(tableName) {
+    // table1Name: {
+    //     name:"table1Name",
+    //     NEXT_PRIMARY_KEY:5,
+    //     headers: ["PRIMARY_KEY",
+    //         "field1Name",
+    //         "field2Name",
+    //         "field3Name"
+    //     ],
+    //     dataTypes: {
+    //         "PRIMARY_KEY": "NUMBER",
+    //         "field1Name":"STRING",
+    //         "field2Name":"NUMBER",
+    //         "field3Name":"NUMBER"
+    //     },
+    //     data: [
+    //         {"PRIMARY_KEY": 0, "field1Name":"yes", "field2Name":"no", "field3Name":"maybe"},
+    //         {"PRIMARY_KEY": 1, "field1Name": 4, "field2Name":5, "field3Name":6},
+    //         {"PRIMARY_KEY": 2, "field1Name": 7, "field2Name":8, "field3Name":9}
+    //     ]
+    // }
 
-    //get a copy of the datatable from the database
-    let tempTable = [];
-    for (let i = 0; i < dbObject[tableName].length; i++) {
-        tempTable.push(JSON.parse(JSON.stringify(dbObject[tableName][i])));
-    }
+    //get a copy of the datatable object from the database
 
-    //get a copy of the metadata from the database
-    if (tableName.includes("_METADATA")) {
-        //this is a special request
-        //the metadata table does not have an entry of itself
-        let metaDataEntry = JSON.parse(JSON.stringify(tempTable[0]));
-        for (const key in metaDataEntry) {
-            if (Object.hasOwnProperty.call(metaDataEntry, key)) {
-                tempTable[key] = metaDataEntry[key];
-            }
+    let dbTable = JSON.parse(JSON.stringify(dbObject['tables'][tableName]));
+
+    let tempTable = []; //array of objects
+
+    let headers = dbTable["headers"]; //an array
+    let data = dbTable["data"]; //an array of objects
+
+    let tempRow = {};
+    for (row of data) { //loop throught the rows of data
+        tempRow = {};
+        for (let header of headers) { //loop through the field names
+            tempRow[header] = row[header];
         }
-        tempTable["TABLE_NAME"] = tableName;
-    } else {
-        let metaData = JSON.parse(JSON.stringify(dbObject[tableName + "_METADATA"][0]));
-        //attach metadata to this copy
-        tempTable = attachMetaDataToTable(tempTable, metaData);
+        tempTable.push(JSON.parse(JSON.stringify(tempRow)));
+
     }
-    //console.log(tempTable);
+
+    tempTable["tableName"] = tableName;
+    console.log(tempTable);
+
     return tempTable;
 }
 
 function columnsFilter(thisTable, columns = []) {
 
+    alert("got to columns filter");
     //make a new table with only fields in column
     //attach only metadata corresponding fields to table
     //return the table
@@ -547,14 +681,18 @@ function columnsFilter(thisTable, columns = []) {
         tempRow = {};
         for (let j = 0; j < columns.length; j++) { //loop through every column
             if (thisTable[i].hasOwnProperty(columns[j])) { //build the row for the new table
+                console.log("adding");
                 tempRow[columns[j]] = thisTable[i][columns[j]];
-                tempTable[columns[j]] = thisTable[columns[j]]; //add the metadata, very inefficient
+                //tempTable[columns[j]] = thisTable[columns[j]]; //add the metadata, very inefficient
             }
         }
         tempTable.push(JSON.parse(JSON.stringify(tempRow)));
     }
 
-    tempTable["TABLE_NAME"] = thisTable["TABLE_NAME"];
+    tempTable["tableName"] = thisTable["tableName"];
+
+    console.log("ResULTTS of columns filter\n------------------");
+    console.log(tempTable);
     return tempTable;
 }
 
@@ -762,6 +900,28 @@ function updateDataDiv() {
 /// TABLE, WHICH RETURNS UNDEFINED
 
 
+//This Central function always returns a "table", and here is an example of a table:
+
+// table1Name: {
+//     NEXT_PRIMARY_KEY:5,
+//     headers: ["PRIMARY_KEY",
+//         "field1Name",
+//         "field2Name",
+//         "field3Name"
+//     ],
+//     dataTypes: [
+//         "NUMBER",
+//         "STRING",
+//         "NUMBER",
+//         "NUMBER"
+//     ],
+//     data: [
+//         ["yes", "no", "maybe"],
+//         [4, 5, 6],
+//         [7, 8, 9]
+//     ]
+// }
+
 // main function that parses the query string and then calls the appropriate function.
 //      the appropriate function returns a table (an array of objects) with attached properties of metadata
 //      this table (and array of objects) is returned with attached metadata as properties.
@@ -783,7 +943,7 @@ function sqlQuery(strSQL) {
 
 function _sqlQuery(strSQL) {
 
-    let dbMetaDataBackup = JSON.parse(JSON.stringify(dbMetaData));
+    //let dbMetaDataBackup = JSON.parse(JSON.stringify(dbMetaData));
     let dbObjectBackup = JSON.parse(JSON.stringify(dbObject));
 
     console.log(strSQL);
@@ -797,73 +957,74 @@ function _sqlQuery(strSQL) {
 
     let thisTable = [];
 
+    //NEED TO DO
     if ((strSQL.includes("INSERT")) && (strSQL.includes("SELECT"))) {
         console.log("proces  INSERT SELECT"); //also will process inner join
         thisTable = processInsertSelect(strSQL);
-
+        //NEED TO DO
     } else if (strSQL.includes("INNER")) {
         console.log("process INNER JOIN");
         thisTable = processInnerJoin(strSQL);
-
-    } else if (strSQL.includes("SELECT")) {
+        //NEED TO DO
+    } else if (strSQL.includes("SELECT")) { //GOT SELECT ALL DONE, NEED TO DO WHERE AND ORDER FILTERS
         console.log("process SELECT statement");
         thisTable = processSelectStatement(strSQL);
-
-    } else if (strSQL.includes("INSERT")) {
+        //NEED TO DO
+    } else if (strSQL.includes("INSERT")) { //NEXT UP
         console.log("process INSERT INTO");
         thisTable = processInsertInto(strSQL);
-
+        //NEED TO DO
     } else if (strSQL.includes("UPDATE")) {
         console.log("process UPDATE statement");
         thisTable = processUpdate(strSQL);
-
+        //NEED TO DO
     } else if (strSQL.includes("DELETE")) {
         console.log("process DELETE statement");
         thisTable = processDelete(strSQL);
 
-    } else if (strSQL.includes("CREATE")) {
+    } else if (strSQL.includes("CREATE")) { //DONE
         console.log("process CREATE table statement");
         thisTable = processCreateTable(strSQL);
-
+        //NEED TO DO
     } else if ((strSQL.includes("DROP")) && (!strSQL.includes("ALTER"))) {
         console.log("process DROP TABLE statement");
         thisTable = processDropTable(strSQL);
-
+        //NEED TO DO
     } else if (strSQL.includes("SHOW")) {
         console.log("process SHOW TABLES statement");
         thisTable = processShowTables();
-
+        //NEED TO DO
     } else if (strSQL.includes("DESCRIBE")) {
         console.log("process DESCRIBE TABLE statement");
         thisTable = processDescribeTable(strSQL);
-
+        //NEED TO DO
     } else if (strSQL.includes("HELP")) {
         console.log("process HELP statement");
         thisTable = processHelp(strSQL);
-
+        //NEED TO DO
     } else if ((strSQL.includes("ALTER")) && (strSQL.includes("TABLE")) && (strSQL.includes("CHANGE"))) {
         console.log("process ALTER TABLE CHANGE statement");
         thisTable = processAlterTableChange(strSQL);
-
+        //NEED TO DO
     } else if ((strSQL.includes("ALTER")) && (strSQL.includes("TABLE")) && (strSQL.includes("ADD"))) {
         console.log("process ALTER TABLE ADD statement");
         thisTable = processAlterTableAddColumn(strSQL);
-
+        //NEED TO DO
     } else if ((strSQL.includes("ALTER")) && (strSQL.includes("TABLE")) && (strSQL.includes("DROP"))) {
         console.log("process ALTER TABLE DROP statement");
         thisTable = processAlterTableDropColumn(strSQL);
-
+        //NEED TO DO
     } else if (strSQL.includes("NAME")) {
         console.log("process NAME DATABASE statement");
         thisTable = processNameDatabase(strSQL);
-
+        //NEED TO DO
     } else {
         console.log('sql statement not understood');
         thisTable = "ERROR:\n - sql statement not understood, could not be parsed.";
     }
 
     if ((typeof(thisTable) === 'string') && (thisTable.includes("ERROR"))) { //indicates an error
-        dbMetaData = JSON.parse(JSON.stringify(dbMetaDataBackup));
+        //dbMetaData = JSON.parse(JSON.stringify(dbMetaDataBackup));
         dbObject = JSON.parse(JSON.stringify(dbObjectBackup));
         updateDataDiv();
         thisTable += "\n dbObject and dbMetaData reset to values before attempted SQL operation."
@@ -874,12 +1035,20 @@ function _sqlQuery(strSQL) {
 
 }
 
+
+//sqlQuery always returns object like this:
 function processNameDatabase(strSQL) {
     try {
         let tempTable = [];
         let databaseName = readBackTicks(strSQL)[0]; //get filename
-        sqlQuery("CREATE TABLE DBNAME (NAME STRING);");
-        tempTable = sqlQuery("INSERT INTO DBNAME (NAME) VALUES (`" + databaseName + "`);");
+
+        //dbObject.name = databaseName;
+
+        tempTable[0] = JSON.parse(JSON.stringify(dbObject.name));
+
+
+        //sqlQuery("CREATE TABLE DBNAME (NAME STRING);");
+        //tempTable = sqlQuery("INSERT INTO DBNAME (NAME) VALUES (`" + databaseName + "`);");
         return tempTable;
     } catch (error) {
         let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
@@ -1165,28 +1334,52 @@ function processCreateTable(strSQL) {
 
 function _createTable(tableName, fieldNames = [], dataTypes = []) {
     try {
-        tempTable = [];
+
+        // table1Name: {
+        //     name:"table1Name",
+        //     NEXT_PRIMARY_KEY:5,
+        //     headers: ["PRIMARY_KEY",
+        //         "field1Name",
+        //         "field2Name",
+        //         "field3Name"
+        //     ],
+        //     dataTypes: {
+        //         "PRIMARY_KEY": "NUMBER",
+        //         "field1Name":"STRING",
+        //         "field2Name":"NUMBER",
+        //         "field3Name":"NUMBER"
+        //     },
+        //     data: [
+        //         {"PRIMARY_KEY": 0, "field1Name":"yes", "field2Name":"no", "field3Name":"maybe"},
+        //         {"PRIMARY_KEY": 1, "field1Name": 4, "field2Name":5, "field3Name":6},
+        //         {"PRIMARY_KEY": 2, "field1Name": 7, "field2Name":8, "field3Name":9}
+        //     ]
+        // }
+
         //make an empty entry into the database
-        dbObject[tableName] = [];
+        dbObject.tables[tableName] = {};
 
-        //make a metatable entry into the database
-        dbObject[tableName + "_METADATA"] = [];
+        //build a temporary table
+        let tempTable = {};
+        tempTable["name"] = tableName;
+        tempTable["NEXT_PRIMARY_KEY"] = 1;
+        tempTable["headers"] = [];
+        tempTable["dataTypes"] = {};
+        tempTable["data"] = [];
 
-        //place metadata in the table's metadata table
-        metaData = {};
-        metaData["TABLE_NAME"] = tableName;
-        metaData["NEXT_PRIMARY_KEY"] = 1;
-        metaData["PRIMARY_KEY"] = "NUMBER";
-
-        //loop through field names and datatype and add to metadata
+        //need to loop through field names and datatypes
+        tempTable["headers"].push("PRIMARY_KEY");
+        tempTable["dataTypes"]["PRIMARY_KEY"] = "STRING";
         for (let i = 0; i < fieldNames.length; i++) {
-            metaData[fieldNames[i]] = dataTypes[i];
+            tempTable["headers"].push(fieldNames[i]);
+            tempTable["dataTypes"][fieldNames[i]] = dataTypes[i];
         }
+        console.log(tempTable);
 
-        //make the metadatatable
-        dbObject[tableName + "_METADATA"][0] = JSON.parse(JSON.stringify(metaData));
+        //copy and assign the temporary table to the dbObject's table
 
-        //update visually
+        dbObject.tables[tableName] = JSON.parse(JSON.stringify(tempTable));
+
         updateDataDiv();
 
         //return the table just made
@@ -1549,32 +1742,67 @@ function readBackTicks(myString) {
 function _insertInto(tableName, fieldNames = [], values = []) {
     try {
         if (fieldNames.length != values.length) {
-            let tempTable = [];
-            tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
-            return tempTable;
+            // let tempTable = [];
+            // tempTable["TABLE_NAME"] = "FIELD VALUE MISMATCH";
+            return "ERROR: FIELD VALUE MISMATCH";
         } else {
-            tempTable = [];
+            // table1Name: {
+            //     name:"table1Name",
+            //     NEXT_PRIMARY_KEY:5,
+            //     headers: ["PRIMARY_KEY",
+            //         "field1Name",
+            //         "field2Name",
+            //         "field3Name"
+            //     ],
+            //     dataTypes: {
+            //         "PRIMARY_KEY":"NUMBER",
+            //         "field1Name":"STRING",
+            //         "field2Name":"NUMBER",
+            //         "field3Name":"NUMBER"
+            //     },
+            //     data: [
+            //         {"PRIMARY_KEY": 0, "field1Name":"yes", "field2Name":"no", "field3Name":"maybe"},
+            //         {"PRIMARY_KEY": 1, "field1Name": 4, "field2Name":5, "field3Name":6},
+            //         {"PRIMARY_KEY": 2, "field1Name": 7, "field2Name":8, "field3Name":9}
+            //     ]
+            // }
+            let dbTable = JSON.parse(JSON.stringify(dbObject["tables"][tableName])); //get copy of dbObjects table
+            let dataTypes = dbTable["dataTypes"]; //an object
+            let currentData = dbTable["data"]; //an array of objects, acopy of the current tables data
+            let nextPrimaryKey = dbTable["NEXT_PRIMARY_KEY"];
+            let dbHeaders = dbTable["headers"]; //an array
 
-            //get a copy of the metadata from the database
-            let metaData = JSON.parse(JSON.stringify(dbObject[tableName + "_METADATA"][0]));
-            let thisPrimaryKey = metaData["NEXT_PRIMARY_KEY"];
-            //build row entry which is an object
-            let tempObject = {};
-            tempObject['PRIMARY_KEY'] = thisPrimaryKey; //
+            //make new row of data to be added
+            let newRow = {};
+
+            //add primary key to new row
+            newRow["PRIMARY_KEY"] = nextPrimaryKey;
+
+            //loop through field names and add key/value data to new row
             for (let i = 0; i < fieldNames.length; i++) {
-                //check to see what type of data type field is
-                if (metaData[fieldNames[i]] === "NUMBER") {
-                    tempObject[fieldNames[i]] = Number(values[i]);
+                console.log(fieldNames[i]);
+                console.log(dataTypes[fieldNames[i]]);
+                thisDataType = dataTypes[fieldNames[i]];
+                if (thisDataType === "NUMBER") {
+                    newRow[fieldNames[i]] = Number(values[i]);
+                } else if (thisDataType === "STRING") {
+                    newRow[fieldNames[i]] = values[i];
                 } else {
-                    tempObject[fieldNames[i]] = values[i];
+                    alert("something wrong with figuring out data type in insert statement.")
                 }
             }
-            //add the entry to the table
-            dbObject[tableName].push(JSON.parse(JSON.stringify(tempObject)));
-            //advance the primary key in the table's metadata
-            dbObject[tableName + "_METADATA"][0]["NEXT_PRIMARY_KEY"] = thisPrimaryKey + 1;
 
-            //update visually
+            currentData.push(newRow); //adds new row of data
+            console.log(fieldNames);
+            console.log(values);
+            console.log(newRow);
+
+            //set the database object tables data to a copy of the currentData
+            dbObject["tables"][tableName]["data"] = JSON.parse(JSON.stringify(currentData));
+            //increment database tables primary key
+            dbObject["tables"][tableName]["NEXT_PRIMARY_KEY"] = nextPrimaryKey + 1;
+
+            //make changes to the data div
             updateDataDiv();
 
             //return the table just modified
@@ -1732,6 +1960,9 @@ function processSelectStatement(strSQL) {
             //   this is the columns array
         let middleString = getStringBetween(strSQL, "SELECT", "FROM");
         columns = splitByCommasAndCleanWhiteSpace(middleString); //Got columns!
+        console.log("columns selected\n-----------------");
+        console.log(columns);
+
 
         // get table name
         let tokens = tokenizeStringBySpace(strSQL);
