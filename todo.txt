@@ -4,8 +4,11 @@
 
 CREATE TABLE owners (firstname STRING, lastname STRING, email STRING, age NUMBER);
 INSERT INTO owners (firstname, lastname, email, age) VALUES (`John`, `Jones`, `john@gmail.com`, `43`);
+INSERT INTO owners (firstname, lastname, email, age) VALUES (`John`, `Doe`, `johndoe@gmail.com`, `44`);
+INSERT INTO owners (firstname, lastname, email, age) VALUES (`Jane`, `Jones`, `janey@gmail.com`, `33`);
 SELECT firstname FROM owners;
-
+SELECT * FROM owners WHERE firstname=`Jane`;
+SELECT email FROM owners WHERE age>=`43` ORDER BY age DESC;
 
 finiished 
 create table
@@ -19,3 +22,34 @@ columns filter
 on formatTable2
 
 need to figure out how to only list rows with selected headings, and in same order as table headings
+done
+
+where order by columns filter now done.
+
+
+
+
+
+CREATE TABLE                DONE
+DROP TABLE                  DONE
+SHOW TABLES
+DESCRIBE TABLES
+SELECT                      DONE
+SELECT column filter        DONE
+SELECT WHERE filter         DONE
+SELECT ORDER BY ASC DESC    DONE
+INSERT INTO                 DONE
+UPDATE
+DELETE FROM TABLE WHERE
+INSERT SELECT
+INNER JOIN
+HELP
+ALTER TABLE CHANGE
+ALTER TABLE ADD
+ALTER TABLE DROP
+NAME DATABASE
+
+
+
+
+

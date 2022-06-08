@@ -63,6 +63,27 @@
 //         {"PRIMARY_KEY": 2, "field1Name": 7, "field2Name":8, "field3Name":9}
 //     ]
 // }
+
+// table1Name: {
+//     name:"table1Name",
+//     NEXT_PRIMARY_KEY:5,
+//     headers: ["PRIMARY_KEY",
+//         "field1Name",
+//         "field2Name",
+//         "field3Name"
+//     ],
+//     dataTypes: {
+//         "PRIMARY_KEY":"NUMBER",
+//         "field1Name":"STRING",
+//         "field2Name":"NUMBER",
+//         "field3Name":"NUMBER"
+//     },
+//     data: [
+//         {"PRIMARY_KEY": 0, "field1Name":"yes", "field2Name":"no", "field3Name":"maybe"},
+//         {"PRIMARY_KEY": 1, "field1Name": 4, "field2Name":5, "field3Name":6},
+//         {"PRIMARY_KEY": 2, "field1Name": 7, "field2Name":8, "field3Name":9}
+//     ]
+// }
 //USING THIS NEW STRUCTURE
 let dbObject = {
     tables: {
@@ -73,10 +94,10 @@ let dbObject = {
                 "PRIMARY_KEY",
                 "name"
             ],
-            dataTypes: [
-                "STRING",
-                "STRING"
-            ],
+            dataTypes: {
+                "PRIMARY_KEY": "NUMBER",
+                "name": "STRING"
+            },
             data: [
                 { "PRIMARY_KEY": 0, "name": "myname" }
             ]
@@ -89,12 +110,12 @@ let dbObject = {
                 "field2Name",
                 "field3Name"
             ],
-            dataTypes: [
-                "NUMBER",
-                "STRING",
-                "NUMBER",
-                "NUMBER"
-            ],
+            dataTypes: {
+                "PRIMARY_KEY": "NUMBER",
+                "field1Name": "STRING",
+                "field2Name": "NUMBER",
+                "field3Name": "NUMBER"
+            },
             data: [
                 { "PRIMARY_KEY": 0, "field1Name": "yes", "field2Name": "no", "field3Name": "maybe" },
                 { "PRIMARY_KEY": 1, "field1Name": 4, "field2Name": 5, "field3Name": 6 },
@@ -313,6 +334,14 @@ function runSQL() {
 
 }
 
+function arrayOfObjectsHasProperty(arrayOfObjects, databaseHeader) {
+    for (row of arrayOfObjects) {
+        if (row.hasOwnProperty(databaseHeader)) {
+            return true;
+        }
+    }
+}
+
 function formatTable2(arrayOfObjectsTable) {
     console.log(arrayOfObjectsTable);
 
@@ -321,71 +350,73 @@ function formatTable2(arrayOfObjectsTable) {
             return "<pre><table><tbody><tr><th>ERROR:</th></tr><tr><td>" + arrayOfObjectsTable + "</td></tr></tbody></table></pre>";
         } else {
 
-            let tableName = arrayOfObjectsTable["tableName"];
-            let headers = dbObject["tables"][tableName]["headers"]; //an array
-            let data = dbObject["tables"][tableName]["data"];
-
-            console.log("");
-            console.log("-".repeat(32));
-            console.log("table:" + tableName);
             let tempString = "";
-            tempStringHtml = "<pre><table>"; //start table
-            tempStringHtml += "<tr>"; //start header row
+            let tempStringHtml = "";
+            let tableName = arrayOfObjectsTable["tableName"];
 
-            for (let header of headers) {
-                if (arrayOfObjectsTable[0].hasOwnProperty(header)) {
+            if (dbObject["tables"].hasOwnProperty(tableName)) {
+                let databaseHeaders = dbObject["tables"][tableName]["headers"]; //an array in the database table
+                let headers = []; //the header array we are building
+
+                //get headers, an array of headers, but in same order as the database
+                //loop through headers the database table
+                for (let databaseHeader of databaseHeaders) {
+                    if (arrayOfObjectsHasProperty(arrayOfObjectsTable, databaseHeader)) {
+                        headers.push(databaseHeader); //if header is in any row of the database table, add to header array
+                    }
+                }
+
+                //let headers = dbObject["tables"][tableName]["headers"]; //an array
+                let data = dbObject["tables"][tableName]["data"];
+
+                console.log("");
+                console.log("-".repeat(32));
+                console.log("table:" + tableName);
+                tempString = "";
+                tempStringHtml = "<pre><table>"; //start table
+                tempStringHtml += "<tr>"; //start header row
+
+                for (let header of headers) {
+                    // if (arrayOfObjectsTable[0].hasOwnProperty(header)) {
                     tempString += header + " ";
                     tempStringHtml += '<th>' + header + '</th>';
+                    //}
                 }
-            }
-            // for (let j = 0; j < headers.length; j++) {
-            //     tempString += headerArray[j] + " ";
-            //     tempStringHtml += '<th>' + headerArray[j] + '</th>';
-            // }
+                // for (let j = 0; j < headers.length; j++) {
+                //     tempString += headerArray[j] + " ";
+                //     tempStringHtml += '<th>' + headerArray[j] + '</th>';
+                // }
 
-            console.log("-".repeat(32));
-            console.log(tempString);
-            console.log("-".repeat(32));
-            tempStringHtml += '</tr>' //finish header row
-
-
-
-            tempString = "";
-            for (let i = 0; i < data.length; i++) { //go through every index in table and build table rows
-                tempStringHtml += '<tr>';
-                for (let j = 0; j < headers.length; j++) { //go through every index of header array
-                    tempString += data[i][headers[j]] + " ";
-                    tempStringHtml += '<td>' + data[i][headers[j]] + '</td>';
-                }
+                console.log("-".repeat(32));
                 console.log(tempString);
+                console.log("-".repeat(32));
+                tempStringHtml += '</tr>' //finish header row
+
                 tempString = "";
+                for (let i = 0; i < arrayOfObjectsTable.length; i++) { //go through every index in table and build table rows
+                    tempStringHtml += '<tr>';
+                    for (let j = 0; j < headers.length; j++) { //go through every index of header array
+                        tempString += arrayOfObjectsTable[i][headers[j]] + " ";
+                        tempStringHtml += '<td>' + arrayOfObjectsTable[i][headers[j]] + '</td>';
+                    }
+                    console.log(tempString);
+                    tempString = "";
 
-                tempStringHtml += '</tr>';
+                    tempStringHtml += '</tr>';
+                }
+                tempStringHtml += '</table></pre>';
+
+                let formattedTable = tempStringHtml;
+
+                return formattedTable;
+            } else {
+                console.log("No table found.");
+                tempStringHtml = "<pre>No table found.</pre>"
+
+                return tempStringHtml;
+
             }
-            tempStringHtml += '</table></pre>';
 
-
-
-            // tempString = "";
-            // for (let i = 0; i < thisTable.length; i++) { //go through every index in table and build table rows
-            //     tempStringHtml += '<tr>';
-            //     for (let j = 0; j < headerArray.length; j++) { //go through every index of header array
-            //         tempString += thisTable[i][headerArray[j]] + " ";
-            //         tempStringHtml += '<td>' + thisTable[i][headerArray[j]] + '</td>';
-            //     }
-            //     console.log(tempString);
-            //     tempString = "";
-
-            //     tempStringHtml += '</tr>';
-            // }
-            // tempStringHtml += '</table></pre>';
-
-
-
-
-            let formattedTable = tempStringHtml;
-
-            return formattedTable;
         }
 
     } catch (error) {
@@ -400,8 +431,6 @@ function formatTable2(arrayOfObjectsTable) {
 //}
 function savePage() {
     let thisDocument = turnWebPageIntoString();
-
-
     saveStringToTextFile(thisDocument, "pagecopy", ".html");
 }
 
@@ -669,7 +698,7 @@ function _selectAllFrom(tableName) {
 
 function columnsFilter(thisTable, columns = []) {
 
-    alert("got to columns filter");
+    //alert("got to columns filter");
     //make a new table with only fields in column
     //attach only metadata corresponding fields to table
     //return the table
@@ -787,18 +816,50 @@ function _innerJoin(table1, table2, table1Field, table2Field) {
 }
 
 function whereFilter(thisTable, compareField, operator, compareValue) {
+    console.log("in whereFilter\nthisTable is:\n");
+    console.log(thisTable);
+
 
     // make new empty table
     let tempTable = [];
+    let tableName = thisTable["tableName"];
+    console.log(tableName);
+
+    console.log(dbObject["tables"][tableName]);
+    //let databaseTableHeaders = dbObject["tables"][tableName]["headers"]; //an indexed array
+    //let headerIndex = databaseTableHeaders.indexOf[compareField]; //index of the compare field in question
+    let compareFieldDataType = dbObject["tables"][tableName]["dataTypes"][compareField]; //
+    //example
+    // name: "table1Name",
+    // NEXT_PRIMARY_KEY: 5,
+    // headers: ["PRIMARY_KEY",
+    //     "field1Name",
+    //     "field2Name",
+    //     "field3Name"
+    // ],
+    // dataTypes: {
+    //     "PRIMARY_KEY":"NUMBER",
+    //     "field1Name":"STRING",
+    //     "field2Name":"NUMBER",
+    //     "field3Name":"NUMBER"
+    // },
+    // data: [
+    //     { "PRIMARY_KEY": 0, "field1Name": "yes", "field2Name": "no", "field3Name": "maybe" },
+    //     { "PRIMARY_KEY": 1, "field1Name": 4, "field2Name": 5, "field3Name": 6 },
+    //     { "PRIMARY_KEY": 2, "field1Name": 7, "field2Name": 8, "field3Name": 9 }
+    // ]
 
     // see if compare value is string or number
     // if number convert to number
 
-    if (thisTable[compareField] === "NUMBER") {
+    if (compareFieldDataType === "NUMBER") {
+        //alert("is number");
         compareValue = Number(compareValue);
     }
 
     // if condition is met in table, add that row to new table
+
+    //To be safer could convert "thisTable[i] to correct data type during comparison"
 
     if (operator === '=') {
         for (let i = 0; i < thisTable.length; i++) {
@@ -850,7 +911,12 @@ function whereFilter(thisTable, compareField, operator, compareValue) {
         }
     }
 
-    tempTable = transferMetadata(tempTable, thisTable);
+    //tempTable = transferMetadata(tempTable, thisTable);
+
+    tempTable["tableName"] = tableName;
+
+    console.log("RESULT OF WHERE FILTER\n");
+    console.log(tempTable);
 
     return tempTable;
 }
@@ -966,7 +1032,7 @@ function _sqlQuery(strSQL) {
         console.log("process INNER JOIN");
         thisTable = processInnerJoin(strSQL);
         //NEED TO DO
-    } else if (strSQL.includes("SELECT")) { //GOT SELECT ALL DONE, NEED TO DO WHERE AND ORDER FILTERS
+    } else if (strSQL.includes("SELECT")) { //GOT SELECT ALL DONE, WHERE AND ORDER FILTERS DONE
         console.log("process SELECT statement");
         thisTable = processSelectStatement(strSQL);
         //NEED TO DO
@@ -1290,12 +1356,11 @@ function processDropTable(strSQL) {
 
 function _dropTable(tableName) {
     try {
-        delete dbObject[tableName];
-        delete dbObject[tableName + "_METADATA"];
+        delete dbObject["tables"][tableName];
         updateDataDiv();
         //send something back
         let tempTable = [];
-        tempTable["TABLE_NAME"] = "DROPPED " + tableName;
+        tempTable["tableName"] = "DROPPED " + tableName;
 
         return tempTable;
     } catch (error) {
@@ -1344,7 +1409,7 @@ function _createTable(tableName, fieldNames = [], dataTypes = []) {
         //         "field3Name"
         //     ],
         //     dataTypes: {
-        //         "PRIMARY_KEY": "NUMBER",
+        //         "PRIMARY_KEY":"NUMBER",
         //         "field1Name":"STRING",
         //         "field2Name":"NUMBER",
         //         "field3Name":"NUMBER"
@@ -1357,7 +1422,7 @@ function _createTable(tableName, fieldNames = [], dataTypes = []) {
         // }
 
         //make an empty entry into the database
-        dbObject.tables[tableName] = {};
+        dbObject["tables"][tableName] = {};
 
         //build a temporary table
         let tempTable = {};
@@ -1971,9 +2036,6 @@ function processSelectStatement(strSQL) {
 
         tempTable = _selectAllFrom(tableName);
 
-        if (columns[0] != "*") {
-            tempTable = columnsFilter(tempTable, columns);
-        }
 
         if (strSQL.includes("WHERE")) {
             whereIndex = tokens.indexOf("WHERE");
@@ -1994,6 +2056,11 @@ function processSelectStatement(strSQL) {
             }
             tempTable = orderByFilter(tempTable, orderByField, direction);
         }
+
+        if (columns[0] != "*") {
+            tempTable = columnsFilter(tempTable, columns);
+        }
+
         console.log(tempTable);
         return tempTable;
     } catch (error) {
