@@ -1740,10 +1740,6 @@ function processSelectStatement(strSQL) {
 
         tempTable = _selectAllFrom(tableName);
 
-        if (columns[0] != "*") {
-            tempTable = columnsFilter(tempTable, columns);
-        }
-
         if (strSQL.includes("WHERE")) {
             whereIndex = tokens.indexOf("WHERE");
             let compareField = tokens[whereIndex + 1];
@@ -1763,6 +1759,11 @@ function processSelectStatement(strSQL) {
             }
             tempTable = orderByFilter(tempTable, orderByField, direction);
         }
+
+        if (columns[0] != "*") {
+            tempTable = columnsFilter(tempTable, columns);
+        }
+
         console.log(tempTable);
         return tempTable;
     } catch (error) {
