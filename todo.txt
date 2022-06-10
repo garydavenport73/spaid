@@ -32,7 +32,7 @@ where order by columns filter now done.
 
 CREATE TABLE                DONE
 DROP TABLE                  DONE
-SHOW TABLES
+SHOW TABLES                 DONE
 DESCRIBE TABLES
 SELECT                      DONE
 SELECT column filter        DONE
