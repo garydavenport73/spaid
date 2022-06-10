@@ -99,7 +99,7 @@ let dbObject = {
                 "name": "STRING"
             },
             data: [
-                { "PRIMARY_KEY": 0, "name": "myname" }
+                { "PRIMARY_KEY": 0, "name": "DBNAME" }
             ]
         },
         table1Name: {
@@ -113,7 +113,7 @@ let dbObject = {
             dataTypes: {
                 "PRIMARY_KEY": "NUMBER",
                 "field1Name": "STRING",
-                "field2Name": "NUMBER",
+                "field2Name": "STRING",
                 "field3Name": "NUMBER"
             },
             data: [
@@ -367,6 +367,13 @@ function formatTable2(arrayOfObjectsTable) {
                 headers.push("name");
                 let finalTable = formattedTable3(headers, arrayOfObjectsTable);
                 return finalTable;
+            } else if (arrayOfObjectsTable["tableName"].split(" ")[0] === "DESCRIBE") {
+                let headers = [];
+                headers.push("field");
+                headers.push("type");
+                let finalTable = formattedTable3(headers, arrayOfObjectsTable);
+                return finalTable;
+
             } else {
                 console.log("No table found.");
                 tempStringHtml = "<pre>No table found.</pre>"
@@ -1318,13 +1325,14 @@ function processDescribeTable(strSQL) {
 
 function _describe(thisTableName) {
     try {
-        if (thisTableName.includes("_METADATA")) {
-            let tempTable = sqlQuery("SELECT * FROM " + thisTableName);
-            tempTable["TABLE_NAME"] = thisTableName;
-        } else {
-            let tempTable = sqlQuery("SELECT * FROM " + thisTableName + "_METADATA");
-            tempTable["TABLE_NAME"] = thisTableName + "_METADATA";
+        let tempTable = [];
+        let tempRow = {};
+        for (let header of dbObject["tables"][thisTableName]["headers"]) {
+            tempRow["field"] = header;
+            tempRow["type"] = dbObject["tables"][thisTableName]["dataTypes"][header];
+            tempTable.push(JSON.parse(JSON.stringify(tempRow)));
         }
+        tempTable["tableName"] = "DESCRIBE TABLE " + thisTableName;
         return tempTable;
     } catch (error) {
         let thisError = ("ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack).toString();
