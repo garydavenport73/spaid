@@ -344,20 +344,15 @@ function arrayOfObjectsHasProperty(arrayOfObjects, databaseHeader) {
 
 function formatTable2(arrayOfObjectsTable) {
     console.log(arrayOfObjectsTable);
-
     try {
         if ((typeof(arrayOfObjectsTable) === "string") && (arrayOfObjectsTable.includes("ERROR"))) {
             return "<pre><table><tbody><tr><th>ERROR:</th></tr><tr><td>" + arrayOfObjectsTable + "</td></tr></tbody></table></pre>";
         } else {
-
-            let tempString = "";
             let tempStringHtml = "";
             let tableName = arrayOfObjectsTable["tableName"];
-
             if (dbObject["tables"].hasOwnProperty(tableName)) {
                 let databaseHeaders = dbObject["tables"][tableName]["headers"]; //an array in the database table
                 let headers = []; //the header array we are building
-
                 //get headers, an array of headers, but in same order as the database
                 //loop through headers the database table
                 for (let databaseHeader of databaseHeaders) {
@@ -365,64 +360,61 @@ function formatTable2(arrayOfObjectsTable) {
                         headers.push(databaseHeader); //if header is in any row of the database table, add to header array
                     }
                 }
-
-                //let headers = dbObject["tables"][tableName]["headers"]; //an array
-                let data = dbObject["tables"][tableName]["data"];
-
-                console.log("");
-                console.log("-".repeat(32));
-                console.log("table:" + tableName);
-                tempString = "";
-                tempStringHtml = "<pre><table>"; //start table
-                tempStringHtml += "<tr>"; //start header row
-
-                for (let header of headers) {
-                    // if (arrayOfObjectsTable[0].hasOwnProperty(header)) {
-                    tempString += header + " ";
-                    tempStringHtml += '<th>' + header + '</th>';
-                    //}
-                }
-                // for (let j = 0; j < headers.length; j++) {
-                //     tempString += headerArray[j] + " ";
-                //     tempStringHtml += '<th>' + headerArray[j] + '</th>';
-                // }
-
-                console.log("-".repeat(32));
-                console.log(tempString);
-                console.log("-".repeat(32));
-                tempStringHtml += '</tr>' //finish header row
-
-                tempString = "";
-                for (let i = 0; i < arrayOfObjectsTable.length; i++) { //go through every index in table and build table rows
-                    tempStringHtml += '<tr>';
-                    for (let j = 0; j < headers.length; j++) { //go through every index of header array
-                        tempString += arrayOfObjectsTable[i][headers[j]] + " ";
-                        tempStringHtml += '<td>' + arrayOfObjectsTable[i][headers[j]] + '</td>';
-                    }
-                    console.log(tempString);
-                    tempString = "";
-
-                    tempStringHtml += '</tr>';
-                }
-                tempStringHtml += '</table></pre>';
-
-                let formattedTable = tempStringHtml;
-
-                return formattedTable;
+                let finalTable = formattedTable3(headers, arrayOfObjectsTable);
+                return finalTable;
+            } else if (arrayOfObjectsTable["tableName"] === "SHOW TABLES") {
+                let headers = [];
+                headers.push("name");
+                let finalTable = formattedTable3(headers, arrayOfObjectsTable);
+                return finalTable;
             } else {
                 console.log("No table found.");
                 tempStringHtml = "<pre>No table found.</pre>"
-
                 return tempStringHtml;
-
             }
-
         }
-
     } catch (error) {
         return "<pre><table><tbody><tr><th>ERROR</th></tr><tr><td>" + "ERROR:\n" + error.name + "\n" + error.message + "\n" + error.stack + "</td></tr></tbody></table></pre>";
-
     }
+}
+
+function formattedTable3(headers, arrayOfObjectsTableWithTableNameAttached) {
+    let tempString = "";
+    console.log("");
+    console.log("-".repeat(32));
+    console.log("table:" + tableName);
+    tempString = "";
+    tempStringHtml = "<pre><table>"; //start table
+    tempStringHtml += "<tr>"; //start header row
+
+    for (let header of headers) {
+        tempString += header + " ";
+        tempStringHtml += '<th>' + header + '</th>';
+    }
+    console.log("-".repeat(32));
+    console.log(tempString);
+    console.log("-".repeat(32));
+    tempStringHtml += '</tr>' //finish header row
+
+    tempString = "";
+    for (let i = 0; i < arrayOfObjectsTableWithTableNameAttached.length; i++) { //go through every index in table and build table rows
+        tempStringHtml += '<tr>';
+        for (let j = 0; j < headers.length; j++) { //go through every index of header array
+            tempString += arrayOfObjectsTableWithTableNameAttached[i][headers[j]] + " ";
+            tempStringHtml += '<td>' + arrayOfObjectsTableWithTableNameAttached[i][headers[j]] + '</td>';
+        }
+        console.log(tempString);
+        tempString = "";
+
+        tempStringHtml += '</tr>';
+    }
+    tempStringHtml += '</table></pre>';
+
+    let formattedTable = tempStringHtml;
+
+    return formattedTable;
+
+
 }
 
 //function savePage() {
@@ -940,13 +932,15 @@ function transferMetadata(table, donorTable) {
 }
 
 function _showTables() {
+    //need to return rows of single key value pairs, table name is "SHOW TABLES"
     let tempTable = [];
     let tempRowObject = {};
-    for (let tableName in dbObject) {
-        tempRowObject["TABLE_NAME"] = tableName;
+    for (table in dbObject['tables']) {
+        tempRowObject = {};
+        tempRowObject["name"] = dbObject['tables'][table]['name'];
         tempTable.push(JSON.parse(JSON.stringify(tempRowObject)));
     }
-    tempTable["TABLE_NAME"] = 'SHOW TABLES';
+    tempTable["tableName"] = 'SHOW TABLES';
     return tempTable;
 }
 
